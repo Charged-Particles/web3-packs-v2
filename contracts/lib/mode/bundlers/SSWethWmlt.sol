@@ -60,7 +60,7 @@ contract SSWethWmlt is IWeb3PacksBundler, VelodromeV1Router {
     tokenId = 0;
   }
 
-  function getTokenPath(bool reverse) internal override view returns (IWeb3PacksDefs.Route[] memory tokenPath) {
+  function getTokenPath(bool reverse) public override view returns (IWeb3PacksDefs.Route[] memory tokenPath) {
     IWeb3PacksDefs.Route[] memory tokens = new IWeb3PacksDefs.Route[](2);
     if (reverse) {
       tokens[0] = IWeb3PacksDefs.Route({token0: getToken1().tokenAddress, token1: _usdc, stable: false});

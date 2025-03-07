@@ -38,16 +38,18 @@ abstract contract Web3PacksRouterBase is
   BlackholePrevention
 {
   address public _weth;
-  address public _router;
   address public _manager;
   address public _token0;
   address public _token1;
 
-  int24 public _tickLower;
-  int24 public _tickUpper;
+  address public _router;
+  bytes32 public _poolId;
 
   // The ID Associated with this Bundler (must be Registered with Web3Packs)
   bytes32 public _bundlerId;
+
+  int24 public _tickLower;
+  int24 public _tickUpper;
 
   // Store Liquidity Positions by Pack Token ID
   mapping(uint256 => IWeb3PacksDefs.LiquidityPosition) internal _liquidityPositionsByTokenId;
@@ -56,8 +58,9 @@ abstract contract Web3PacksRouterBase is
     _weth = config.weth;
     _token0 = config.token0;
     _token1 = config.token1;
-    _router = config.router;
     _manager = config.manager;
+    _router = config.router;
+    _poolId = config.poolId;
     _bundlerId = config.bundlerId;
     _tickLower = config.tickLower;
     _tickUpper = config.tickUpper;
@@ -87,8 +90,13 @@ abstract contract Web3PacksRouterBase is
     return token;
   }
 
-  /// @dev This should be overridden to specify custom routes/paths for swapping
-  function getTokenPath(bool reverse) internal virtual view returns (IWeb3PacksDefs.Route[] memory tokenPath) {
+  /// @dev This can be overridden to specify custom routes/paths for swapping
+  function getPoolId() public virtual view returns (bytes32 poolId) {
+    poolId = _poolId;
+  }
+
+  /// @dev This can be overridden to specify custom routes/paths for swapping
+  function getTokenPath(bool reverse) public virtual view returns (IWeb3PacksDefs.Route[] memory tokenPath) {
     IWeb3PacksDefs.Route[] memory tokens = new IWeb3PacksDefs.Route[](1);
     tokens[0] = reverse
       ? IWeb3PacksDefs.Route({token0: getToken1().tokenAddress, token1: getToken0().tokenAddress, stable: false})
@@ -96,9 +104,17 @@ abstract contract Web3PacksRouterBase is
     return tokens;
   }
 
-  /// @dev This should be overridden to provide a PoolID if required (Balancer Pools)
-  function getPoolId() internal virtual view returns (bytes32 poolId) {
-    return bytes32("");
+  /// @dev This can be overridden to specify custom ordering for swapping
+  function getOrderedAssets(bool reverse) public virtual view returns (address[] memory, uint256[] memory) {
+    address[] memory assets = new address[](2);
+    assets[0] = reverse ? getToken1().tokenAddress : getToken0().tokenAddress;
+    assets[1] = reverse ? getToken0().tokenAddress : getToken1().tokenAddress;
+
+    uint256[] memory amounts = new uint256[](2);
+    amounts[0] = reverse ? getBalanceToken1() : getBalanceToken0();
+    amounts[1] = reverse ? getBalanceToken0() : getBalanceToken1();
+
+    return (assets, amounts);
   }
 
   /***********************************|

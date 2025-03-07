@@ -62,7 +62,7 @@ abstract contract BalancerRouter is Web3PacksRouterBase {
     uint256 balanceAmount1,
     uint256,
     uint256,
-    bool stable
+    bool
   )
     public
     virtual
@@ -75,19 +75,11 @@ abstract contract BalancerRouter is Web3PacksRouterBase {
       uint256 amount1
     )
   {
-    IWeb3PacksDefs.Token memory token0 = getToken0();
-    IWeb3PacksDefs.Token memory token1 = getToken1();
-
     (address poolAddress, ) = IBalancerV2Vault(_router).getPool(getPoolId());
 
-    (IAsset[] memory assets, uint256[] memory amounts) = _getAssetsAndAmounts(
-      token0.tokenAddress,
-      token1.tokenAddress,
-      poolAddress,
-      balanceAmount0,
-      balanceAmount1,
-      stable
-    );
+    (address[] memory addresses, uint256[] memory amounts) = getOrderedAssets(false);
+    IAsset[] memory assets = new IAsset[](addresses.length);
+    for (uint i; i < addresses.length; i++) { assets[i] = IAsset(addresses[i]); }
 
     // Add Liquidity
     bytes memory userData = abi.encode(IBalancerV2Vault.JoinKind.EXACT_TOKENS_IN_FOR_BPT_OUT, amounts, 0);
@@ -101,8 +93,7 @@ abstract contract BalancerRouter is Web3PacksRouterBase {
 
     lpTokenId = uint256(uint160(poolAddress));
     liquidity = IERC20(poolAddress).balanceOf(address(this));
-    amount0 = balanceAmount0 - IERC20(token0.tokenAddress).balanceOf(address(this));
-    amount1 = balanceAmount1 - IERC20(token1.tokenAddress).balanceOf(address(this));
+    (amount0, amount1) = _getRemainders(balanceAmount0, balanceAmount1);
   }
 
   function collectLpFees(IWeb3PacksDefs.LiquidityPosition memory)
@@ -123,18 +114,11 @@ abstract contract BalancerRouter is Web3PacksRouterBase {
     onlyManagerOrSelf
     returns (uint amount0, uint amount1)
   {
-    IWeb3PacksDefs.Token memory token0 = getToken0();
-    IWeb3PacksDefs.Token memory token1 = getToken1();
-
     (address poolAddress, ) = IBalancerV2Vault(_router).getPool(getPoolId());
-    (IAsset[] memory assets, uint256[] memory amounts) = _getAssetsAndAmounts(
-      token0.tokenAddress,
-      token1.tokenAddress,
-      poolAddress,
-      0,
-      0,
-      liquidityPosition.stable
-    );
+
+    (address[] memory addresses, uint256[] memory amounts) = getOrderedAssets(false);
+    IAsset[] memory assets = new IAsset[](addresses.length);
+    for (uint i; i < addresses.length; i++) { assets[i] = IAsset(addresses[i]); }
 
     TransferHelper.safeApprove(
       poolAddress,
@@ -152,8 +136,7 @@ abstract contract BalancerRouter is Web3PacksRouterBase {
     });
     IBalancerV2Vault(_router).exitPool(getPoolId(), address(this), payable(address(this)), exitData);
 
-    amount0 = IERC20(token0.tokenAddress).balanceOf(address(this));
-    amount1 = IERC20(token1.tokenAddress).balanceOf(address(this));
+    (amount0, amount1) = _getRemainders(0, 0);
   }
 
 
@@ -188,87 +171,10 @@ abstract contract BalancerRouter is Web3PacksRouterBase {
     }
   }
 
-  function _getAssetsAndAmounts(
-    address token0,
-    address token1,
-    address poolAddress,
-    uint256 balanceAmount0,
-    uint256 balanceAmount1,
-    bool isStable
-  )
-    internal
-    pure
-    returns (
-      IAsset[] memory assets,
-      uint256[] memory amounts
-    )
-  {
-    // Balancer LPs must be entered into with Tokens ordered from Smallest to Largest.
-    // Stable LPs also require the Pool Address, which also must be sorted.
-    if (isStable) {
-      assets = new IAsset[](3);
-      amounts = new uint256[](3);
-
-      if (uint160(token0) <= uint160(token1) && uint160(token0) <= uint160(poolAddress)) {
-        assets[0] = IAsset(token0);
-        amounts[0] = balanceAmount0;
-        if (uint160(token1) <= uint160(poolAddress)) {
-          assets[1] = IAsset(token1);
-          assets[2] = IAsset(poolAddress);
-          amounts[1] = balanceAmount1;
-          amounts[2] = 0;
-        } else {
-          assets[1] = IAsset(poolAddress);
-          assets[2] = IAsset(token1);
-          amounts[1] = 0;
-          amounts[2] = balanceAmount1;
-        }
-      } else if (uint160(token1) <= uint160(token0) && uint160(token1) <= uint160(poolAddress)) {
-        assets[0] = IAsset(token1);
-        amounts[0] = balanceAmount1;
-        if (uint160(token0) <= uint160(poolAddress)) {
-          assets[1] = IAsset(token0);
-          assets[2] = IAsset(poolAddress);
-          amounts[1] = balanceAmount0;
-          amounts[2] = 0;
-        } else {
-          assets[1] = IAsset(poolAddress);
-          assets[2] = IAsset(token0);
-          amounts[1] = 0;
-          amounts[2] = balanceAmount0;
-        }
-      } else {
-        assets[0] = IAsset(poolAddress);
-        amounts[0] = 0;
-        if (uint160(token0) <= uint160(token1)) {
-          assets[1] = IAsset(token0);
-          assets[2] = IAsset(token1);
-          amounts[1] = balanceAmount0;
-          amounts[2] = balanceAmount1;
-        } else {
-          assets[1] = IAsset(token1);
-          assets[2] = IAsset(token0);
-          amounts[1] = balanceAmount1;
-          amounts[2] = balanceAmount0;
-        }
-      }
-    } else {
-      assets = new IAsset[](2);
-      amounts = new uint256[](2);
-
-      if (uint160(token0) < uint160(token1)) {
-        assets[0] = IAsset(token0);
-        assets[1] = IAsset(token1);
-
-        amounts[0] = balanceAmount0;
-        amounts[1] = balanceAmount1;
-      } else {
-        assets[0] = IAsset(token1);
-        assets[1] = IAsset(token0);
-
-        amounts[0] = balanceAmount1;
-        amounts[1] = balanceAmount0;
-      }
-    }
+  function _getRemainders(uint256 balanceAmount0, uint256 balanceAmount1) internal view returns (uint256 amount0, uint256 amount1) {
+    amount0 = getBalanceToken0();
+    amount1 = getBalanceToken1();
+    if (balanceAmount0 > 0) { amount0 = balanceAmount0 - amount0; }
+    if (balanceAmount1 > 0) { amount1 = balanceAmount1 - amount1; }
   }
 }
