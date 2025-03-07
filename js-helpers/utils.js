@@ -23,6 +23,11 @@ const log = (...args) => {
   console.log(...args);
 };
 
+const isHardhat = (network) => {
+  const isForked = network?.config?.forking?.enabled ?? false;
+  return isForked || network?.name === 'hardhat';
+};
+
 const chainIdByName = (chainName) => {
   switch (_.toLower(chainName)) {
     case 'homestead': return 1;
@@ -86,6 +91,7 @@ module.exports = {
   toStr,
   toBytes,
   log,
+  isHardhat,
   chainTypeById,
   chainNameById,
   chainIdByName,
