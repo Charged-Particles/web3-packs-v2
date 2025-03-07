@@ -20,13 +20,18 @@
           },
           {
             "internalType": "address",
-            "name": "router",
+            "name": "manager",
             "type": "address"
           },
           {
             "internalType": "address",
-            "name": "manager",
+            "name": "router",
             "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "poolId",
+            "type": "bytes32"
           },
           {
             "internalType": "bytes32",
@@ -309,6 +314,19 @@
         "internalType": "address",
         "name": "",
         "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "_poolId",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
       }
     ],
     "stateMutability": "view",
@@ -617,6 +635,43 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "reverse",
+        "type": "bool"
+      }
+    ],
+    "name": "getOrderedAssets",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getPoolId",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "poolId",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "getToken0",
     "outputs": [
@@ -671,6 +726,42 @@
         "internalType": "struct IWeb3PacksDefs.Token",
         "name": "token1",
         "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "reverse",
+        "type": "bool"
+      }
+    ],
+    "name": "getTokenPath",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "token0",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "token1",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "stable",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct IWeb3PacksDefs.Route[]",
+        "name": "tokenPath",
+        "type": "tuple[]"
       }
     ],
     "stateMutability": "view",
