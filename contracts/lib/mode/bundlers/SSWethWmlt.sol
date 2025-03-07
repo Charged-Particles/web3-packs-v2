@@ -111,14 +111,15 @@ contract SSWethWmlt is IWeb3PacksBundler, VelodromeV1Router {
     onlyManagerOrSelf
     returns(uint256 ethAmountOut)
   {
-    // Perform Swap
-    swapSingle(10000, true); // 100% wMLT -> WETH
-
-    // Transfer Assets to Receiver
     if (sellAll) {
+      // Perform Swap
+      swapSingle(10000, true); // 100% wMLT -> WETH
+
+      // Send ETH to Receiver
       ethAmountOut = exitWethAndTransfer(receiver);
     } else {
-      TransferHelper.safeTransfer(getToken0().tokenAddress, receiver, getBalanceToken0());
+      // Send Token to Receiver
+      TransferHelper.safeTransfer(getToken1().tokenAddress, receiver, getBalanceToken1());
     }
   }
 }

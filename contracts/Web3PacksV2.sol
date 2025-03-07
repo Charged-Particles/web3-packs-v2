@@ -69,7 +69,7 @@ contract Web3PacksV2 is
   uint256 public _protocolFee;
 
   mapping (bytes32 => address) public _bundlersById;
-  mapping (uint256 => uint256) public _packPriceByPackId;
+  mapping (uint256 => uint256) internal _packPriceByPackId;
   mapping (uint256 => bytes32[]) internal _bundlesByPackId;
 
   // Charged Particles Wallet Managers
@@ -144,6 +144,10 @@ contract Web3PacksV2 is
     return _getPackBalances(tokenAddress, tokenId);
   }
 
+  function getPackPriceEth(uint256 tokenId) public view override returns (uint256 packPriceEth) {
+    packPriceEth = _packPriceByPackId[tokenId];
+  }
+
   /***********************************|
   |     Private Bundle Functions      |
   |__________________________________*/
@@ -172,10 +176,11 @@ contract Web3PacksV2 is
     uint256 amountOut;
     uint256 nftTokenId;
 
+    // Iterate over each Bundle
     bytes32[] memory packBundlerIds = new bytes32[](bundleChunks.length);
     for (uint256 i; i < bundleChunks.length; i++) {
       IWeb3PacksDefs.BundleChunk memory chunk = bundleChunks[i];
-      packBundlerIds[i] = chunk.bundlerId;
+      packBundlerIds[i] = chunk.bundlerId; // track bundlerIds per pack
 
       // Ensure Bundler is Registered
       if (_bundlersById[chunk.bundlerId] == address(0)) {
@@ -235,9 +240,9 @@ contract Web3PacksV2 is
       revert NoBundlesInPack();
     }
 
-    address assetReceiver;
-    address lpTokenAddress;
-    uint256 lpTokenId;
+    // address assetReceiver;
+    address assetTokenAddress;
+    uint256 assetTokenId;
     for (uint i; i < _bundlesByPackId[packTokenId].length; i++) {
       bytes32 bundlerId = _bundlesByPackId[packTokenId][i];
       if (_bundlersById[bundlerId] == address(0)) {
@@ -246,13 +251,13 @@ contract Web3PacksV2 is
       }
       bundler = IWeb3PacksBundler(_bundlersById[bundlerId]);
 
-      // Pull Assets from NFT
-      (lpTokenAddress, lpTokenId) = bundler.getLiquidityToken(packTokenId);
-      assetReceiver = sellAll ? _bundlersById[bundlerId] : receiver;
-      if (lpTokenId == 0) {
-        _release(assetReceiver, packTokenId, lpTokenAddress);
+      // Pull Assets from NFT and send to Bundler for Unbundling
+      (assetTokenAddress, assetTokenId) = bundler.getLiquidityToken(packTokenId);
+      // assetReceiver = sellAll ? _bundlersById[bundlerId] : receiver;
+      if (assetTokenId == 0) {
+        _release(_bundlersById[bundlerId], packTokenId, assetTokenAddress);
       } else {
-        _breakBond(assetReceiver, packTokenId, lpTokenAddress, lpTokenId);
+        _breakBond(_bundlersById[bundlerId], packTokenId, assetTokenAddress, assetTokenId);
       }
 
       // Unbundle current asset

@@ -77,7 +77,7 @@ contract LPIusdUsdc is IWeb3PacksBundler, AlgebraRouter {
   }
 
   // NOTE: Call via "staticCall" for Quote
-  function quoteSwapIUSD(bool reverse) public payable virtual returns (uint256 amountOut) {
+  function quoteSwapToken0(bool reverse) public payable virtual returns (uint256 amountOut) {
     enterWeth(msg.value);
     amountOut = reverse
       ? swapCustom(10000, getToken0().tokenAddress, _weth)
@@ -85,7 +85,7 @@ contract LPIusdUsdc is IWeb3PacksBundler, AlgebraRouter {
   }
 
   // NOTE: Call via "staticCall" for Quote
-  function quoteSwapUSDC(bool reverse) public payable virtual returns (uint256 amountOut) {
+  function quoteSwapToken1(bool reverse) public payable virtual returns (uint256 amountOut) {
     enterWeth(msg.value);
     amountOut = reverse
       ? swapCustom(10000, getToken1().tokenAddress, _weth)

@@ -51,4 +51,8 @@ interface IWeb3Packs is IWeb3PacksDefs {
     uint256 tokenId
   ) external
     returns (TokenAmount[] memory);
+
+  function getPackPriceEth(uint256 tokenId)
+    external
+    returns (uint256 packPriceEth);
 }
