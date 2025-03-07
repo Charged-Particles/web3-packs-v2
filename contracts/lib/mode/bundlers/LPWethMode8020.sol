@@ -25,7 +25,7 @@ pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
-import "../routers/AlgebraRouter.sol";
+import "../routers/BalancerRouter.sol";
 import "../../../interfaces/IWeb3PacksBundler.sol";
 
 /*
@@ -33,9 +33,9 @@ import "../../../interfaces/IWeb3PacksBundler.sol";
   Token 0 = WETH 50%
   Token 1 = MODE 50%
  */
-contract LPWethMode8020 is IWeb3PacksBundler, AlgebraRouter {
+contract LPWethMode8020 is IWeb3PacksBundler, BalancerRouter {
   // Inherit from the Algebra Router
-  constructor(IWeb3PacksDefs.RouterConfig memory config) AlgebraRouter(config) {}
+  constructor(IWeb3PacksDefs.RouterConfig memory config) BalancerRouter(config) {}
 
   /***********************************|
   |          Configuration            |
