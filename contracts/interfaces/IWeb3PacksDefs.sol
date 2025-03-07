@@ -41,8 +41,9 @@ interface IWeb3PacksDefs {
     address weth;
     address token0;
     address token1;
-    address router;
     address manager;
+    address router;
+    bytes32 poolId;
     bytes32 bundlerId;
     int24 tickLower;
     int24 tickUpper;
