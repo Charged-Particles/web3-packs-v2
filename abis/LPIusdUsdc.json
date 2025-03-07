@@ -732,7 +732,7 @@
         "type": "bool"
       }
     ],
-    "name": "quoteSwapIUSD",
+    "name": "quoteSwapToken0",
     "outputs": [
       {
         "internalType": "uint256",
@@ -751,7 +751,7 @@
         "type": "bool"
       }
     ],
-    "name": "quoteSwapUSDC",
+    "name": "quoteSwapToken1",
     "outputs": [
       {
         "internalType": "uint256",
