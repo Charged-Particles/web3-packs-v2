@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-// SSWethSmd.sol
+// LPWethMode8020.sol
 // Copyright (c) 2025 Firma Lux, Inc. <https://charged.fi>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,36 +23,38 @@
 
 pragma solidity 0.8.17;
 
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
-import "../routers/PancakeRouter.sol";
+import "../routers/AlgebraRouter.sol";
 import "../../../interfaces/IWeb3PacksBundler.sol";
 
 /*
-  Performs a Single-Sided Swap on SwapMode Exchange using the Pancake Router
-  Token 0 = WETH
-  Token 1 = SMD
+  Creates a Liquidity Position on Kim Exchange using the Algebra Router
+  Token 0 = WETH 50%
+  Token 1 = MODE 50%
  */
-contract SSWethSmd is IWeb3PacksBundler, PancakeRouter {
-  // Inherit from the Pancake Router
-  constructor(IWeb3PacksDefs.RouterConfig memory config) PancakeRouter(config) {}
+contract LPWethMode8020 is IWeb3PacksBundler, AlgebraRouter {
+  // Inherit from the Algebra Router
+  constructor(IWeb3PacksDefs.RouterConfig memory config) AlgebraRouter(config) {}
 
   /***********************************|
   |          Configuration            |
   |__________________________________*/
 
-  // Token 1 = SMD on Mode (SwapMode Exchange)
+  // Token 0 = WETH
+  // Token 1 = Mode on Mode (Kim Exchange)
   function getToken1() public view override returns (IWeb3PacksDefs.Token memory token1) {
     IWeb3PacksDefs.Token memory token = IWeb3PacksDefs.Token({
       tokenAddress: _token1,
       tokenDecimals: 18,
-      tokenSymbol: "SMD"
+      tokenSymbol: "MODE"
     });
     return token;
   }
 
-  function getLiquidityToken(uint256) public override view returns (address tokenAddress, uint256 tokenId) {
-    tokenAddress = getToken1().tokenAddress;
-    tokenId = 0;
+  function getLiquidityToken(uint256 packTokenId) public override view returns (address tokenAddress, uint256 tokenId) {
+    tokenAddress = _router;
+    tokenId = _liquidityPositionsByTokenId[packTokenId].lpTokenId;
   }
 
   /***********************************|
@@ -65,7 +67,7 @@ contract SSWethSmd is IWeb3PacksBundler, PancakeRouter {
     amountOut = swapSingle(10000, reverse);
   }
 
-  function bundle(uint256, address sender)
+  function bundle(uint256 packTokenId, address sender)
     payable
     external
     override
@@ -77,32 +79,54 @@ contract SSWethSmd is IWeb3PacksBundler, PancakeRouter {
     )
   {
     // Perform Swap
-    amountOut = swapSingle(10000, false); // 100% WETH -> SMD
+    uint256 token1Balance = swapSingle(8000, false); // 80% WETH -> MODE
+    uint256 token0Balance = getBalanceToken0();
+
+    // Deposit Liquidity
+    (uint256 lpTokenId, uint256 liquidity, , ) = createLiquidityPosition(token0Balance, token1Balance, 0, 0, false);
+    nftTokenId = lpTokenId;
+    amountOut = liquidity;
+    tokenAddress = _router;
 
     // Transfer back to Manager
-    tokenAddress = getToken1().tokenAddress;
-    nftTokenId = 0;
-    TransferHelper.safeTransfer(tokenAddress, _manager, amountOut);
+    IERC721(tokenAddress).safeTransferFrom(address(this), _manager, nftTokenId);
+
+    // Track Liquidity Position by Pack Token ID
+    _liquidityPositionsByTokenId[packTokenId] = IWeb3PacksDefs.LiquidityPosition({
+      lpTokenId: lpTokenId,
+      liquidity: liquidity,
+      stable: false
+    });
 
     // Refund Unused Amounts
     refundUnusedTokens(sender);
   }
 
-  function unbundle(address payable receiver, uint256, bool sellAll)
+  function unbundle(address payable receiver, uint256 packTokenId, bool sellAll)
     external
     override
     onlyManagerOrSelf
     returns(uint256 ethAmountOut)
   {
+    // Perform Swap
     if (sellAll) {
-      // Perform Swap
-      swapSingle(10000, true); // 100% SMD -> WETH
+      // Remove Liquidity
+      IWeb3PacksDefs.LiquidityPosition memory liquidityPosition = _liquidityPositionsByTokenId[packTokenId];
+      removeLiquidityPosition(liquidityPosition);
+      collectLpFees(liquidityPosition);
 
-      // Send ETH to Receiver
+      // Swap Assets back to WETH
+      swapSingle(10000, true); // 100% MODE -> WETH
       ethAmountOut = exitWethAndTransfer(receiver);
     } else {
-      // Send Token to Receiver
-      TransferHelper.safeTransfer(getToken1().tokenAddress, receiver, getBalanceToken1());
+      // NOTE: For this Bundle, we want users to be able to Unbundle and receive the actual Liquidity NFT for Voting Purposes
+      (address lpTokenAddress, uint256 lpTokenId) = getLiquidityToken(packTokenId);
+
+      // Transfer Assets to Receiver
+      IERC721(lpTokenAddress).safeTransferFrom(address(this), receiver, lpTokenId);
     }
+
+    // Clear Liquidity Position
+    delete _liquidityPositionsByTokenId[packTokenId];
   }
 }
