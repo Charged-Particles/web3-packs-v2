@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-// Web3PacksModeV2.sol
+// Web3PacksV2.sol
 // Copyright (c) 2025 Firma Lux, Inc. <https://charged.fi>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -46,7 +46,7 @@ import "./interfaces/IChargedParticles.sol";
 import "./interfaces/IBaseProton.sol";
 import "./interfaces/IWETH9.sol";
 
-contract Web3PacksModeV2 is
+contract Web3PacksV2 is
   IWeb3Packs,
   Ownable,
   Pausable,
