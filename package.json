@@ -20,7 +20,8 @@
     "coverage": "yarn clean-test && hardhat --show-stack-traces coverage --temp coverage_build && yarn clean-test",
     "gas": "REPORT_GAS=true hardhat test",
     "start": "hardhat node --port 8545",
-    "deploy": "hardhat deploy --tags web3packs --network",
+    "deploy": "hardhat deploy --tags web3packs,deploySS,deployLP --network",
+    "erc721": "hardhat deploy --tags ERC721Mintable --network",
     "erc20": "hardhat deploy --tags ERC20Mintable --network"
   },
   "dependencies": {

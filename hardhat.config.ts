@@ -83,7 +83,7 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       chainId: 34443,
-      gasPrice: 100e9,
+      gasPrice: 'auto',
       forking: {
         // url: 'https://polygon-mainnet.g.alchemy.com/v2/' + process.env.ALCHEMY_ETH_APIKEY,
         // blockNumber: 30784049
@@ -91,7 +91,7 @@ const config: HardhatUserConfig = {
         blockNumber: 15004000
       },
       accounts: {
-        mnemonic: mnemonic.mainnet,
+        mnemonic: mnemonic.testnet,
         initialIndex: 0,
         count: 10,
       },

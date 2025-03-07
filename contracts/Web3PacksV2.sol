@@ -501,16 +501,16 @@ contract Web3PacksV2 is
     emit ChargedStateSet(chargedState);
   }
 
-  function setTreasury(address payable treasury) external onlyOwner {
-    require(treasury != address(0), "Invalid address for treasury");
-    _treasury = treasury;
-    emit Web3PacksTreasurySet(treasury);
-  }
-
   function setProton(address proton) external onlyOwner {
     require(proton != address(0), "Invalid address for proton");
     _proton = proton;
     emit ProtonSet(proton);
+  }
+
+  function setTreasury(address payable treasury) external onlyOwner {
+    require(treasury != address(0), "Invalid address for treasury");
+    _treasury = treasury;
+    emit Web3PacksTreasurySet(treasury);
   }
 
   function setProtocolFee(uint256 fee) external onlyOwner {
