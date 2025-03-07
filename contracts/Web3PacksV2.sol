@@ -69,7 +69,8 @@ contract Web3PacksV2 is
   address payable internal _treasury;
   uint256 public _protocolFee;
 
-  mapping (bytes32 => address) internal _bundlersById;
+  mapping (bytes32 => address) public _bundlersById;
+  mapping (uint256 => uint256) public _packPriceByPackId;
   mapping (uint256 => bytes32[]) internal _bundlesByPackId;
 
   // Charged Particles Wallet Managers
@@ -195,8 +196,9 @@ contract Web3PacksV2 is
       }
     }
 
-    // Track Bundles in Pack
+    // Track Pack Data
     _bundlesByPackId[tokenId] = packBundlerIds;
+    _packPriceByPackId[tokenId] = ethPackPrice;
 
     // Set the Timelock State
     _lock(lockState, tokenId);

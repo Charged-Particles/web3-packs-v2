@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-// SSWethWmlt.sol
+// LPWethWbtc.sol
 // Copyright (c) 2025 Firma Lux, Inc. <https://charged.fi>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,53 +24,38 @@
 pragma solidity 0.8.17;
 pragma abicoder v2;
 
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
-import "../routers/VelodromeV1Router.sol";
+import "../routers/AlgebraRouter.sol";
 import "../../../interfaces/IWeb3PacksBundler.sol";
-import "../../../interfaces/IVelodrome.sol";
 
 /*
-  Performs a Single-Sided Swap on Velodrome Exchange using the Velodrome V1 Router
-  Token 0 = WETH
-  Token 1 = wMLT
+  Creates a Liquidity Position on Kim Exchange using the Algebra Router
+  Token 0 = WETH 50%
+  Token 1 = WBTC 50%
  */
-contract SSWethWmlt is IWeb3PacksBundler, VelodromeV1Router {
-  address public _usdc;
-
-  // Inherit from the Velodrome V1 Router
-  constructor(IWeb3PacksDefs.RouterConfig memory config, address usdc) VelodromeV1Router(config) {
-    _usdc = usdc;
-  }
+contract LPWethWbtc is IWeb3PacksBundler, AlgebraRouter {
+  // Inherit from the Algebra Router
+  constructor(IWeb3PacksDefs.RouterConfig memory config) AlgebraRouter(config) {}
 
   /***********************************|
   |          Configuration            |
   |__________________________________*/
 
-  // Token 1 = wMLT on Mode (Velodrome Exchange)
+  // Token 0 = WETH
+  // Token 1 = WBTC on Mode (Kim Exchange)
   function getToken1() public view override returns (IWeb3PacksDefs.Token memory token1) {
     IWeb3PacksDefs.Token memory token = IWeb3PacksDefs.Token({
       tokenAddress: _primaryToken,
       tokenDecimals: 18,
-      tokenSymbol: "wMLT"
+      tokenSymbol: "WBTC"
     });
     return token;
   }
 
-  function getLiquidityToken(uint256) public override view returns (address tokenAddress, uint256 tokenId) {
-    tokenAddress = _getVelodromePairAddress(getToken0().tokenAddress, getToken1().tokenAddress);
-    tokenId = 0;
-  }
-
-  function getTokenPath(bool reverse) internal override view returns (IWeb3PacksDefs.Route[] memory tokenPath) {
-    IWeb3PacksDefs.Route[] memory tokens = new IWeb3PacksDefs.Route[](2);
-    if (reverse) {
-      tokens[0] = IWeb3PacksDefs.Route({token0: getToken1().tokenAddress, token1: _usdc, stable: false});
-      tokens[1] = IWeb3PacksDefs.Route({token0: _usdc, token1: getToken0().tokenAddress, stable: false});
-    } else {
-      tokens[0] = IWeb3PacksDefs.Route({token0: getToken0().tokenAddress, token1: _usdc, stable: false});
-      tokens[1] = IWeb3PacksDefs.Route({token0: _usdc, token1: getToken1().tokenAddress, stable: false});
-    }
-    return tokens;
+  function getLiquidityToken(uint256 packTokenId) public override view returns (address tokenAddress, uint256 tokenId) {
+    tokenAddress = _router;
+    tokenId = _liquidityPositionsByTokenId[packTokenId].lpTokenId;
   }
 
   /***********************************|
@@ -83,7 +68,7 @@ contract SSWethWmlt is IWeb3PacksBundler, VelodromeV1Router {
     amountOut = swapSingle(10000, reverse);
   }
 
-  function bundle(uint256, address sender)
+  function bundle(uint256 packTokenId, address sender)
     payable
     external
     override
@@ -94,32 +79,54 @@ contract SSWethWmlt is IWeb3PacksBundler, VelodromeV1Router {
       uint256 nftTokenId
     )
   {
+    uint256 wethBalance = getBalanceToken0();
+
     // Perform Swap
-    amountOut = swapSingle(10000, false); // 100% WETH -> wMLT
+    amountOut = swapSingle(5000, false); // 50% WETH -> WBTC
+    wethBalance = getBalanceToken0();
+
+    // Deposit Liquidity
+    (uint256 lpTokenId, uint256 liquidity, , ) = createLiquidityPosition(wethBalance, amountOut, 0, 0, false);
+    nftTokenId = lpTokenId;
 
     // Transfer back to Manager
-    tokenAddress = getToken1().tokenAddress;
-    nftTokenId = 0;
-    TransferHelper.safeTransfer(tokenAddress, _manager, amountOut);
+    tokenAddress = _router;
+    IERC721(tokenAddress).safeTransferFrom(address(this), _manager, nftTokenId);
+
+    // Track Liquidity Position by Pack Token ID
+    _liquidityPositionsByTokenId[packTokenId] = IWeb3PacksDefs.LiquidityPosition({
+      lpTokenId: lpTokenId,
+      liquidity: liquidity,
+      stable: false
+    });
 
     // Refund Unused Amounts
     refundUnusedTokens(sender);
   }
 
-  function unbundle(address payable receiver, uint256, bool sellAll)
+  function unbundle(address payable receiver, uint256 packTokenId, bool sellAll)
     external
     override
     onlyManagerOrSelf
     returns(uint256 ethAmountOut)
   {
-    // Perform Swap
-    swapSingle(10000, true); // 100% wMLT -> WETH
+    // Remove Liquidity
+    IWeb3PacksDefs.LiquidityPosition memory liquidityPosition = _liquidityPositionsByTokenId[packTokenId];
+    removeLiquidityPosition(liquidityPosition);
+    collectLpFees(liquidityPosition);
 
-    // Transfer Assets to Receiver
+    // Perform Swap
     if (sellAll) {
+      // Swap Assets back to WETH
+      swapSingle(10000, true); // 100% WBTC -> WETH
       ethAmountOut = exitWethAndTransfer(receiver);
     } else {
+      // Transfer Assets to Receiver
       TransferHelper.safeTransfer(getToken0().tokenAddress, receiver, getBalanceToken0());
+      TransferHelper.safeTransfer(getToken1().tokenAddress, receiver, getBalanceToken1());
     }
+
+    // Clear Liquidity Position
+    delete _liquidityPositionsByTokenId[packTokenId];
   }
 }

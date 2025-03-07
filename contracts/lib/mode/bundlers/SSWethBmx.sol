@@ -44,6 +44,10 @@ contract SSWethBmx is IWeb3PacksBundler, VelodromeV1Router {
     _wmlt = wmlt;
   }
 
+  /***********************************|
+  |          Configuration            |
+  |__________________________________*/
+
   // Token 1 = BMX on Mode (Velodrome Exchange)
   function getToken1() public view override returns (IWeb3PacksDefs.Token memory token1) {
     IWeb3PacksDefs.Token memory token = IWeb3PacksDefs.Token({
@@ -72,6 +76,10 @@ contract SSWethBmx is IWeb3PacksBundler, VelodromeV1Router {
     }
     return tokens;
   }
+
+  /***********************************|
+  |          Standard Code            |
+  |__________________________________*/
 
   // NOTE: Call via "staticCall" for Quote
   function quoteSwap(bool reverse) public payable virtual returns (uint256 amountOut) {

@@ -29,7 +29,6 @@ import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "../routers/AlgebraRouter.sol";
 import "../../../interfaces/IWeb3PacksBundler.sol";
 
-
 /*
   Creates a Liquidity Position on Kim Exchange using the Algebra Router
   Token 0 = WETH 50%
@@ -38,6 +37,10 @@ import "../../../interfaces/IWeb3PacksBundler.sol";
 contract LPWethMode is IWeb3PacksBundler, AlgebraRouter {
   // Inherit from the Algebra Router
   constructor(IWeb3PacksDefs.RouterConfig memory config) AlgebraRouter(config) {}
+
+  /***********************************|
+  |          Configuration            |
+  |__________________________________*/
 
   // Token 0 = WETH
   // Token 1 = Mode on Mode (Kim Exchange)
@@ -54,6 +57,10 @@ contract LPWethMode is IWeb3PacksBundler, AlgebraRouter {
     tokenAddress = _router;
     tokenId = _liquidityPositionsByTokenId[packTokenId].lpTokenId;
   }
+
+  /***********************************|
+  |          Standard Code            |
+  |__________________________________*/
 
   // NOTE: Call via "staticCall" for Quote
   function quoteSwap(bool reverse) public payable virtual returns (uint256 amountOut) {

@@ -37,6 +37,10 @@ contract SSWethMode is IWeb3PacksBundler, AlgebraRouter {
   // Inherit from the Algebra Router
   constructor(IWeb3PacksDefs.RouterConfig memory config) AlgebraRouter(config) {}
 
+  /***********************************|
+  |          Configuration            |
+  |__________________________________*/
+
   // Token 1 = MODE on Mode (Kim Exchange)
   function getToken1() public view override returns (IWeb3PacksDefs.Token memory token1) {
     IWeb3PacksDefs.Token memory token = IWeb3PacksDefs.Token({
@@ -51,6 +55,10 @@ contract SSWethMode is IWeb3PacksBundler, AlgebraRouter {
     tokenAddress = getToken1().tokenAddress;
     tokenId = 0;
   }
+
+  /***********************************|
+  |          Standard Code            |
+  |__________________________________*/
 
   // NOTE: Call via "staticCall" for Quote
   function quoteSwap(bool reverse) public payable virtual returns (uint256 amountOut) {

@@ -27,7 +27,6 @@ import "./IWeb3PacksDefs.sol";
 interface IWeb3PacksRouter is IWeb3PacksDefs {
   function getToken0() external returns (IWeb3PacksDefs.Token calldata token0);
   function getToken1() external returns (IWeb3PacksDefs.Token calldata token1);
-  // function getMiddleTokens() external returns (address[] memory middleTokens);
 
   function getBalanceToken0() external returns (uint256 balanceToken0);
   function getBalanceToken1() external returns (uint256 balanceToken1);
