@@ -29,7 +29,6 @@
 //
 
 pragma solidity 0.8.17;
-pragma abicoder v2;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -186,6 +185,8 @@ contract Web3PacksV2 is
       TransferHelper.safeTransfer(_weth, address(bundler), chunkWeth);
 
       // Receive Assets from Bundler
+      //  If Liquidity is ERC20: nftTokenId == 0
+      //  If Liquidity is ERC721: nftTokenId > 0
       (tokenAddress, amountOut, nftTokenId) = bundler.bundle(tokenId, _msgSender());
 
       // Deposit the Assets into the Web3Packs NFT

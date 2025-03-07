@@ -11,20 +11,17 @@
   "scripts": {
     "reinstall": "rm -rf node_modules && rm -f yarn.lock && yarn clean && yarn",
     "clean": "rm -rf build cache coverage coverage.json test-results.xml",
-    "clean-deployed": "rm -rf abis && rm -f .openzeppelin/unknown-31337.json && rm -f .openzeppelin/kovan.json",
     "clean-test": "rm -rf abis .openzeppelin/${npm_config_network:-'unknown-31337'}.json deployments/${npm_config_network:-hardhat}/*.json test-results.xml",
     "verify": "yarn hint && yarn test",
     "compile": "hardhat --show-stack-traces --max-memory 8192 compile",
-    "test": "yarn hardhat test --deploy-fixture --network hardhat ./tests/Web3PacksMode.test.ts",
-    "test-only": "yarn clean-test && hardhat test --show-stack-traces",
+    "test": "yarn hardhat test --deploy-fixture --network hardhat ./tests/Web3PacksV2.test.ts",
     "watch-test": "hardhat watch test",
     "hint": "solhint \"contracts/**/*.sol\"",
     "coverage": "yarn clean-test && hardhat --show-stack-traces coverage --temp coverage_build && yarn clean-test",
     "gas": "REPORT_GAS=true hardhat test",
     "start": "hardhat node --port 8545",
-    "deploy": "hardhat deploy --tags mode_packs --network",
-    "erc20": "hardhat deploy --tags ERC20Mintable --network",
-    "rewards": "hardhat deploy --tags DistroRewards --network"
+    "deploy": "hardhat deploy --tags web3packs --network",
+    "erc20": "hardhat deploy --tags ERC20Mintable --network"
   },
   "dependencies": {
     "@balancer-labs/sdk": "^1.1.6",

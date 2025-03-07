@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-// LPWethWbtc.sol
+// LPIusdUsdc.sol
 // Copyright (c) 2025 Firma Lux, Inc. <https://charged.fi>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,10 +30,10 @@ import "../../../interfaces/IWeb3PacksBundler.sol";
 
 /*
   Creates a Liquidity Position on Kim Exchange using the Algebra Router
-  Token 0 = WETH 50%
-  Token 1 = WBTC 50%
+  Token 0 = iUSD 50%
+  Token 1 = USDC 50%
  */
-contract LPWethWbtc is IWeb3PacksBundler, AlgebraRouter {
+contract LPIusdUsdc is IWeb3PacksBundler, AlgebraRouter {
   // Inherit from the Algebra Router
   constructor(IWeb3PacksDefs.RouterConfig memory config) AlgebraRouter(config) {}
 
@@ -41,13 +41,22 @@ contract LPWethWbtc is IWeb3PacksBundler, AlgebraRouter {
   |          Configuration            |
   |__________________________________*/
 
-  // Token 0 = WETH
-  // Token 1 = WBTC on Mode (Kim Exchange)
+  // Token 0 = iUSD on Mode (Kim Exchange)
+  function getToken0() public view override returns (IWeb3PacksDefs.Token memory token0) {
+    IWeb3PacksDefs.Token memory token = IWeb3PacksDefs.Token({
+      tokenAddress: _token0,
+      tokenDecimals: 18,
+      tokenSymbol: "iUSD"
+    });
+    return token;
+  }
+
+  // Token 1 = USDC on Mode (Kim Exchange)
   function getToken1() public view override returns (IWeb3PacksDefs.Token memory token1) {
     IWeb3PacksDefs.Token memory token = IWeb3PacksDefs.Token({
       tokenAddress: _token1,
-      tokenDecimals: 18,
-      tokenSymbol: "WBTC"
+      tokenDecimals: 6,
+      tokenSymbol: "USDC"
     });
     return token;
   }
@@ -67,6 +76,22 @@ contract LPWethWbtc is IWeb3PacksBundler, AlgebraRouter {
     amountOut = swapSingle(10000, reverse);
   }
 
+  // NOTE: Call via "staticCall" for Quote
+  function quoteSwapIUSD(bool reverse) public payable virtual returns (uint256 amountOut) {
+    enterWeth(msg.value);
+    amountOut = reverse
+      ? swapCustom(10000, getToken0().tokenAddress, _weth)
+      : swapCustom(10000, _weth, getToken0().tokenAddress);
+  }
+
+  // NOTE: Call via "staticCall" for Quote
+  function quoteSwapUSDC(bool reverse) public payable virtual returns (uint256 amountOut) {
+    enterWeth(msg.value);
+    amountOut = reverse
+      ? swapCustom(10000, getToken1().tokenAddress, _weth)
+      : swapCustom(10000, _weth, getToken1().tokenAddress);
+  }
+
   function bundle(uint256 packTokenId, address sender)
     payable
     external
@@ -78,12 +103,12 @@ contract LPWethWbtc is IWeb3PacksBundler, AlgebraRouter {
       uint256 nftTokenId
     )
   {
-    // Perform Swap
-    uint256 token1Balance = swapSingle(5000, false); // 50% WETH -> WBTC
-    uint256 token0Balance = getBalanceToken0();
+    // Perform Swaps
+    uint256 iusdBalance = swapCustom(5000, _weth, getToken0().tokenAddress); // 50% WETH -> iUSD
+    uint256 usdcBalance = swapCustom(10000, _weth, getToken1().tokenAddress); // Remaining WETH -> USDC
 
     // Deposit Liquidity
-    (uint256 lpTokenId, uint256 liquidity, , ) = createLiquidityPosition(token0Balance, token1Balance, 0, 0, false);
+    (uint256 lpTokenId, uint256 liquidity, , ) = createLiquidityPosition(iusdBalance, usdcBalance, 0, 0, false);
     nftTokenId = lpTokenId;
     amountOut = liquidity;
     tokenAddress = _router;
@@ -116,7 +141,8 @@ contract LPWethWbtc is IWeb3PacksBundler, AlgebraRouter {
     // Perform Swap
     if (sellAll) {
       // Swap Assets back to WETH
-      swapSingle(10000, true); // 100% WBTC -> WETH
+      swapCustom(10000, getToken0().tokenAddress, _weth); // 100% iUSD -> WETH
+      swapCustom(10000, getToken1().tokenAddress, _weth); // 100% USDC -> WETH
       ethAmountOut = exitWethAndTransfer(receiver);
     } else {
       // Transfer Assets to Receiver

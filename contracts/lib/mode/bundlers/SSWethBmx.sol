@@ -22,7 +22,6 @@
 // SOFTWARE.
 
 pragma solidity 0.8.17;
-pragma abicoder v2;
 
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "../routers/VelodromeV1Router.sol";
@@ -51,7 +50,7 @@ contract SSWethBmx is IWeb3PacksBundler, VelodromeV1Router {
   // Token 1 = BMX on Mode (Velodrome Exchange)
   function getToken1() public view override returns (IWeb3PacksDefs.Token memory token1) {
     IWeb3PacksDefs.Token memory token = IWeb3PacksDefs.Token({
-      tokenAddress: _primaryToken,
+      tokenAddress: _token1,
       tokenDecimals: 18,
       tokenSymbol: "BMX"
     });

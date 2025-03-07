@@ -22,7 +22,6 @@
 // SOFTWARE.
 
 pragma solidity 0.8.17;
-pragma abicoder v2;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
@@ -46,7 +45,7 @@ contract LPWethKim is IWeb3PacksBundler, AlgebraRouter {
   // Token 1 = KIM on Mode (Kim Exchange)
   function getToken1() public view override returns (IWeb3PacksDefs.Token memory token1) {
     IWeb3PacksDefs.Token memory token = IWeb3PacksDefs.Token({
-      tokenAddress: _primaryToken,
+      tokenAddress: _token1,
       tokenDecimals: 18,
       tokenSymbol: "KIM"
     });
@@ -79,18 +78,17 @@ contract LPWethKim is IWeb3PacksBundler, AlgebraRouter {
       uint256 nftTokenId
     )
   {
-    uint256 wethBalance = getBalanceToken0();
-
     // Perform Swap
-    amountOut = swapSingle(5000, false); // 50% WETH -> KIM
-    wethBalance = getBalanceToken0();
+    uint256 token1Balance = swapSingle(5000, false); // 50% WETH -> KIM
+    uint256 token0Balance = getBalanceToken0();
 
     // Deposit Liquidity
-    (uint256 lpTokenId, uint256 liquidity, , ) = createLiquidityPosition(wethBalance, amountOut, 0, 0, false);
+    (uint256 lpTokenId, uint256 liquidity, , ) = createLiquidityPosition(token0Balance, token1Balance, 0, 0, false);
     nftTokenId = lpTokenId;
+    amountOut = liquidity;
+    tokenAddress = _router;
 
     // Transfer back to Manager
-    tokenAddress = _router;
     IERC721(tokenAddress).safeTransferFrom(address(this), _manager, nftTokenId);
 
     // Track Liquidity Position by Pack Token ID

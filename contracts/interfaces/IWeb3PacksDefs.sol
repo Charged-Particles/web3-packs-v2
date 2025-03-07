@@ -39,7 +39,8 @@ interface IWeb3PacksDefs {
 
   struct RouterConfig {
     address weth;
-    address primaryToken;
+    address token0;
+    address token1;
     address router;
     address manager;
     bytes32 bundlerId;

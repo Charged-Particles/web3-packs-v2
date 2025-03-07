@@ -2,24 +2,51 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "weth",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "proton",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "chargedParticles",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "chargedState",
-        "type": "address"
+        "components": [
+          {
+            "internalType": "address",
+            "name": "weth",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "token0",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "token1",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "router",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "manager",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "bundlerId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "int24",
+            "name": "tickLower",
+            "type": "int24"
+          },
+          {
+            "internalType": "int24",
+            "name": "tickUpper",
+            "type": "int24"
+          }
+        ],
+        "internalType": "struct IWeb3PacksDefs.RouterConfig",
+        "name": "config",
+        "type": "tuple"
       }
     ],
     "stateMutability": "nonpayable",
@@ -130,51 +157,6 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "bundlerAddress",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes32",
-        "name": "bundlerId",
-        "type": "bytes32"
-      }
-    ],
-    "name": "BundlerRegistered",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "chargedParticles",
-        "type": "address"
-      }
-    ],
-    "name": "ChargedParticlesSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "chargedState",
-        "type": "address"
-      }
-    ],
-    "name": "ChargedStateSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
         "name": "previousOwner",
         "type": "address"
       },
@@ -186,127 +168,6 @@
       }
     ],
     "name": "OwnershipTransferred",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "receiver",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes32",
-        "name": "packType",
-        "type": "bytes32"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "ethPackPrice",
-        "type": "uint256"
-      }
-    ],
-    "name": "PackBundled",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "receiver",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "ethAmount",
-        "type": "uint256"
-      }
-    ],
-    "name": "PackUnbundled",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "Paused",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "fee",
-        "type": "uint256"
-      }
-    ],
-    "name": "ProtocolFeeSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "proton",
-        "type": "address"
-      }
-    ],
-    "name": "ProtonSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "Unpaused",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "treasury",
-        "type": "address"
-      }
-    ],
-    "name": "Web3PacksTreasurySet",
     "type": "event"
   },
   {
@@ -410,14 +271,21 @@
     "type": "event"
   },
   {
-    "inputs": [
+    "inputs": [],
+    "name": "_bundlerId",
+    "outputs": [
       {
         "internalType": "bytes32",
         "name": "",
         "type": "bytes32"
       }
     ],
-    "name": "_bundlersById",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "_manager",
     "outputs": [
       {
         "internalType": "address",
@@ -430,7 +298,7 @@
   },
   {
     "inputs": [],
-    "name": "_chargedParticles",
+    "name": "_router",
     "outputs": [
       {
         "internalType": "address",
@@ -443,7 +311,33 @@
   },
   {
     "inputs": [],
-    "name": "_chargedState",
+    "name": "_tickLower",
+    "outputs": [
+      {
+        "internalType": "int24",
+        "name": "",
+        "type": "int24"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "_tickUpper",
+    "outputs": [
+      {
+        "internalType": "int24",
+        "name": "",
+        "type": "int24"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "_token0",
     "outputs": [
       {
         "internalType": "address",
@@ -456,65 +350,7 @@
   },
   {
     "inputs": [],
-    "name": "_cpBasketManager",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "_cpWalletManager",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "_packPriceByPackId",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "_protocolFee",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "_proton",
+    "name": "_token1",
     "outputs": [
       {
         "internalType": "address",
@@ -541,64 +377,285 @@
   {
     "inputs": [
       {
-        "components": [
-          {
-            "internalType": "bytes32",
-            "name": "bundlerId",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "uint256",
-            "name": "percentBasisPoints",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct IWeb3PacksDefs.BundleChunk[]",
-        "name": "bundleChunks",
-        "type": "tuple[]"
-      },
-      {
-        "internalType": "string",
-        "name": "tokenMetaUri",
-        "type": "string"
-      },
-      {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "ERC20Timelock",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "ERC721Timelock",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct IWeb3PacksDefs.LockState",
-        "name": "lockState",
-        "type": "tuple"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "packType",
-        "type": "bytes32"
-      },
-      {
         "internalType": "uint256",
-        "name": "ethPackPrice",
+        "name": "",
         "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
       }
     ],
     "name": "bundle",
     "outputs": [
+      {
+        "internalType": "address",
+        "name": "tokenAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountOut",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nftTokenId",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "lpTokenId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "liquidity",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "stable",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct IWeb3PacksDefs.LiquidityPosition",
+        "name": "liquidityPosition",
+        "type": "tuple"
+      }
+    ],
+    "name": "collectLpFees",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount0",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount1",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "balanceAmount0",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "balanceAmount1",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minAmount0",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minAmount1",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "name": "createLiquidityPosition",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "lpTokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "liquidity",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount0",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount1",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "enterWeth",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address payable",
+        "name": "receiver",
+        "type": "address"
+      }
+    ],
+    "name": "exitWethAndTransfer",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "ethAmount",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getBalanceToken0",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "balanceToken0",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getBalanceToken1",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "balanceToken1",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getBalanceWeth",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "balanceWeth",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "getLiquidityToken",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "tokenAddress",
+        "type": "address"
+      },
       {
         "internalType": "uint256",
         "name": "tokenId",
         "type": "uint256"
       }
     ],
-    "stateMutability": "payable",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getToken0",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "tokenAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tokenDecimals",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "tokenSymbol",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct IWeb3PacksDefs.Token",
+        "name": "token0",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getToken1",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "tokenAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tokenDecimals",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "tokenSymbol",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct IWeb3PacksDefs.Token",
+        "name": "token1",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -649,40 +706,75 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "pause",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "paused",
-    "outputs": [
+    "inputs": [
       {
         "internalType": "bool",
-        "name": "",
+        "name": "reverse",
         "type": "bool"
       }
     ],
-    "stateMutability": "view",
+    "name": "quoteSwap",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountOut",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "payable",
     "type": "function"
   },
   {
     "inputs": [
       {
-        "internalType": "bytes32",
-        "name": "bundlerId",
-        "type": "bytes32"
-      },
-      {
         "internalType": "address",
-        "name": "bundlerAddress",
+        "name": "sender",
         "type": "address"
       }
     ],
-    "name": "registerBundlerId",
+    "name": "refundUnusedTokens",
     "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "lpTokenId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "liquidity",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "stable",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct IWeb3PacksDefs.LiquidityPosition",
+        "name": "liquidityPosition",
+        "type": "tuple"
+      }
+    ],
+    "name": "removeLiquidityPosition",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount0",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount1",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -697,11 +789,11 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "chargedParticles",
+        "name": "manager",
         "type": "address"
       }
     ],
-    "name": "setChargedParticles",
+    "name": "setManager",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -710,11 +802,50 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "chargedState",
+        "name": "router",
         "type": "address"
       }
     ],
-    "name": "setChargedState",
+    "name": "setRouter",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "int24",
+        "name": "tickLower",
+        "type": "int24"
+      }
+    ],
+    "name": "setTickLower",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "int24",
+        "name": "tickUpper",
+        "type": "int24"
+      }
+    ],
+    "name": "setTickUpper",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "weth",
+        "type": "address"
+      }
+    ],
+    "name": "setWeth",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -723,38 +854,52 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "fee",
+        "name": "percentOfAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "token0",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "token1",
+        "type": "address"
+      }
+    ],
+    "name": "swapCustom",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountOut",
         "type": "uint256"
       }
     ],
-    "name": "setProtocolFee",
-    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "proton",
-        "type": "address"
-      }
-    ],
-    "name": "setProton",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
+        "internalType": "uint256",
+        "name": "percentOfAmount",
+        "type": "uint256"
+      },
       {
-        "internalType": "address payable",
-        "name": "treasury",
-        "type": "address"
+        "internalType": "bool",
+        "name": "reverse",
+        "type": "bool"
       }
     ],
-    "name": "setTreasury",
-    "outputs": [],
+    "name": "swapSingle",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountOut",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -779,13 +924,8 @@
         "type": "address"
       },
       {
-        "internalType": "address",
-        "name": "tokenAddress",
-        "type": "address"
-      },
-      {
         "internalType": "uint256",
-        "name": "tokenId",
+        "name": "",
         "type": "uint256"
       },
       {
@@ -795,14 +935,13 @@
       }
     ],
     "name": "unbundle",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "unpause",
-    "outputs": [],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "ethAmountOut",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },

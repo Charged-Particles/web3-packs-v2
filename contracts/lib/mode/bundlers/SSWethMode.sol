@@ -22,7 +22,6 @@
 // SOFTWARE.
 
 pragma solidity 0.8.17;
-pragma abicoder v2;
 
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "../routers/AlgebraRouter.sol";
@@ -44,7 +43,7 @@ contract SSWethMode is IWeb3PacksBundler, AlgebraRouter {
   // Token 1 = MODE on Mode (Kim Exchange)
   function getToken1() public view override returns (IWeb3PacksDefs.Token memory token1) {
     IWeb3PacksDefs.Token memory token = IWeb3PacksDefs.Token({
-      tokenAddress: _primaryToken,
+      tokenAddress: _token1,
       tokenDecimals: 18,
       tokenSymbol: "MODE"
     });

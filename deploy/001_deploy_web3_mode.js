@@ -10,13 +10,6 @@ const _ = require('lodash');
 const globals = require('../js-helpers/globals');
 
 const _ADDRESS = {
-  // Polygon
-  137: {
-    ChargedParticles: '0x0288280Df6221E7e9f23c1BB398c820ae0Aa6c10',
-    ChargedState: '0x9c00b8CF03f58c0420CDb6DE72E27Bf11964025b',
-    Proton: '0x1CeFb0E1EC36c7971bed1D64291fc16a145F35DC',
-    NonfungiblePositionManager: '0x91ae842A5Ffd8d12023116943e72A606179294f3',
-  },
   // mode
   34443: {
     Weth: '0x4200000000000000000000000000000000000006',
@@ -216,4 +209,4 @@ module.exports = async (hre) => {
   }
 };
 
-module.exports.tags = ['mode_packs']
+module.exports.tags = ['web3packs']

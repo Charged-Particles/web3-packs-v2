@@ -22,7 +22,6 @@
 // SOFTWARE.
 
 pragma solidity 0.8.17;
-pragma abicoder v2;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -41,7 +40,8 @@ abstract contract Web3PacksRouterBase is
   address public _weth;
   address public _router;
   address public _manager;
-  address public _primaryToken;
+  address public _token0;
+  address public _token1;
 
   int24 public _tickLower;
   int24 public _tickUpper;
@@ -54,7 +54,8 @@ abstract contract Web3PacksRouterBase is
 
   constructor(IWeb3PacksDefs.RouterConfig memory config) {
     _weth = config.weth;
-    _primaryToken = config.primaryToken;
+    _token0 = config.token0;
+    _token1 = config.token1;
     _router = config.router;
     _manager = config.manager;
     _bundlerId = config.bundlerId;
@@ -62,6 +63,11 @@ abstract contract Web3PacksRouterBase is
     _tickUpper = config.tickUpper;
   }
 
+  /***********************************|
+  |          Configuration            |
+  |__________________________________*/
+
+  /// @dev This should be overridden if Token0 is not WETH
   function getToken0() public virtual view returns (IWeb3PacksDefs.Token memory token0) {
     IWeb3PacksDefs.Token memory token = IWeb3PacksDefs.Token({
       tokenAddress: _weth,
@@ -71,6 +77,7 @@ abstract contract Web3PacksRouterBase is
     return token;
   }
 
+  /// @dev This should be overridden if Token1 is not WETH
   function getToken1() public virtual view returns (IWeb3PacksDefs.Token memory token1) {
     IWeb3PacksDefs.Token memory token = IWeb3PacksDefs.Token({
       tokenAddress: _weth,
@@ -80,6 +87,7 @@ abstract contract Web3PacksRouterBase is
     return token;
   }
 
+  /// @dev This should be overridden to specify custom routes/paths for swapping
   function getTokenPath(bool reverse) internal virtual view returns (IWeb3PacksDefs.Route[] memory tokenPath) {
     IWeb3PacksDefs.Route[] memory tokens = new IWeb3PacksDefs.Route[](1);
     tokens[0] = reverse
@@ -88,8 +96,17 @@ abstract contract Web3PacksRouterBase is
     return tokens;
   }
 
+  /// @dev This should be overridden to provide a PoolID if required (Balancer Pools)
   function getPoolId() internal virtual view returns (bytes32 poolId) {
     return bytes32("");
+  }
+
+  /***********************************|
+  |          Standard Code            |
+  |__________________________________*/
+
+  function getBalanceWeth() public virtual view returns (uint256 balanceWeth) {
+    return IERC20(_weth).balanceOf(address(this));
   }
 
   function getBalanceToken0() public virtual view returns (uint256 balanceToken0) {

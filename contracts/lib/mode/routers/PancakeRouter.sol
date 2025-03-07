@@ -22,7 +22,6 @@
 // SOFTWARE.
 
 pragma solidity 0.8.17;
-pragma abicoder v2;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -48,6 +47,16 @@ abstract contract PancakeRouter is Web3PacksRouterBase {
     IWeb3PacksDefs.Token memory token0 = reverse ? getToken1() : getToken0();
     IWeb3PacksDefs.Token memory token1 = reverse ? getToken0() : getToken1();
     amountOut = _performSwap(percentOfAmount, token0.tokenAddress, token1.tokenAddress);
+  }
+
+  function swapCustom(uint256 percentOfAmount, address token0, address token1)
+    public
+    virtual
+    override
+    onlyManagerOrSelf
+    returns (uint256 amountOut)
+  {
+    amountOut = _performSwap(percentOfAmount, token0, token1);
   }
 
   function createLiquidityPosition(

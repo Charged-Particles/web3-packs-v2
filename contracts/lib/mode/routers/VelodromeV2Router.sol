@@ -22,7 +22,6 @@
 // SOFTWARE.
 
 pragma solidity 0.8.17;
-pragma abicoder v2;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -61,6 +60,21 @@ abstract contract VelodromeV2Router is Web3PacksRouterBase {
       routes[i] = VRoute({from: tokens[i].token0, to: tokens[i].token1, stable: tokens[i].stable});
     }
     amountOut = _performSwap(percentOfAmount, token0.tokenAddress, token1.tokenAddress, routes);
+  }
+
+  function swapCustom(uint256 percentOfAmount, address token0, address token1)
+    public
+    virtual
+    override
+    onlyManagerOrSelf
+    returns (uint256 amountOut)
+  {
+    IWeb3PacksDefs.Route[] memory tokens = getTokenPath(false);
+    VRoute[] memory routes = new VRoute[](tokens.length);
+    for (uint i; i < tokens.length; i++) {
+      routes[i] = VRoute({from: tokens[i].token0, to: tokens[i].token1, stable: tokens[i].stable});
+    }
+    amountOut = _performSwap(percentOfAmount, token0, token1, routes);
   }
 
   function createLiquidityPosition(

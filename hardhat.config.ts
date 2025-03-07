@@ -234,7 +234,7 @@ const config: HardhatUserConfig = {
     runOnCompile: true,
     clear: true,
     flat: true,
-    only: ['Web3Packs', 'ERC20Mintable'],
+    only: ['Web3Packs', 'ERC20Mintable', 'ERC721Mintable', 'SS', 'LP'],
     except: ['IWeb3Packs', 'Web3PacksRouterBase'],
   },
   sourcify: { enabled: true },
