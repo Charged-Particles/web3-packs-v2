@@ -727,6 +727,44 @@
   {
     "inputs": [
       {
+        "internalType": "bool",
+        "name": "reverse",
+        "type": "bool"
+      }
+    ],
+    "name": "quoteSwapIUSD",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountOut",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "reverse",
+        "type": "bool"
+      }
+    ],
+    "name": "quoteSwapUSDC",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountOut",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "sender",
         "type": "address"

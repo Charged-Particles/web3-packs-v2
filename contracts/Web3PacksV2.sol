@@ -139,6 +139,11 @@ contract Web3PacksV2 is
     emit PackUnbundled(tokenId, receiver, ethAmount);
   }
 
+  // NOTE: Call via "staticCall" for Balances
+  function getPackBalances(address tokenAddress, uint256 tokenId) public override returns (TokenAmount[] memory) {
+    return _getPackBalances(tokenAddress, tokenId);
+  }
+
   /***********************************|
   |     Private Bundle Functions      |
   |__________________________________*/
@@ -258,6 +263,41 @@ contract Web3PacksV2 is
     delete _bundlesByPackId[packTokenId];
   }
 
+  function _getPackBalances(address tokenAddress, uint256 tokenId) internal returns (TokenAmount[] memory) {
+    IWeb3PacksBundler bundler;
+
+    // Ensure Pack has Bundles
+    if (_bundlesByPackId[tokenId].length == 0) {
+      revert NoBundlesInPack();
+    }
+
+    uint256 bundleCount = _bundlesByPackId[tokenId].length;
+    TokenAmount[] memory tokenBalances = new TokenAmount[](bundleCount);
+    for (uint i; i < bundleCount; i++) {
+      bytes32 bundlerId = _bundlesByPackId[tokenId][i];
+      if (_bundlersById[bundlerId] == address(0)) {
+        // skip unregistered bundlers
+        continue;
+      }
+
+      // Get Liquidity Token from Bundler
+      bundler = IWeb3PacksBundler(_bundlersById[bundlerId]);
+      (address assetTokenAddress, uint256 assetTokenId) = bundler.getLiquidityToken(tokenId);
+      bool isNft = (assetTokenId > 0);
+
+      // Get Balance of NFT from Charged Particles
+      uint256 assetBalance = isNft ? 1 : _getMass(tokenAddress, tokenId, assetTokenAddress);
+
+      // Track Token Balances
+      tokenBalances[i] = TokenAmount({
+        tokenAddress: assetTokenAddress,
+        balance: assetBalance,
+        nftTokenId: assetTokenId
+      });
+    }
+    return tokenBalances;
+  }
+
   /***********************************|
   |     Private Charged Functions     |
   |__________________________________*/
@@ -373,6 +413,12 @@ contract Web3PacksV2 is
         lockState.ERC721Timelock
       );
     }
+  }
+
+  function _getMass(address tokenAddress, uint256 tokenId, address assetTokenAddress) internal returns (uint256 assetMass) {
+    /// @dev "baseParticleMass" is not a "view" function; call via "callStatic"
+    assetMass = IChargedParticles(_chargedParticles)
+      .baseParticleMass(tokenAddress, tokenId, _cpWalletManager, assetTokenAddress);
   }
 
   function _collectFees(uint256 excludedAmount) internal {

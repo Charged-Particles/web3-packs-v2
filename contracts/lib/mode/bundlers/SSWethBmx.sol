@@ -58,7 +58,7 @@ contract SSWethBmx is IWeb3PacksBundler, VelodromeV1Router {
   }
 
   function getLiquidityToken(uint256) public override view returns (address tokenAddress, uint256 tokenId) {
-    tokenAddress = _getVelodromePairAddress(getToken0().tokenAddress, getToken1().tokenAddress);
+    tokenAddress = getToken1().tokenAddress;
     tokenId = 0;
   }
 

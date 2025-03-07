@@ -59,6 +59,12 @@ interface IWeb3PacksDefs {
     string tokenSymbol;
   }
 
+  struct TokenAmount {
+    address tokenAddress;
+    uint256 balance;
+    uint256 nftTokenId;
+  }
+
   struct Route {
     address token0;
     address token1;

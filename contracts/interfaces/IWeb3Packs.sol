@@ -25,18 +25,18 @@ pragma solidity 0.8.17;
 import "./IWeb3PacksDefs.sol";
 
 interface IWeb3Packs is IWeb3PacksDefs {
-
+  // BUNDLE
   function bundle(
     IWeb3PacksDefs.BundleChunk[] calldata bundleChunks,
     string calldata tokenMetaUri,
     IWeb3PacksDefs.LockState calldata lockState,
     bytes32 packType,
     uint256 ethPackPrice
-  )
-    external
+  ) external
     payable
     returns(uint256 tokenId);
 
+  // UNBUNDLE
   function unbundle(
     address payable receiver,
     address tokenAddress,
@@ -45,4 +45,10 @@ interface IWeb3Packs is IWeb3PacksDefs {
   ) external
     payable;
 
+  // QUERY
+  function getPackBalances(
+    address tokenAddress,
+    uint256 tokenId
+  ) external
+    returns (TokenAmount[] memory);
 }
