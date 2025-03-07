@@ -60,6 +60,9 @@ contract Web3PacksV2 is
   event ProtocolFeeSet(uint256 fee);
   event Web3PacksTreasurySet(address indexed treasury);
   event BundlerRegistered(address indexed bundlerAddress, bytes32 bundlerId);
+  event BalanceClaimed(address indexed account, uint256 balance);
+
+  uint256 private constant BASIS_POINTS = 10000;
 
   address public _weth;
   address public _proton;
@@ -71,6 +74,7 @@ contract Web3PacksV2 is
   mapping (bytes32 => address) public _bundlersById;
   mapping (uint256 => uint256) internal _packPriceByPackId;
   mapping (uint256 => bytes32[]) internal _bundlesByPackId;
+  mapping (address => uint256) internal _referrerBalance;
 
   // Charged Particles Wallet Managers
   string public _cpWalletManager = "generic.B";
@@ -95,6 +99,7 @@ contract Web3PacksV2 is
 
   function bundle(
     IWeb3PacksDefs.BundleChunk[] calldata bundleChunks,
+    address[] calldata referrals,
     string calldata tokenMetaUri,
     IWeb3PacksDefs.LockState calldata lockState,
     bytes32 packType,
@@ -108,11 +113,12 @@ contract Web3PacksV2 is
     returns(uint256 tokenId)
   {
     _collectFees(ethPackPrice);
+    uint256 rewards = _calculateReferralRewards(ethPackPrice, referrals);
     tokenId = _bundle(
       bundleChunks,
       tokenMetaUri,
       lockState,
-      ethPackPrice
+      ethPackPrice - rewards
     );
     emit PackBundled(tokenId, _msgSender(), packType, ethPackPrice);
   }
@@ -147,6 +153,20 @@ contract Web3PacksV2 is
   function getPackPriceEth(uint256 tokenId) public view override returns (uint256 packPriceEth) {
     packPriceEth = _packPriceByPackId[tokenId];
   }
+
+  function getReferralRewardsOf(address account) public view override returns (uint256 balance) {
+    balance = _referrerBalance[account];
+  }
+
+  function claimReferralRewards(address payable account) public override nonReentrant {
+    uint256 balance = _referrerBalance[account];
+    if (address(this).balance >= balance) {
+      (bool sent, ) = account.call{value: balance}("");
+      require(sent, "Failed to send referral rewards");
+      emit BalanceClaimed(account, balance);
+    }
+  }
+
 
   /***********************************|
   |     Private Bundle Functions      |
@@ -189,7 +209,7 @@ contract Web3PacksV2 is
       bundler = IWeb3PacksBundler(_bundlersById[chunk.bundlerId]);
 
       // Calculate Percent
-      chunkWeth = (wethTotal * chunk.percentBasisPoints) / 10000;
+      chunkWeth = (wethTotal * chunk.percentBasisPoints) / BASIS_POINTS;
 
       // Send WETH to Bundler
       TransferHelper.safeTransfer(_weth, address(bundler), chunkWeth);
@@ -434,6 +454,32 @@ contract Web3PacksV2 is
     uint256 fees = msg.value - excludedAmount;
     (bool sent, ) = _treasury.call{value: fees}("");
     require(sent, "Failed to send fees to Treasury");
+  }
+
+  function _calculateReferralRewards(
+    uint256 ethPackPrice,
+    address[] memory referrals
+  ) internal returns (uint256 fee) {
+    uint256 referralAmountTotal = ((ethPackPrice * 330) / BASIS_POINTS);  // 3.3%
+
+    // Calculate Referral Amounts and Distribute
+    if (referrals.length > 0 && referrals[0] != address(0)) {
+      // Remove Referral Value from Funding Value
+      fee = referralAmountTotal;
+
+      if (referrals.length > 1 && referrals[1] != address(0)) {
+        if (referrals.length > 2 && referrals[2] != address(0)) {
+          _referrerBalance[referrals[0]] += ((ethPackPrice * 30) / BASIS_POINTS);  // 0.3%
+          _referrerBalance[referrals[1]] += ((ethPackPrice * 30) / BASIS_POINTS);  // 0.3%
+          _referrerBalance[referrals[2]] += ((ethPackPrice * 270) / BASIS_POINTS); // 2.7%
+        } else {
+          _referrerBalance[referrals[0]] += ((ethPackPrice * 30) / BASIS_POINTS);  // 0.3%
+          _referrerBalance[referrals[1]] += ((ethPackPrice * 300) / BASIS_POINTS);  // 3.0%
+        }
+      } else {
+        _referrerBalance[referrals[0]] += referralAmountTotal;  // 3.3%
+      }
+    }
   }
 
   /***********************************|

@@ -130,6 +130,25 @@
       {
         "indexed": true,
         "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "balance",
+        "type": "uint256"
+      }
+    ],
+    "name": "BalanceClaimed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
         "name": "bundlerAddress",
         "type": "address"
       },
@@ -539,6 +558,11 @@
         "type": "tuple[]"
       },
       {
+        "internalType": "address[]",
+        "name": "referrals",
+        "type": "address[]"
+      },
+      {
         "internalType": "string",
         "name": "tokenMetaUri",
         "type": "string"
@@ -580,6 +604,19 @@
       }
     ],
     "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address payable",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "claimReferralRewards",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -636,6 +673,25 @@
       {
         "internalType": "uint256",
         "name": "packPriceEth",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "getReferralRewardsOf",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "balance",
         "type": "uint256"
       }
     ],
