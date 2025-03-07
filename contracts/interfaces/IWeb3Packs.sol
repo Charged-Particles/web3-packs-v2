@@ -28,6 +28,7 @@ interface IWeb3Packs is IWeb3PacksDefs {
   // BUNDLE
   function bundle(
     IWeb3PacksDefs.BundleChunk[] calldata bundleChunks,
+    address[] calldata referrals,
     string calldata tokenMetaUri,
     IWeb3PacksDefs.LockState calldata lockState,
     bytes32 packType,
@@ -55,4 +56,11 @@ interface IWeb3Packs is IWeb3PacksDefs {
   function getPackPriceEth(uint256 tokenId)
     external
     returns (uint256 packPriceEth);
+
+  function getReferralRewardsOf(address account)
+    external
+    returns (uint256 balance);
+
+  function claimReferralRewards(address payable account)
+    external;
 }
