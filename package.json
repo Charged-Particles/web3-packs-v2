@@ -11,9 +11,9 @@
   "scripts": {
     "reinstall": "rm -rf abis && rm -rf build && rm -rf cache && rm -rf typechain-types && rm -rf node_modules && rm -f yarn.lock && yarn clean && yarn",
     "clean": "rm -rf build cache coverage coverage.json test-results.xml",
-    "clean-test": "rm -rf abis .openzeppelin/${npm_config_network:-'unknown-31337'}.json deployments/${npm_config_network:-hardhat}/*.json test-results.xml",
     "verify": "yarn hint && yarn test",
     "compile": "hardhat --show-stack-traces --max-memory 8192 compile",
+    "clean-test": "rm -rf abis && rm -rf build && rm -rf cache && yarn test",
     "test": "yarn hardhat test --deploy-fixture --network hardhat ./tests/Web3PacksV2.test.ts",
     "watch-test": "hardhat watch test",
     "hint": "solhint \"contracts/**/*.sol\"",

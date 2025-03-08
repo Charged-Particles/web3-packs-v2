@@ -311,6 +311,8 @@ describe('Web3PacksV2', async ()=> {
 
         // @ts-ignore
         const bundlerContract = await ethers.getContract(bundler.contract);
+        const token0 = (await bundlerContract.getToken0())['tokenAddress'];
+        const token1 = (await bundlerContract.getToken1())['tokenAddress'];
 
         // Get Balance before Transaction for Test Confirmation
         const preBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
@@ -330,6 +332,7 @@ describe('Web3PacksV2', async ()=> {
         const { tokenAddress: lpTokenAddress, tokenId: lpTokenId } = await bundlerContract.getLiquidityToken(tokenId);
 
         // Check Liquidity Type
+        let liquidityTokenAmount;
         if (lpTokenId.toBigInt() > 0n) {
           // Check Pack for Liquidity NFT
           const tokenBonds = await web3pack.getBonds('generic.B');
@@ -338,14 +341,34 @@ describe('Web3PacksV2', async ()=> {
         } else {
           // Check Pack for Liquidity Tokens
           const tokenMass = await web3pack.getMass(lpTokenAddress, 'generic.B');
-          const tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
-          expect(tokenAmount).to.be.gt(100);
+          liquidityTokenAmount = tokenMass[network.config.chainId ?? '']?.value;
+          expect(liquidityTokenAmount).to.be.gt(100);
         }
 
         // Confirm ETH Balance
         const expectedBalance = preBalance - ethPackPrice.toBigInt() - globals.protocolFee.toBigInt() - gasCost.toBigInt();
         const postBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
         expect(postBalance).to.eq(expectedBalance);
+
+        // Unbundle Pack
+        await _callUnbundle({ tokenId });
+
+        // Check Receiver for Tokens
+        if (bundler.bundlerId === 'LP-WETH-MODE-8020') {
+          // Governance Pack wants to Unbundle Liquidity Tokens without Exiting Position - for Voting Purposes
+          const tokenContract = new Contract(lpTokenAddress, globals.erc20Abi, deployerSigner);
+          const tokenBalance = await tokenContract.balanceOf(deployer);
+          expect(tokenBalance).to.be.gte(liquidityTokenAmount);
+        } else {
+          // Check Receiver for Tokens
+          const tokenContract0 = new Contract(token0, globals.erc20Abi, deployerSigner);
+          const tokenBalance0 = await tokenContract0.balanceOf(deployer);
+          expect(tokenBalance0).to.be.gte(100);
+
+          const tokenContract1 = new Contract(token1, globals.erc20Abi, deployerSigner);
+          const tokenBalance1 = await tokenContract1.balanceOf(deployer);
+          expect(tokenBalance1).to.be.gte(100);
+        }
       });
     }
   });
