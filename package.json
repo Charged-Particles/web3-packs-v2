@@ -5,11 +5,11 @@
   "license": "MIT",
   "private": true,
   "engines": {
-    "node": ">=20.17.0",
-    "npm": ">=10.8.2"
+    "node": ">=18.20.4",
+    "npm": ">=10.7.0"
   },
   "scripts": {
-    "reinstall": "rm -rf node_modules && rm -f yarn.lock && yarn clean && yarn",
+    "reinstall": "rm -rf abis && rm -rf build && rm -rf cache && rm -rf typechain-types && rm -rf node_modules && rm -f yarn.lock && yarn clean && yarn",
     "clean": "rm -rf build cache coverage coverage.json test-results.xml",
     "clean-test": "rm -rf abis .openzeppelin/${npm_config_network:-'unknown-31337'}.json deployments/${npm_config_network:-hardhat}/*.json test-results.xml",
     "verify": "yarn hint && yarn test",

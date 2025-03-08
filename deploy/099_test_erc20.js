@@ -13,10 +13,14 @@ module.exports = async (hre) => {
     return isForked || network?.name === 'hardhat';
   };
 
+  log('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+  log('Charged Particles - Web3 Packs V2 - Test Contracts');
+  log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n');
+
   //
   // Deploy Contracts
   //
-  log('Deploying Test ERC20...');
+  log('\nDeploying Test ERC20...');
   log(`Deployer = ${deployer}`);
 
   const constructorArgs = [ 'ERC20 Mintable', 'E20M' ];
@@ -34,8 +38,6 @@ module.exports = async (hre) => {
   // const amount = ethers.utils.parseUnits('5000', 18);
   // log(`  Minting ${amount} Tokens to Deployer: ${deployer}`);
   // await erc20.mint(deployer, amount);
-
-  log('Done!');
 };
 
 module.exports.tags = ['ERC20Mintable']

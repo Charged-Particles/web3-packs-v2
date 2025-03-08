@@ -23,12 +23,13 @@
 
 pragma solidity 0.8.17;
 
+import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "./BlackholePrevention.sol";
-import "../interfaces/IWETH9.sol";
 import "../interfaces/IWeb3PacksRouter.sol";
 import "../interfaces/IWeb3PacksDefs.sol";
 
@@ -37,6 +38,8 @@ abstract contract Web3PacksRouterBase is
   Ownable,
   BlackholePrevention
 {
+  using Address for address payable;
+
   address public _weth;
   address public _manager;
   address public _token0;
@@ -66,6 +69,8 @@ abstract contract Web3PacksRouterBase is
     _tickUpper = config.tickUpper;
   }
 
+  receive() external payable {}
+
   /***********************************|
   |          Configuration            |
   |__________________________________*/
@@ -88,11 +93,6 @@ abstract contract Web3PacksRouterBase is
       tokenSymbol: "WETH"
     });
     return token;
-  }
-
-  /// @dev This can be overridden to specify custom routes/paths for swapping
-  function getPoolId() public virtual view returns (bytes32 poolId) {
-    poolId = _poolId;
   }
 
   /// @dev This can be overridden to specify custom routes/paths for swapping
@@ -134,14 +134,18 @@ abstract contract Web3PacksRouterBase is
   }
 
   function enterWeth(uint256 amount) public virtual {
-    IWETH9(_weth).deposit{value: amount}();
+    IWETH(_weth).deposit{value: amount}();
   }
 
   function exitWethAndTransfer(address payable receiver) public virtual returns (uint256 ethAmount) {
-    ethAmount = IERC20(_weth).balanceOf(address(this));
-    IWETH9(_weth).withdraw(ethAmount);
-    (bool sent, ) = receiver.call{value: ethAmount}("");
-    require(sent, "Failed to exit and transfer weth");
+    uint256 wethBalance = getBalanceWeth();
+    if (wethBalance > 0) {
+      IWETH(_weth).withdraw(wethBalance);
+    }
+    ethAmount = address(this).balance;
+    if (ethAmount > 0) {
+      receiver.sendValue(ethAmount);
+    }
   }
 
   function refundUnusedTokens(address sender) public virtual {

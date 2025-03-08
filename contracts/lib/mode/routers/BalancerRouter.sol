@@ -30,7 +30,6 @@ import "../../Web3PacksRouterBase.sol";
 import "../../../interfaces/IWeb3PacksDefs.sol";
 import {IAsset, IBalancerV2Vault} from "../../../interfaces/IBalancerV2Vault.sol";
 
-
 abstract contract BalancerRouter is Web3PacksRouterBase {
   // Pass constructor data
   constructor(IWeb3PacksDefs.RouterConfig memory config) Web3PacksRouterBase(config) {}
@@ -75,11 +74,13 @@ abstract contract BalancerRouter is Web3PacksRouterBase {
       uint256 amount1
     )
   {
-    (address poolAddress, ) = IBalancerV2Vault(_router).getPool(getPoolId());
+    (address poolAddress, ) = IBalancerV2Vault(_router).getPool(_poolId);
 
     (address[] memory addresses, uint256[] memory amounts) = getOrderedAssets(false);
     IAsset[] memory assets = new IAsset[](addresses.length);
-    for (uint i; i < addresses.length; i++) { assets[i] = IAsset(addresses[i]); }
+    for (uint i; i < addresses.length; i++) {
+      assets[i] = IAsset(addresses[i]);
+    }
 
     // Add Liquidity
     bytes memory userData = abi.encode(IBalancerV2Vault.JoinKind.EXACT_TOKENS_IN_FOR_BPT_OUT, amounts, 0);
@@ -89,7 +90,7 @@ abstract contract BalancerRouter is Web3PacksRouterBase {
       userData: userData,
       fromInternalBalance: false
     });
-    IBalancerV2Vault(_router).joinPool(getPoolId(), address(this), address(this), joinData);
+    IBalancerV2Vault(_router).joinPool(_poolId, address(this), address(this), joinData);
 
     lpTokenId = uint256(uint160(poolAddress));
     liquidity = IERC20(poolAddress).balanceOf(address(this));
@@ -114,7 +115,7 @@ abstract contract BalancerRouter is Web3PacksRouterBase {
     onlyManagerOrSelf
     returns (uint amount0, uint amount1)
   {
-    (address poolAddress, ) = IBalancerV2Vault(_router).getPool(getPoolId());
+    (address poolAddress, ) = IBalancerV2Vault(_router).getPool(_poolId);
 
     (address[] memory addresses, uint256[] memory amounts) = getOrderedAssets(false);
     IAsset[] memory assets = new IAsset[](addresses.length);
@@ -134,7 +135,7 @@ abstract contract BalancerRouter is Web3PacksRouterBase {
       userData: userData,
       toInternalBalance: false
     });
-    IBalancerV2Vault(_router).exitPool(getPoolId(), address(this), payable(address(this)), exitData);
+    IBalancerV2Vault(_router).exitPool(_poolId, address(this), payable(address(this)), exitData);
 
     (amount0, amount1) = _getRemainders(0, 0);
   }
@@ -151,10 +152,10 @@ abstract contract BalancerRouter is Web3PacksRouterBase {
 
     if (swapAmount > 0) {
       IBalancerV2Vault.SingleSwap memory swapData = IBalancerV2Vault.SingleSwap({
-        poolId: getPoolId(),
+        poolId: _poolId,
         kind: IBalancerV2Vault.SwapKind.GIVEN_IN,
         assetIn: IAsset(token0),
-        assetOut: IAsset(_weth),
+        assetOut: IAsset(token1),
         amount: swapAmount,
         userData: bytes("")
       });

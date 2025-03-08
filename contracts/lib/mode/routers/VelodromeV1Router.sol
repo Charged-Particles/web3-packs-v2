@@ -43,8 +43,8 @@ abstract contract VelodromeV1Router is Web3PacksRouterBase {
     onlyManagerOrSelf
     returns (uint256 amountOut)
   {
-    IWeb3PacksDefs.Token memory token0 = getToken0();
-    IWeb3PacksDefs.Token memory token1 = getToken1();
+    IWeb3PacksDefs.Token memory token0 = reverse ? getToken1() : getToken0();
+    IWeb3PacksDefs.Token memory token1 = reverse ? getToken0() : getToken1();
     IWeb3PacksDefs.Route[] memory tokens = getTokenPath(reverse);
     IVelodrome.Route[] memory routes = new IVelodrome.Route[](tokens.length);
     for (uint i; i < tokens.length; i++) {

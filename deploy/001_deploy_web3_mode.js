@@ -64,4 +64,5 @@ module.exports = async (hre) => {
   }
 };
 
+module.exports.dependencies = ['ERC20Mintable', 'ERC721Mintable'];
 module.exports.tags = ['web3packs']

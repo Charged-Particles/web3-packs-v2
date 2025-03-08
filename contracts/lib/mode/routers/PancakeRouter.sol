@@ -141,7 +141,7 @@ abstract contract PancakeRouter is Web3PacksRouterBase {
     internal
     returns (uint256 amountOut)
   {
-    address[] memory routes = new address[](1);
+    address[] memory routes = new address[](2);
     routes[0] = token0;
     routes[1] = token1;
 

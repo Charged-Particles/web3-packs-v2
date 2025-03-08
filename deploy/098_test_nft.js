@@ -12,7 +12,7 @@ module.exports = async (hre) => {
     //
     // Deploy Contracts
     //
-    log('Deploying Test NFT...');
+    log('\nDeploying Test NFT...');
 
     await deploy('ERC721Mintable', {
       from: deployer,
