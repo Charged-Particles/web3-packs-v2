@@ -1,14 +1,12 @@
 import { expect } from 'chai';
 import { ethers, network, getNamedAccounts } from 'hardhat';
 import { BigNumber, Contract, Signer } from 'ethers';
-// import _ from 'lodash';
 
 import globals from '../js-helpers/globals';
 import { _findNearestValidTick } from './utils';
 
 import { Web3PacksV2, IWeb3PacksDefs } from '../typechain-types/contracts/Web3PacksV2';
 import { ERC721Mintable } from '../typechain-types/contracts/lib/ERC721Mintable';
-import { LPWethMode8020 } from '../typechain-types/contracts/lib/mode/bundlers/LPWethMode8020';
 
 import IAlgebraRouterABI from '../build/contracts/contracts/interfaces/IAlgebraRouter.sol/IAlgebraRouter.json';
 import INonfungiblePositionManager from '../build/contracts/contracts/interfaces/INonfungiblePositionManager.sol/INonfungiblePositionManager.json';
@@ -75,8 +73,6 @@ describe('Web3PacksV2', async ()=> {
   // Define contracts
   let web3packs: Web3PacksV2;
   let Proton: Contract;
-  let wETH: Contract;
-  let TestNFT: ERC721Mintable;
 
   // Charged Particles SDK
   let charged: Charged;
@@ -117,16 +113,12 @@ describe('Web3PacksV2', async ()=> {
 
     // @ts-ignore
     web3packs = await ethers.getContract('Web3PacksV2') as Web3PacksV2;
-    // @ts-ignore
-    TestNFT = await ethers.getContract('ERC721Mintable') as ERC721Mintable;
 
     ownerSigner = await ethers.getSigner(treasury);
     deployerSigner = await ethers.getSigner(deployer);
     testSigner = ethers.Wallet.fromMnemonic(`${process.env.TESTNET_MNEMONIC}`.replace(/_/g, ' '));
     // @ts-ignore
     charged = new Charged({ providers: network.provider, signer: testSigner });
-
-    wETH = new Contract(tokenAddress.weth, globals.wethAbi, deployerSigner);
 
     IVelodromeRouter = new ethers.utils.Interface(globals.velodromeRouterAbi);
     velodromeRouter = new Contract(routers.velodrome, IVelodromeRouter, deployerSigner);
@@ -142,15 +134,6 @@ describe('Web3PacksV2', async ()=> {
 
     Proton = new ethers.Contract(contracts.protonC, protonBAbi, ownerSigner);
   });
-
-  // beforeEach(async () => {
-  //   const { treasury } = await getNamedAccounts();
-
-  //   await network.provider.request({
-  //     method: "hardhat_impersonateAccount",
-  //     params: [treasury],
-  //   });
-  // });
 
   const _callBundle = async ({
     bundleChunks = [],
@@ -199,7 +182,6 @@ describe('Web3PacksV2', async ()=> {
 
     // Unbundle Pack
     const unbundleFee = globals.protocolFee;
-    // console.log({ sellAll });
     const unbundleTx = await web3packs.unbundle(
       receiver,
       Proton.address,
@@ -213,7 +195,7 @@ describe('Web3PacksV2', async ()=> {
     return {gasCost};
   };
 
-  describe('Single-sided Bundlers (w/o Sell All)', async () => {
+  describe('Single-sided Bundlers (w/o Sell All)', () => {
     for (let i = 0; i < singleSidedBundlers.length; i++) {
       const bundler = singleSidedBundlers[i];
 
@@ -262,7 +244,7 @@ describe('Web3PacksV2', async ()=> {
     }
   });
 
-  describe('Single-sided Bundlers (w/ Sell All)', async () => {
+  describe('Single-sided Bundlers (w/ Sell All)', () => {
     for (let i = 0; i < singleSidedBundlers.length; i++) {
       const bundler = singleSidedBundlers[i];
 
@@ -312,7 +294,7 @@ describe('Web3PacksV2', async ()=> {
     }
   });
 
-  describe('Liquidity-Position Bundlers (w/o Sell All)', async () => {
+  describe('Liquidity-Position Bundlers (w/o Sell All)', () => {
     for (let i = 0; i < liqPosBundlers.length; i++) {
       const bundler = liqPosBundlers[i];
 
@@ -386,7 +368,7 @@ describe('Web3PacksV2', async ()=> {
     }
   });
 
-  describe('Liquidity-Position Bundlers (w/ Sell All)', async () => {
+  describe('Liquidity-Position Bundlers (w/ Sell All)', () => {
     for (let i = 0; i < liqPosBundlers.length; i++) {
       const bundler = liqPosBundlers[i];
 
@@ -446,6 +428,38 @@ describe('Web3PacksV2', async ()=> {
       });
     }
   });
+  describe('Web3Packs Bundler Public Routines', () => {
+    it('Allows external checks on Balance/Address of Token 0');
+    it('Allows external checks on Balance/Address of Token 1');
+    it('Allows external checks on Liquidity Token');
+    it('Allows external Quotes for Primary Token for Swaps');
+  });
 
+  describe('Web3Packs Public Routines', () => {
+    it('Collects Fees properly');
+    it('Allows external checks on Current Pack Balances');
+    it('Allows external checks on Original Pack Price');
+  });
 
+  describe('Web3Packs Referrals', () => {
+    it('Allows external checks on Referral Rewards');
+    it('Allows external Claim on Rewards from Referrals');
+    it('Properly Accounts for 1 Referrer');
+    it('Properly Accounts for 2 Referrers');
+    it('Properly Accounts for 3 Referrers');
+  });
+
+  describe('Web3Packs Custom Packs', () => {
+    it('Bundles an Ecosystem Pack');
+    it('Bundles a Defi Pack');
+    it('Bundles a Governance Pack');
+    it('Bundles an AI Pack');
+  });
+
+  describe('Web3Packs Error Tests', () => {
+    it('Bundles an Ecosystem Pack');
+    it('Bundles a Defi Pack');
+    it('Bundles a Governance Pack');
+    it('Bundles an AI Pack');
+  });
 });
