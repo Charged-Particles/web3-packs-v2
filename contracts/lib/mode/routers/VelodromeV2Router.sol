@@ -77,13 +77,7 @@ abstract contract VelodromeV2Router is Web3PacksRouterBase {
     amountOut = _performSwap(percentOfAmount, token0, token1, routes);
   }
 
-  function createLiquidityPosition(
-    uint256,
-    uint256,
-    uint256,
-    uint256,
-    bool
-  )
+  function createLiquidityPosition(bool)
     public
     virtual
     override
@@ -132,11 +126,11 @@ abstract contract VelodromeV2Router is Web3PacksRouterBase {
     uint256 swapAmount = (balance * percentOfAmount) / 10000;
 
     if (swapAmount > 0) {
-      TransferHelper.safeApprove(token0, _router, swapAmount);
+      TransferHelper.safeApprove(token0, _swapRouter, swapAmount);
       bytes memory commands = abi.encodePacked(bytes1(uint8(Commands.V2_SWAP_EXACT_IN)));
       bytes[] memory inputs = new bytes[](1);
       inputs[0] = abi.encode(Constants.MSG_SENDER, swapAmount, 0, routes, true);
-      IUniversalRouter(_router).execute(commands, inputs, block.timestamp);
+      IUniversalRouter(_swapRouter).execute(commands, inputs, block.timestamp);
       amountOut = IERC20(token1).balanceOf(address(this));
     }
   }

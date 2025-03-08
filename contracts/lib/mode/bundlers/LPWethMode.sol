@@ -53,7 +53,7 @@ contract LPWethMode is IWeb3PacksBundler, AlgebraRouter {
   }
 
   function getLiquidityToken(uint256 packTokenId) public override view returns (address tokenAddress, uint256 tokenId) {
-    tokenAddress = _router;
+    tokenAddress = _liquidityRouter;
     tokenId = _liquidityPositionsByTokenId[packTokenId].lpTokenId;
   }
 
@@ -79,14 +79,13 @@ contract LPWethMode is IWeb3PacksBundler, AlgebraRouter {
     )
   {
     // Perform Swap
-    uint256 token1Balance = swapSingle(5000, false); // 50% WETH -> MODE
-    uint256 token0Balance = getBalanceToken0();
+    swapSingle(5000, false); // 50% WETH -> MODE
 
     // Deposit Liquidity
-    (uint256 lpTokenId, uint256 liquidity, , ) = createLiquidityPosition(token0Balance, token1Balance, 0, 0, false);
+    (uint256 lpTokenId, uint256 liquidity, , ) = createLiquidityPosition(false);
     nftTokenId = lpTokenId;
     amountOut = liquidity;
-    tokenAddress = _router;
+    tokenAddress = _liquidityRouter;
 
     // Transfer back to Manager
     IERC721(tokenAddress).safeTransferFrom(address(this), _manager, nftTokenId);

@@ -58,13 +58,7 @@ abstract contract UniswapV2Router is Web3PacksRouterBase {
     amountOut = _performSwap(percentOfAmount, token0, token1);
   }
 
-  function createLiquidityPosition(
-    uint256 balanceAmount0,
-    uint256 balanceAmount1,
-    uint256 minAmount0,
-    uint256 minAmount1,
-    bool
-  )
+  function createLiquidityPosition(bool)
     public
     virtual
     override
@@ -78,9 +72,18 @@ abstract contract UniswapV2Router is Web3PacksRouterBase {
   {
     IWeb3PacksDefs.Token memory token0 = getToken0();
     IWeb3PacksDefs.Token memory token1 = getToken1();
+    (
+      uint256 balanceAmount0,
+      uint256 balanceAmount1,
+      uint256 minAmount0,
+      uint256 minAmount1
+    ) = getLiquidityAmounts();
+
+    TransferHelper.safeApprove(token0.tokenAddress, _liquidityRouter, balanceAmount0);
+    TransferHelper.safeApprove(token1.tokenAddress, _liquidityRouter, balanceAmount1);
 
     // Add Liquidity
-    (amount0, amount1, liquidity) = IUniswapV2Router02(_router).addLiquidity(
+    (amount0, amount1, liquidity) = IUniswapV2Router02(_liquidityRouter).addLiquidity(
       token0.tokenAddress,
       token1.tokenAddress,
       balanceAmount0,
@@ -120,12 +123,12 @@ abstract contract UniswapV2Router is Web3PacksRouterBase {
     address lpTokenAddress = _getUniswapV2PairAddress(token0.tokenAddress, token1.tokenAddress);
     TransferHelper.safeApprove(
       lpTokenAddress,
-      _router,
+      _liquidityRouter,
       liquidityPosition.liquidity
     );
 
     // Release Liquidity
-    (amount0, amount1) = IUniswapV2Router02(_router).removeLiquidity(
+    (amount0, amount1) = IUniswapV2Router02(_liquidityRouter).removeLiquidity(
       token0.tokenAddress,
       token1.tokenAddress,
       liquidityPosition.liquidity,
@@ -148,8 +151,8 @@ abstract contract UniswapV2Router is Web3PacksRouterBase {
     path[1] = token1;
 
     if (swapAmount > 0) {
-      TransferHelper.safeApprove(token0, _router, swapAmount);
-      IUniswapV2Router02(_router).swapExactTokensForETHSupportingFeeOnTransferTokens(
+      TransferHelper.safeApprove(token0, _swapRouter, swapAmount);
+      IUniswapV2Router02(_swapRouter).swapExactTokensForETHSupportingFeeOnTransferTokens(
         swapAmount,
         0,
         path,
@@ -161,7 +164,7 @@ abstract contract UniswapV2Router is Web3PacksRouterBase {
   }
 
   function _getUniswapV2Factory() internal view returns (address) {
-    return IUniswapV2Router02(_router).factory();
+    return IUniswapV2Router02(_liquidityRouter).factory();
   }
 
   function _getUniswapV2PairAddress(address token0, address token1) internal view returns (address) {

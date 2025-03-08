@@ -1,8 +1,9 @@
-const { chainIdByName, toBytes, isHardhat, log } = require('../js-helpers/utils');
+const { chainIdByName, toBytes, isHardhat, findNearestValidTick, log } = require('../js-helpers/utils');
 const globals = require('../js-helpers/globals');
 
 const bundlerContractName = 'SSWethMode';
 const bundlerId = 'SS-WETH-MODE';
+const priceSlippage = 300n; // 3%
 
 module.exports = async (hre) => {
     const { ethers, getNamedAccounts, deployments } = hre;
@@ -20,11 +21,13 @@ module.exports = async (hre) => {
       token0: tokenAddress.weth,
       token1: tokenAddress.mode,
       manager: web3packs.address,
-      router: routers.kim,
+      swapRouter: routers.kim,
+      liquidityRouter: routers.kimNft,
       poolId: toBytes(''),
       bundlerId: toBytes(bundlerId),
-      tickLower: 0,
-      tickUpper: 0,
+      slippage: priceSlippage,
+      tickLower: BigInt(findNearestValidTick(60, true)),
+      tickUpper: BigInt(findNearestValidTick(60, false)),
     }];
 
     //

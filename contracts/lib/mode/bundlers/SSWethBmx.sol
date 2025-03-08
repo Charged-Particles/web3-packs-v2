@@ -63,7 +63,7 @@ contract SSWethBmx is IWeb3PacksBundler, VelodromeV1Router {
   }
 
   function getTokenPath(bool reverse) public override view returns (IWeb3PacksDefs.Route[] memory tokenPath) {
-    IWeb3PacksDefs.Route[] memory tokens = new IWeb3PacksDefs.Route[](2);
+    IWeb3PacksDefs.Route[] memory tokens = new IWeb3PacksDefs.Route[](3);
     if (reverse) {
       tokens[0] = IWeb3PacksDefs.Route({token0: getToken1().tokenAddress, token1: _wmlt, stable: false});
       tokens[1] = IWeb3PacksDefs.Route({token0: _wmlt, token1: _usdc, stable: false});
@@ -122,7 +122,7 @@ contract SSWethBmx is IWeb3PacksBundler, VelodromeV1Router {
       // Send ETH to Receiver
       ethAmountOut = exitWethAndTransfer(receiver);
     } else {
-      // Send Token to Receiver
+      // Send Tokens to Receiver
       TransferHelper.safeTransfer(getToken1().tokenAddress, receiver, getBalanceToken1());
     }
   }

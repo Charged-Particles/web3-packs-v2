@@ -13,7 +13,7 @@ const globals = {
     34443: {
       weth: '0x4200000000000000000000000000000000000006',
       usdc: '0xd988097fb8612cc24eeC14542bC03424c656005f',
-      usdt:  '0xf0F161fDA2712DB8b566946122a5af183995e2eD',
+      usdt: '0xf0F161fDA2712DB8b566946122a5af183995e2eD',
       uni: '0xb33EaAd8d922B1083446DC23f610c2567fB5180f',
       dai: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
       mode: '0xDfc7C877a950e49D2610114102175A06C2e3167a',
@@ -55,12 +55,9 @@ const globals = {
     },
   },
 
-
-  //
-  //  OLD:
-  //
-
-  treasury: '',
+  // Standard Parameters
+  deadline: Math.floor(Date.now() / 1000) + (60 * 10),
+  protocolFee: utils.parseUnits('0.0001', 18),
 
   erc20Abi : [
     'function transfer(address to, uint amount)',
@@ -71,6 +68,16 @@ const globals = {
     'function deposit() public',
     'function withdraw(uint wad) public',
   ],
+
+  // IPFS
+  ipfsMetadata: 'Qmao3Rmq9m38JVV8kuQjnL3hF84cneyt5VQETirTH1VUST',
+
+
+  //
+  //  OLD:
+  //
+
+  treasury: '',
 
   // Charged Particles
   chargedStateContractAddress: '0x2691B4f4251408bA4b8bf9530B6961b9D0C1231F',

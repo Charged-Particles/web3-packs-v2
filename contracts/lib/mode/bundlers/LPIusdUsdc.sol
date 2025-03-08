@@ -62,7 +62,7 @@ contract LPIusdUsdc is IWeb3PacksBundler, AlgebraRouter {
   }
 
   function getLiquidityToken(uint256 packTokenId) public override view returns (address tokenAddress, uint256 tokenId) {
-    tokenAddress = _router;
+    tokenAddress = _liquidityRouter;
     tokenId = _liquidityPositionsByTokenId[packTokenId].lpTokenId;
   }
 
@@ -104,14 +104,14 @@ contract LPIusdUsdc is IWeb3PacksBundler, AlgebraRouter {
     )
   {
     // Perform Swaps
-    uint256 iusdBalance = swapCustom(5000, _weth, getToken0().tokenAddress); // 50% WETH -> iUSD
-    uint256 usdcBalance = swapCustom(10000, _weth, getToken1().tokenAddress); // Remaining WETH -> USDC
+    swapCustom(5000, _weth, getToken0().tokenAddress); // 50% WETH -> iUSD
+    swapCustom(10000, _weth, getToken1().tokenAddress); // Remaining WETH -> USDC
 
     // Deposit Liquidity
-    (uint256 lpTokenId, uint256 liquidity, , ) = createLiquidityPosition(iusdBalance, usdcBalance, 0, 0, false);
+    (uint256 lpTokenId, uint256 liquidity, , ) = createLiquidityPosition(false);
     nftTokenId = lpTokenId;
     amountOut = liquidity;
-    tokenAddress = _router;
+    tokenAddress = _liquidityRouter;
 
     // Transfer back to Manager
     IERC721(tokenAddress).safeTransferFrom(address(this), _manager, nftTokenId);
