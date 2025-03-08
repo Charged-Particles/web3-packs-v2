@@ -36,10 +36,6 @@ interface IWeb3PacksRouter is IWeb3PacksDefs {
   function getBalanceToken1() external returns (uint256 balanceToken1);
   function getBalanceWeth() external returns (uint256 balanceWeth);
 
-  function enterWeth(uint256 amount) external;
-  function exitWethAndTransfer(address payable receiver) external returns (uint256 ethAmount);
-  function refundUnusedTokens(address sender) external;
-
   function swapSingle(uint256 percentOfAmount, bool reverse)
     external
     returns (uint256 amountOut);
