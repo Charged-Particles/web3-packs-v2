@@ -47,8 +47,29 @@ interface FnCallUnbundleReturn {
   gasCost: BigNumber;
 }
 
-
 const toBytes32 = (text) => ethers.utils.formatBytes32String(text);
+
+const singleSidedBundlers = [
+  { bundlerId: 'SS-WETH-BMX',  contract: 'SSWethBmx' },
+  { bundlerId: 'SS-WETH-ICL',  contract: 'SSWethIcl' },
+  { bundlerId: 'SS-WETH-IONX', contract: 'SSWethIonx' },
+  { bundlerId: 'SS-WETH-KIM',  contract: 'SSWethKim' },
+  { bundlerId: 'SS-WETH-MODE', contract: 'SSWethMode' },
+  { bundlerId: 'SS-WETH-SMD',  contract: 'SSWethSmd' },
+  { bundlerId: 'SS-WETH-WMLT', contract: 'SSWethWmlt' },
+];
+
+const liqPosBundlers = [
+  { bundlerId: 'LP-WETH-IONX',  contract: 'LPWethIonx' },
+  { bundlerId: 'LP-WETH-KIM',   contract: 'LPWethKim' },
+  { bundlerId: 'LP-WETH-MODE',  contract: 'LPWethMode' },
+  { bundlerId: 'LP-WETH-STONE', contract: 'LPWethStone' },
+  { bundlerId: 'LP-WETH-USDC',  contract: 'LPWethUsdc' },
+  { bundlerId: 'LP-WETH-WBTC',  contract: 'LPWethWbtc' },
+  { bundlerId: 'LP-IUSD-USDC',  contract: 'LPIusdUsdc' },
+  { bundlerId: 'LP-WETH-MODE-8020',  contract: 'LPWethMode8020' },
+];
+
 
 describe('Web3PacksV2', async ()=> {
   // Define contracts
@@ -122,7 +143,7 @@ describe('Web3PacksV2', async ()=> {
     Proton = new ethers.Contract(contracts.protonC, protonBAbi, ownerSigner);
   });
 
-  // beforeEach(async() => {
+  // beforeEach(async () => {
   //   const { treasury } = await getNamedAccounts();
 
   //   await network.provider.request({
@@ -178,6 +199,7 @@ describe('Web3PacksV2', async ()=> {
 
     // Unbundle Pack
     const unbundleFee = globals.protocolFee;
+    // console.log({ sellAll });
     const unbundleTx = await web3packs.unbundle(
       receiver,
       Proton.address,
@@ -191,184 +213,236 @@ describe('Web3PacksV2', async ()=> {
     return {gasCost};
   };
 
-  describe('Single-sided Bundlers', async() => {
-    const singleSidedBundlers = [
-      { bundlerId: 'SS-WETH-BMX',  contract: 'SSWethBmx' },
-      { bundlerId: 'SS-WETH-ICL',  contract: 'SSWethIcl' },
-      { bundlerId: 'SS-WETH-IONX', contract: 'SSWethIonx' },
-      { bundlerId: 'SS-WETH-KIM',  contract: 'SSWethKim' },
-      { bundlerId: 'SS-WETH-MODE', contract: 'SSWethMode' },
-      { bundlerId: 'SS-WETH-SMD',  contract: 'SSWethSmd' },
-      { bundlerId: 'SS-WETH-WMLT', contract: 'SSWethWmlt' },
-    ];
-
+  describe('Single-sided Bundlers (w/o Sell All)', async () => {
     for (let i = 0; i < singleSidedBundlers.length; i++) {
       const bundler = singleSidedBundlers[i];
 
-      it(`Bundles/Unbundles (w/o Sell All) using Bundler: ${bundler.bundlerId}`, async() => {
-        const { deployer } = await getNamedAccounts();
-        const ethPackPrice = ethers.utils.parseUnits('1', 18);
+      it(`Bundles/Unbundles using Bundler: ${bundler.bundlerId}`, () => {
+        (async (sellAll) => {
+          const { deployer } = await getNamedAccounts();
+          const ethPackPrice = ethers.utils.parseUnits('1', 18);
 
-        // @ts-ignore
-        const bundlerContract = await ethers.getContract(bundler.contract);
-        const token1 = (await bundlerContract.getToken1())['tokenAddress'];
+          // @ts-ignore
+          const bundlerContract = await ethers.getContract(bundler.contract);
+          const token1 = (await bundlerContract.getToken1())['tokenAddress'];
 
-        // Get Balance before Transaction for Test Confirmation
-        const preBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
+          // Get Balance before Transaction for Test Confirmation
+          const preBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
 
-        const bundleChunks:IWeb3PacksDefs.BundleChunkStruct[] = [
-          {bundlerId: toBytes32(bundler.bundlerId), percentBasisPoints: 10000},
-        ];
+          const bundleChunks:IWeb3PacksDefs.BundleChunkStruct[] = [
+            {bundlerId: toBytes32(bundler.bundlerId), percentBasisPoints: 10000},
+          ];
 
-        // Bundle Pack
-        const { tokenId, gasCost } = await _callBundle({
-          bundleChunks,
-          packType: 'ECOSYSTEM',
-          ethPackPrice,
-        });
-        const web3pack = charged.NFT(Proton.address, tokenId);
+          // Bundle Pack
+          const { tokenId, gasCost } = await _callBundle({
+            bundleChunks,
+            packType: 'ECOSYSTEM',
+            ethPackPrice,
+          });
+          const web3pack = charged.NFT(Proton.address, tokenId);
 
-        const tokenMass = await web3pack.getMass(token1, 'generic.B');
-        const tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
-        expect(tokenAmount).to.be.gt(100);
+          const tokenMass = await web3pack.getMass(token1, 'generic.B');
+          const tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
+          expect(tokenAmount).to.be.gt(100);
 
-        // Confirm ETH Balance
-        const expectedBalance = preBalance - ethPackPrice.toBigInt() - globals.protocolFee.toBigInt() - gasCost.toBigInt();
-        const postBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
-        expect(postBalance).to.eq(expectedBalance);
+          // Confirm ETH Balance
+          const expectedBalance = preBalance - ethPackPrice.toBigInt() - globals.protocolFee.toBigInt() - gasCost.toBigInt();
+          const postBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
+          expect(postBalance).to.eq(expectedBalance);
 
-        // Unbundle Pack
-        await _callUnbundle({ tokenId });
+          // Unbundle Pack
+          await _callUnbundle({ tokenId });
 
-        // Check Receiver for Tokens
-        const tokenContract = new Contract(token1, globals.erc20Abi, deployerSigner);
-        const tokenBalance = await tokenContract.balanceOf(deployer);
-        expect(tokenBalance).to.be.gte(tokenAmount);
-      });
-
-      it(`Bundles/Unbundles (w/ Sell All) using Bundler: ${bundler.bundlerId}`, async() => {
-        const { deployer } = await getNamedAccounts();
-        const ethPackPrice = ethers.utils.parseUnits('1', 18);
-
-        // @ts-ignore
-        const bundlerContract = await ethers.getContract(bundler.contract);
-        const token1 = (await bundlerContract.getToken1())['tokenAddress'];
-
-        // Get Balance before Transaction for Test Confirmation
-        const preBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
-
-        const bundleChunks:IWeb3PacksDefs.BundleChunkStruct[] = [
-          {bundlerId: toBytes32(bundler.bundlerId), percentBasisPoints: 10000},
-        ];
-
-        // Bundle Pack
-        const { tokenId, gasCost } = await _callBundle({
-          bundleChunks,
-          packType: 'ECOSYSTEM',
-          ethPackPrice,
-        });
-        const web3pack = charged.NFT(Proton.address, tokenId);
-
-        const tokenMass = await web3pack.getMass(token1, 'generic.B');
-        const tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
-        expect(tokenAmount).to.be.gt(100);
-
-        // Confirm ETH Balance
-        const expectedBalance = preBalance - ethPackPrice.toBigInt() - globals.protocolFee.toBigInt() - gasCost.toBigInt();
-        const postBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
-        expect(postBalance).to.eq(expectedBalance);
-
-        // Unbundle Pack
-        const { gasCost: unbundleGasCost } = await _callUnbundle({ tokenId, sellAll: true });
-        const finalBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
-
-        // Confirm ETH Balance
-        const sellAllValue = (ethPackPrice.toBigInt() * 9500n) / 10000n; // at least 95%
-        const newExpectedBalance = postBalance + sellAllValue - globals.protocolFee.toBigInt() - unbundleGasCost.toBigInt();
-        expect(finalBalance).to.gte(newExpectedBalance);
+          // Check Receiver for Tokens
+          const tokenContract = new Contract(token1, globals.erc20Abi, deployerSigner);
+          const tokenBalance = await tokenContract.balanceOf(deployer);
+          expect(tokenBalance).to.be.gte(tokenAmount);
+        })(false);
       });
     }
   });
 
-  describe('Liquidity-Position Bundlers', async() => {
-    const liqPosBundlers = [
-      { bundlerId: 'LP-WETH-IONX',  contract: 'LPWethIonx' },
-      { bundlerId: 'LP-WETH-KIM',   contract: 'LPWethKim' },
-      { bundlerId: 'LP-WETH-MODE',  contract: 'LPWethMode' },
-      { bundlerId: 'LP-WETH-STONE', contract: 'LPWethStone' },
-      { bundlerId: 'LP-WETH-USDC',  contract: 'LPWethUsdc' },
-      { bundlerId: 'LP-WETH-WBTC',  contract: 'LPWethWbtc' },
-      { bundlerId: 'LP-IUSD-USDC',  contract: 'LPIusdUsdc' },
-      { bundlerId: 'LP-WETH-MODE-8020',  contract: 'LPWethMode8020' },
-    ];
+  describe('Single-sided Bundlers (w/ Sell All)', async () => {
+    for (let i = 0; i < singleSidedBundlers.length; i++) {
+      const bundler = singleSidedBundlers[i];
 
+      it(`Bundles/Unbundles using Bundler: ${bundler.bundlerId}`, () => {
+        (async (sellAll) => {
+          const { deployer } = await getNamedAccounts();
+          const ethPackPrice = ethers.utils.parseUnits('1', 18);
+
+          // @ts-ignore
+          const bundlerContract = await ethers.getContract(bundler.contract);
+          const token1 = (await bundlerContract.getToken1())['tokenAddress'];
+
+          // Get Balance before Transaction for Test Confirmation
+          const preBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
+
+          const bundleChunks:IWeb3PacksDefs.BundleChunkStruct[] = [
+            {bundlerId: toBytes32(bundler.bundlerId), percentBasisPoints: 10000},
+          ];
+
+          // Bundle Pack
+          const { tokenId, gasCost } = await _callBundle({
+            bundleChunks,
+            packType: 'ECOSYSTEM',
+            ethPackPrice,
+          });
+          const web3pack = charged.NFT(Proton.address, tokenId);
+
+          const tokenMass = await web3pack.getMass(token1, 'generic.B');
+          const tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
+          expect(tokenAmount).to.be.gt(100);
+
+          // Confirm ETH Balance
+          const expectedBalance = preBalance - ethPackPrice.toBigInt() - globals.protocolFee.toBigInt() - gasCost.toBigInt();
+          const postBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
+          expect(postBalance).to.eq(expectedBalance);
+
+          // Unbundle Pack
+          const { gasCost: unbundleGasCost } = await _callUnbundle({ tokenId, sellAll: true });
+          const finalBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
+
+          // Confirm ETH Balance
+          const sellAllValue = (ethPackPrice.toBigInt() * 9500n) / 10000n; // at least 95%
+          const newExpectedBalance = postBalance + sellAllValue - globals.protocolFee.toBigInt() - unbundleGasCost.toBigInt();
+          expect(finalBalance).to.gte(newExpectedBalance);
+        })(true);
+      });
+    }
+  });
+
+  describe('Liquidity-Position Bundlers (w/o Sell All)', async () => {
     for (let i = 0; i < liqPosBundlers.length; i++) {
       const bundler = liqPosBundlers[i];
 
-      it(`Bundles/Unbundles (w/o Sell All) using Bundler: ${bundler.bundlerId}`, async() => {
-        const { deployer } = await getNamedAccounts();
-        const ethPackPrice = ethers.utils.parseUnits('0.1', 18);
+      it(`Bundles/Unbundles using Bundler: ${bundler.bundlerId}`, () => {
+        (async (sellAll) => {
+          const { deployer } = await getNamedAccounts();
+          const ethPackPrice = ethers.utils.parseUnits('0.1', 18);
 
-        // @ts-ignore
-        const bundlerContract = await ethers.getContract(bundler.contract);
-        const token0 = (await bundlerContract.getToken0())['tokenAddress'];
-        const token1 = (await bundlerContract.getToken1())['tokenAddress'];
+          // @ts-ignore
+          const bundlerContract = await ethers.getContract(bundler.contract);
+          const token0 = (await bundlerContract.getToken0())['tokenAddress'];
+          const token1 = (await bundlerContract.getToken1())['tokenAddress'];
 
-        // Get Balance before Transaction for Test Confirmation
-        const preBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
+          // Get Balance before Transaction for Test Confirmation
+          const preBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
 
-        const bundleChunks:IWeb3PacksDefs.BundleChunkStruct[] = [
-          {bundlerId: toBytes32(bundler.bundlerId), percentBasisPoints: 10000},
-        ];
+          const bundleChunks:IWeb3PacksDefs.BundleChunkStruct[] = [
+            {bundlerId: toBytes32(bundler.bundlerId), percentBasisPoints: 10000},
+          ];
 
-        // Bundle Pack
-        const {tokenId, gasCost} = await _callBundle({
-          bundleChunks,
-          packType: 'DEFI',
-          ethPackPrice,
-        });
+          // Bundle Pack
+          const {tokenId, gasCost} = await _callBundle({
+            bundleChunks,
+            packType: 'DEFI',
+            ethPackPrice,
+          });
 
-        const web3pack = charged.NFT(Proton.address, tokenId);
-        const { tokenAddress: lpTokenAddress, tokenId: lpTokenId } = await bundlerContract.getLiquidityToken(tokenId);
+          const web3pack = charged.NFT(Proton.address, tokenId);
+          const { tokenAddress: lpTokenAddress, tokenId: lpTokenId } = await bundlerContract.getLiquidityToken(tokenId);
 
-        // Check Liquidity Type
-        let liquidityTokenAmount;
-        if (lpTokenId.toBigInt() > 0n) {
-          // Check Pack for Liquidity NFT
-          const tokenBonds = await web3pack.getBonds('generic.B');
-          const bondCount = tokenBonds[network.config.chainId ?? '']?.value;
-          expect(bondCount).to.eq(1);
-        } else {
-          // Check Pack for Liquidity Tokens
-          const tokenMass = await web3pack.getMass(lpTokenAddress, 'generic.B');
-          liquidityTokenAmount = tokenMass[network.config.chainId ?? '']?.value;
-          expect(liquidityTokenAmount).to.be.gt(100);
-        }
+          // Check Liquidity Type
+          let liquidityTokenAmount;
+          if (lpTokenId.toBigInt() > 0n) {
+            // Check Pack for Liquidity NFT
+            const tokenBonds = await web3pack.getBonds('generic.B');
+            const bondCount = tokenBonds[network.config.chainId ?? '']?.value;
+            expect(bondCount).to.eq(1);
+          } else {
+            // Check Pack for Liquidity Tokens
+            const tokenMass = await web3pack.getMass(lpTokenAddress, 'generic.B');
+            liquidityTokenAmount = tokenMass[network.config.chainId ?? '']?.value;
+            expect(liquidityTokenAmount).to.be.gt(100);
+          }
 
-        // Confirm ETH Balance
-        const expectedBalance = preBalance - ethPackPrice.toBigInt() - globals.protocolFee.toBigInt() - gasCost.toBigInt();
-        const postBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
-        expect(postBalance).to.eq(expectedBalance);
+          // Confirm ETH Balance
+          const expectedBalance = preBalance - ethPackPrice.toBigInt() - globals.protocolFee.toBigInt() - gasCost.toBigInt();
+          const postBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
+          expect(postBalance).to.eq(expectedBalance);
 
-        // Unbundle Pack
-        await _callUnbundle({ tokenId });
+          // Unbundle Pack
+          await _callUnbundle({ tokenId, sellAll });
 
-        // Check Receiver for Tokens
-        if (bundler.bundlerId === 'LP-WETH-MODE-8020') {
-          // Governance Pack wants to Unbundle Liquidity Tokens without Exiting Position - for Voting Purposes
-          const tokenContract = new Contract(lpTokenAddress, globals.erc20Abi, deployerSigner);
-          const tokenBalance = await tokenContract.balanceOf(deployer);
-          expect(tokenBalance).to.be.gte(liquidityTokenAmount);
-        } else {
           // Check Receiver for Tokens
-          const tokenContract0 = new Contract(token0, globals.erc20Abi, deployerSigner);
-          const tokenBalance0 = await tokenContract0.balanceOf(deployer);
-          expect(tokenBalance0).to.be.gte(100);
+          if (bundler.bundlerId === 'LP-WETH-MODE-8020') {
+            // Governance Pack wants to Unbundle Liquidity Tokens without Exiting Position - for Voting Purposes
+            const tokenContract = new Contract(lpTokenAddress, globals.erc20Abi, deployerSigner);
+            const tokenBalance = await tokenContract.balanceOf(deployer);
+            expect(tokenBalance).to.be.gte(liquidityTokenAmount);
+          } else {
+            // Check Receiver for Tokens
+            const tokenContract0 = new Contract(token0, globals.erc20Abi, deployerSigner);
+            const tokenBalance0 = await tokenContract0.balanceOf(deployer);
+            expect(tokenBalance0).to.be.gte(100);
 
-          const tokenContract1 = new Contract(token1, globals.erc20Abi, deployerSigner);
-          const tokenBalance1 = await tokenContract1.balanceOf(deployer);
-          expect(tokenBalance1).to.be.gte(100);
-        }
+            const tokenContract1 = new Contract(token1, globals.erc20Abi, deployerSigner);
+            const tokenBalance1 = await tokenContract1.balanceOf(deployer);
+            expect(tokenBalance1).to.be.gte(100);
+          }
+        })(false);
+      });
+    }
+  });
+
+  describe('Liquidity-Position Bundlers (w/ Sell All)', async () => {
+    for (let i = 0; i < liqPosBundlers.length; i++) {
+      const bundler = liqPosBundlers[i];
+
+      it(`Bundles/Unbundles using Bundler: ${bundler.bundlerId}`, () => {
+        (async (sellAll) => {
+          const { deployer } = await getNamedAccounts();
+          const ethPackPrice = ethers.utils.parseUnits('0.1', 18);
+
+          // @ts-ignore
+          const bundlerContract = await ethers.getContract(bundler.contract);
+
+          // Get Balance before Transaction for Test Confirmation
+          const preBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
+
+          const bundleChunks:IWeb3PacksDefs.BundleChunkStruct[] = [
+            {bundlerId: toBytes32(bundler.bundlerId), percentBasisPoints: 10000},
+          ];
+
+          // Bundle Pack
+          const {tokenId, gasCost} = await _callBundle({
+            bundleChunks,
+            packType: 'DEFI',
+            ethPackPrice,
+          });
+
+          const web3pack = charged.NFT(Proton.address, tokenId);
+          const { tokenAddress: lpTokenAddress, tokenId: lpTokenId } = await bundlerContract.getLiquidityToken(tokenId);
+
+          // Check Liquidity Type
+          let liquidityTokenAmount;
+          if (lpTokenId.toBigInt() > 0n) {
+            // Check Pack for Liquidity NFT
+            const tokenBonds = await web3pack.getBonds('generic.B');
+            const bondCount = tokenBonds[network.config.chainId ?? '']?.value;
+            expect(bondCount).to.eq(1);
+          } else {
+            // Check Pack for Liquidity Tokens
+            const tokenMass = await web3pack.getMass(lpTokenAddress, 'generic.B');
+            liquidityTokenAmount = tokenMass[network.config.chainId ?? '']?.value;
+            expect(liquidityTokenAmount).to.be.gt(100);
+          }
+
+          // Confirm ETH Balance
+          const expectedBalance = preBalance - ethPackPrice.toBigInt() - globals.protocolFee.toBigInt() - gasCost.toBigInt();
+          const postBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
+          expect(postBalance).to.eq(expectedBalance);
+
+          // Unbundle Pack
+          const { gasCost: unbundleGasCost } = await _callUnbundle({ tokenId, sellAll });
+          const finalBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
+
+          // Confirm ETH Balance
+          const sellAllValue = (ethPackPrice.toBigInt() * 8000n) / 10000n; // at least 80%
+          const newExpectedBalance = postBalance + sellAllValue - globals.protocolFee.toBigInt() - unbundleGasCost.toBigInt();
+          expect(finalBalance).to.gte(newExpectedBalance);
+        })(true);
       });
     }
   });
