@@ -25,7 +25,12 @@
           },
           {
             "internalType": "address",
-            "name": "router",
+            "name": "swapRouter",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "liquidityRouter",
             "type": "address"
           },
           {
@@ -37,6 +42,11 @@
             "internalType": "bytes32",
             "name": "bundlerId",
             "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "slippage",
+            "type": "uint256"
           },
           {
             "internalType": "int24",
@@ -290,6 +300,19 @@
   },
   {
     "inputs": [],
+    "name": "_liquidityRouter",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "_manager",
     "outputs": [
       {
@@ -316,7 +339,20 @@
   },
   {
     "inputs": [],
-    "name": "_router",
+    "name": "_slippage",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "_swapRouter",
     "outputs": [
       {
         "internalType": "address",
@@ -470,26 +506,6 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "balanceAmount0",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "balanceAmount1",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "minAmount0",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "minAmount1",
-        "type": "uint256"
-      },
-      {
         "internalType": "bool",
         "name": "",
         "type": "bool"
@@ -586,6 +602,34 @@
       {
         "internalType": "uint256",
         "name": "balanceWeth",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getLiquidityAmounts",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount0",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount1",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minAmount0",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minAmount1",
         "type": "uint256"
       }
     ],
@@ -905,6 +949,19 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "router",
+        "type": "address"
+      }
+    ],
+    "name": "setLiquidityRouter",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "manager",
         "type": "address"
       }
@@ -922,7 +979,7 @@
         "type": "address"
       }
     ],
-    "name": "setRouter",
+    "name": "setSwapRouter",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

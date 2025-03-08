@@ -1,8 +1,9 @@
-const { chainIdByName, toBytes, isHardhat, log } = require('../js-helpers/utils');
+const { chainIdByName, toBytes, isHardhat, findNearestValidTick, log } = require('../js-helpers/utils');
 const globals = require('../js-helpers/globals');
 
 const bundlerContractName = 'LPWethIonx';
 const bundlerId = 'LP-WETH-IONX';
+const priceSlippage = 300n; // 3%
 
 module.exports = async (hre) => {
     const { ethers, getNamedAccounts, deployments } = hre;
@@ -20,11 +21,13 @@ module.exports = async (hre) => {
       token0: tokenAddress.weth,
       token1: tokenAddress.ionx,
       manager: web3packs.address,
-      router: routers.kimNft,
+      swapRouter: routers.kim,
+      liquidityRouter: routers.kimNft,
       poolId: toBytes(''),
       bundlerId: toBytes(bundlerId),
-      tickLower: 0,
-      tickUpper: 0,
+      slippage: priceSlippage,
+      tickLower: BigInt(findNearestValidTick(60, true)),
+      tickUpper: BigInt(findNearestValidTick(60, false)),
     }];
 
     //

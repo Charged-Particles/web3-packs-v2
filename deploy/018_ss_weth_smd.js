@@ -1,8 +1,9 @@
-const { chainIdByName, toBytes, isHardhat, log } = require('../js-helpers/utils');
+const { chainIdByName, toBytes, isHardhat, findNearestValidTick, log } = require('../js-helpers/utils');
 const globals = require('../js-helpers/globals');
 
 const bundlerContractName = 'SSWethSmd';
 const bundlerId = 'SS-WETH-SMD';
+const priceSlippage = 900n; // 9% as per: https://medium.com/@conshiptrack/how-to-fix-insufficient-output-amount-error-in-pancakeswap-7ad70a4f99c8
 
 module.exports = async (hre) => {
     const { ethers, getNamedAccounts, deployments } = hre;
@@ -20,11 +21,13 @@ module.exports = async (hre) => {
       token0: tokenAddress.weth,
       token1: tokenAddress.smd,
       manager: web3packs.address,
-      router: routers.swapMode,
+      swapRouter: routers.swapMode,
+      liquidityRouter: routers.swapMode,
       poolId: toBytes(''),
       bundlerId: toBytes(bundlerId),
-      tickLower: 0,
-      tickUpper: 0,
+      slippage: priceSlippage,
+      tickLower: BigInt(findNearestValidTick(60, true)),
+      tickUpper: BigInt(findNearestValidTick(60, false)),
     }];
 
     //

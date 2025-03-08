@@ -45,12 +45,14 @@ abstract contract Web3PacksRouterBase is
   address public _token0;
   address public _token1;
 
-  address public _router;
+  address public _swapRouter;
+  address public _liquidityRouter;
   bytes32 public _poolId;
 
   // The ID Associated with this Bundler (must be Registered with Web3Packs)
   bytes32 public _bundlerId;
 
+  uint256 public _slippage;
   int24 public _tickLower;
   int24 public _tickUpper;
 
@@ -62,9 +64,11 @@ abstract contract Web3PacksRouterBase is
     _token0 = config.token0;
     _token1 = config.token1;
     _manager = config.manager;
-    _router = config.router;
+    _swapRouter = config.swapRouter;
+    _liquidityRouter = config.liquidityRouter;
     _poolId = config.poolId;
     _bundlerId = config.bundlerId;
+    _slippage = config.slippage;
     _tickLower = config.tickLower;
     _tickUpper = config.tickUpper;
   }
@@ -115,6 +119,14 @@ abstract contract Web3PacksRouterBase is
     amounts[1] = reverse ? getBalanceToken0() : getBalanceToken1();
 
     return (assets, amounts);
+  }
+
+  /// @dev This can be overridden to specify custom amounts for swapping
+  function getLiquidityAmounts() public virtual view returns (uint256 amount0, uint256 amount1, uint256 minAmount0, uint256 minAmount1) {
+    amount0 = getBalanceToken0();
+    amount1 = getBalanceToken1();
+    minAmount0 = (amount0 * (10000 - _slippage)) / 10000;
+    minAmount1 = (amount1 * (10000 - _slippage)) / 10000;
   }
 
   /***********************************|
@@ -178,8 +190,12 @@ abstract contract Web3PacksRouterBase is
     _weth = weth;
   }
 
-  function setRouter(address router) external virtual onlyOwner {
-    _router = router;
+  function setSwapRouter(address router) external virtual onlyOwner {
+    _swapRouter = router;
+  }
+
+  function setLiquidityRouter(address router) external virtual onlyOwner {
+    _liquidityRouter = router;
   }
 
   function setManager(address manager) external virtual onlyOwner {

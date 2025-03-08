@@ -59,13 +59,7 @@ abstract contract PancakeRouter is Web3PacksRouterBase {
     amountOut = _performSwap(percentOfAmount, token0, token1);
   }
 
-  function createLiquidityPosition(
-    uint256 balanceAmount0,
-    uint256 balanceAmount1,
-    uint256 minAmount0,
-    uint256 minAmount1,
-    bool
-  )
+  function createLiquidityPosition(bool)
     public
     virtual
     override
@@ -79,9 +73,18 @@ abstract contract PancakeRouter is Web3PacksRouterBase {
   {
     IWeb3PacksDefs.Token memory token0 = getToken0();
     IWeb3PacksDefs.Token memory token1 = getToken1();
+    (
+      uint256 balanceAmount0,
+      uint256 balanceAmount1,
+      uint256 minAmount0,
+      uint256 minAmount1
+    ) = getLiquidityAmounts();
+
+    TransferHelper.safeApprove(token0.tokenAddress, _liquidityRouter, balanceAmount0);
+    TransferHelper.safeApprove(token1.tokenAddress, _liquidityRouter, balanceAmount1);
 
     // Add Liquidity
-    (amount0, amount1, liquidity) = IPancakeRouter02(_router).addLiquidity(
+    (amount0, amount1, liquidity) = IPancakeRouter02(_liquidityRouter).addLiquidity(
       token0.tokenAddress,
       token1.tokenAddress,
       balanceAmount0,
@@ -121,11 +124,11 @@ abstract contract PancakeRouter is Web3PacksRouterBase {
 
     TransferHelper.safeApprove(
       lpTokenAddress,
-      _router,
+      _liquidityRouter,
       liquidityPosition.liquidity
     );
 
-    (amount0, amount1) = IPancakeRouter02(_router).removeLiquidity(
+    (amount0, amount1) = IPancakeRouter02(_liquidityRouter).removeLiquidity(
       token0.tokenAddress,
       token1.tokenAddress,
       liquidityPosition.liquidity,
@@ -149,8 +152,8 @@ abstract contract PancakeRouter is Web3PacksRouterBase {
     uint256 swapAmount = (balance * percentOfAmount) / 10000;
 
     if (swapAmount > 0) {
-      TransferHelper.safeApprove(token0, _router, swapAmount);
-      IPancakeRouter02(_router).swapExactTokensForTokens(
+      TransferHelper.safeApprove(token0, _swapRouter, swapAmount);
+      IPancakeRouter02(_swapRouter).swapExactTokensForTokens(
         swapAmount,
         0,
         routes,
@@ -162,7 +165,7 @@ abstract contract PancakeRouter is Web3PacksRouterBase {
   }
 
   function _getPancakeFactory() internal view returns (address) {
-    return IPancakeRouter02(_router).factory();
+    return IPancakeRouter02(_liquidityRouter).factory();
   }
 
   function _getPancakePairAddress(address token0, address token1) internal view returns (address) {

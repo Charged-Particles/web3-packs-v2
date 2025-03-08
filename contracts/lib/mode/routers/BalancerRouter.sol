@@ -56,13 +56,7 @@ abstract contract BalancerRouter is Web3PacksRouterBase {
     amountOut = _performSwap(percentOfAmount, token0, token1);
   }
 
-  function createLiquidityPosition(
-    uint256 balanceAmount0,
-    uint256 balanceAmount1,
-    uint256,
-    uint256,
-    bool
-  )
+  function createLiquidityPosition(bool)
     public
     virtual
     override
@@ -74,12 +68,14 @@ abstract contract BalancerRouter is Web3PacksRouterBase {
       uint256 amount1
     )
   {
-    (address poolAddress, ) = IBalancerV2Vault(_router).getPool(_poolId);
+    (address poolAddress, ) = IBalancerV2Vault(_liquidityRouter).getPool(_poolId);
+    (uint256 balanceAmount0, uint256 balanceAmount1, , ) = getLiquidityAmounts();
 
     (address[] memory addresses, uint256[] memory amounts) = getOrderedAssets(false);
     IAsset[] memory assets = new IAsset[](addresses.length);
     for (uint i; i < addresses.length; i++) {
       assets[i] = IAsset(addresses[i]);
+      TransferHelper.safeApprove(addresses[i], _liquidityRouter, amounts[i]);
     }
 
     // Add Liquidity
@@ -90,7 +86,7 @@ abstract contract BalancerRouter is Web3PacksRouterBase {
       userData: userData,
       fromInternalBalance: false
     });
-    IBalancerV2Vault(_router).joinPool(_poolId, address(this), address(this), joinData);
+    IBalancerV2Vault(_liquidityRouter).joinPool(_poolId, address(this), address(this), joinData);
 
     lpTokenId = uint256(uint160(poolAddress));
     liquidity = IERC20(poolAddress).balanceOf(address(this));
@@ -115,7 +111,7 @@ abstract contract BalancerRouter is Web3PacksRouterBase {
     onlyManagerOrSelf
     returns (uint amount0, uint amount1)
   {
-    (address poolAddress, ) = IBalancerV2Vault(_router).getPool(_poolId);
+    (address poolAddress, ) = IBalancerV2Vault(_liquidityRouter).getPool(_poolId);
 
     (address[] memory addresses, uint256[] memory amounts) = getOrderedAssets(false);
     IAsset[] memory assets = new IAsset[](addresses.length);
@@ -123,7 +119,7 @@ abstract contract BalancerRouter is Web3PacksRouterBase {
 
     TransferHelper.safeApprove(
       poolAddress,
-      _router,
+      _liquidityRouter,
       liquidityPosition.liquidity
     );
 
@@ -135,7 +131,7 @@ abstract contract BalancerRouter is Web3PacksRouterBase {
       userData: userData,
       toInternalBalance: false
     });
-    IBalancerV2Vault(_router).exitPool(_poolId, address(this), payable(address(this)), exitData);
+    IBalancerV2Vault(_liquidityRouter).exitPool(_poolId, address(this), payable(address(this)), exitData);
 
     (amount0, amount1) = _getRemainders(0, 0);
   }
@@ -148,7 +144,7 @@ abstract contract BalancerRouter is Web3PacksRouterBase {
     uint256 balance = IERC20(token0).balanceOf(address(this));
     uint256 swapAmount = (balance * percentOfAmount) / 10000;
 
-    TransferHelper.safeApprove(token0, _router, swapAmount);
+    TransferHelper.safeApprove(token0, _swapRouter, swapAmount);
 
     if (swapAmount > 0) {
       IBalancerV2Vault.SingleSwap memory swapData = IBalancerV2Vault.SingleSwap({
@@ -166,7 +162,7 @@ abstract contract BalancerRouter is Web3PacksRouterBase {
         recipient: payable(address(this)),
         toInternalBalance: false
       });
-      IBalancerV2Vault(_router).swap(swapData, fundData, 0, block.timestamp);
+      IBalancerV2Vault(_swapRouter).swap(swapData, fundData, 0, block.timestamp);
 
       amountOut = IERC20(token1).balanceOf(address(this));
     }

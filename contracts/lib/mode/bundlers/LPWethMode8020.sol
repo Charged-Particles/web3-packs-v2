@@ -52,9 +52,10 @@ contract LPWethMode8020 is IWeb3PacksBundler, BalancerRouter {
     return token;
   }
 
-  function getLiquidityToken(uint256 packTokenId) public override view returns (address tokenAddress, uint256 tokenId) {
-    tokenAddress = _router;
-    tokenId = _liquidityPositionsByTokenId[packTokenId].lpTokenId;
+  function getLiquidityToken(uint256) public override view returns (address tokenAddress, uint256 tokenId) {
+    (address poolAddress, ) = IBalancerV2Vault(_liquidityRouter).getPool(_poolId);
+    tokenAddress = poolAddress;
+    tokenId = 0;
   }
 
   /***********************************|
@@ -79,17 +80,17 @@ contract LPWethMode8020 is IWeb3PacksBundler, BalancerRouter {
     )
   {
     // Perform Swap
-    uint256 token1Balance = swapSingle(8000, false); // 80% WETH -> MODE
-    uint256 token0Balance = getBalanceToken0();
+    swapSingle(8000, false); // 80% WETH -> MODE
 
     // Deposit Liquidity
-    (uint256 lpTokenId, uint256 liquidity, , ) = createLiquidityPosition(token0Balance, token1Balance, 0, 0, false);
-    nftTokenId = lpTokenId;
+    (uint256 lpTokenId, uint256 liquidity, , ) = createLiquidityPosition(false);
+    address poolAddress = address(uint160(lpTokenId));
+    nftTokenId = 0;
     amountOut = liquidity;
-    tokenAddress = _router;
+    tokenAddress = poolAddress;
 
     // Transfer back to Manager
-    IERC721(tokenAddress).safeTransferFrom(address(this), _manager, nftTokenId);
+    TransferHelper.safeTransfer(poolAddress, _manager, amountOut);
 
     // Track Liquidity Position by Pack Token ID
     _liquidityPositionsByTokenId[packTokenId] = IWeb3PacksDefs.LiquidityPosition({
@@ -108,10 +109,11 @@ contract LPWethMode8020 is IWeb3PacksBundler, BalancerRouter {
     onlyManagerOrSelf
     returns(uint256 ethAmountOut)
   {
+    IWeb3PacksDefs.LiquidityPosition memory liquidityPosition = _liquidityPositionsByTokenId[packTokenId];
+
     // Perform Swap
     if (sellAll) {
       // Remove Liquidity
-      IWeb3PacksDefs.LiquidityPosition memory liquidityPosition = _liquidityPositionsByTokenId[packTokenId];
       removeLiquidityPosition(liquidityPosition);
       collectLpFees(liquidityPosition);
 
@@ -119,11 +121,11 @@ contract LPWethMode8020 is IWeb3PacksBundler, BalancerRouter {
       swapSingle(10000, true); // 100% MODE -> WETH
       ethAmountOut = exitWethAndTransfer(receiver);
     } else {
-      // NOTE: For this Bundle, we want users to be able to Unbundle and receive the actual Liquidity NFT for Voting Purposes
-      (address lpTokenAddress, uint256 lpTokenId) = getLiquidityToken(packTokenId);
+      // NOTE: For this Bundle, we want users to be able to Unbundle and receive the actual Liquidity for Voting Purposes
+      (address lpTokenAddress, ) = getLiquidityToken(packTokenId);
 
       // Transfer Assets to Receiver
-      IERC721(lpTokenAddress).safeTransferFrom(address(this), receiver, lpTokenId);
+      TransferHelper.safeTransfer(lpTokenAddress, receiver, liquidityPosition.liquidity);
     }
 
     // Clear Liquidity Position
