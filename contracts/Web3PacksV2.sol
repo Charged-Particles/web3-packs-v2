@@ -30,11 +30,13 @@
 
 pragma solidity 0.8.17;
 
+import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "./lib/BlackholePrevention.sol";
 import "./interfaces/IWeb3Packs.sol";
@@ -43,7 +45,6 @@ import "./interfaces/IWeb3PacksBundler.sol";
 import "./interfaces/IChargedState.sol";
 import "./interfaces/IChargedParticles.sol";
 import "./interfaces/IBaseProton.sol";
-import "./interfaces/IWETH9.sol";
 
 contract Web3PacksV2 is
   IWeb3Packs,
@@ -52,6 +53,8 @@ contract Web3PacksV2 is
   BlackholePrevention,
   ReentrancyGuard
 {
+  using Address for address payable;
+
   event ChargedParticlesSet(address indexed chargedParticles);
   event ChargedStateSet(address indexed chargedState);
   event ProtonSet(address indexed proton);
@@ -161,8 +164,7 @@ contract Web3PacksV2 is
   function claimReferralRewards(address payable account) public override nonReentrant {
     uint256 balance = _referrerBalance[account];
     if (address(this).balance >= balance) {
-      (bool sent, ) = account.call{value: balance}("");
-      require(sent, "Failed to send referral rewards");
+      account.sendValue(balance);
       emit BalanceClaimed(account, balance);
     }
   }
@@ -187,7 +189,7 @@ contract Web3PacksV2 is
     tokenId = _createBasicProton(tokenMetaUri);
 
     // Wrap ETH for WETH
-    IWETH9(_weth).deposit{value: ethPackPrice}();
+    IWETH(_weth).deposit{value: ethPackPrice}();
     uint256 wethTotal = IERC20(_weth).balanceOf(address(this));
     uint256 chunkWeth;
 
@@ -260,7 +262,6 @@ contract Web3PacksV2 is
       revert NoBundlesInPack();
     }
 
-    // address assetReceiver;
     address assetTokenAddress;
     uint256 assetTokenId;
     for (uint i; i < _bundlesByPackId[packTokenId].length; i++) {
@@ -273,7 +274,6 @@ contract Web3PacksV2 is
 
       // Pull Assets from NFT and send to Bundler for Unbundling
       (assetTokenAddress, assetTokenId) = bundler.getLiquidityToken(packTokenId);
-      // assetReceiver = sellAll ? _bundlersById[bundlerId] : receiver;
       if (assetTokenId == 0) {
         _release(_bundlersById[bundlerId], packTokenId, assetTokenAddress);
       } else {
@@ -452,8 +452,7 @@ contract Web3PacksV2 is
       revert InsufficientForFee(msg.value, excludedAmount, _protocolFee);
     }
     uint256 fees = msg.value - excludedAmount;
-    (bool sent, ) = _treasury.call{value: fees}("");
-    require(sent, "Failed to send fees to Treasury");
+    _treasury.sendValue(fees);
   }
 
   function _calculateReferralRewards(
@@ -501,16 +500,16 @@ contract Web3PacksV2 is
     emit ChargedStateSet(chargedState);
   }
 
-  function setTreasury(address payable treasury) external onlyOwner {
-    require(treasury != address(0), "Invalid address for treasury");
-    _treasury = treasury;
-    emit Web3PacksTreasurySet(treasury);
-  }
-
   function setProton(address proton) external onlyOwner {
     require(proton != address(0), "Invalid address for proton");
     _proton = proton;
     emit ProtonSet(proton);
+  }
+
+  function setTreasury(address payable treasury) external onlyOwner {
+    require(treasury != address(0), "Invalid address for treasury");
+    _treasury = treasury;
+    emit Web3PacksTreasurySet(treasury);
   }
 
   function setProtocolFee(uint256 fee) external onlyOwner {

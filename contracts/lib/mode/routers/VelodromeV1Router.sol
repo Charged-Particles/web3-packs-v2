@@ -43,8 +43,8 @@ abstract contract VelodromeV1Router is Web3PacksRouterBase {
     onlyManagerOrSelf
     returns (uint256 amountOut)
   {
-    IWeb3PacksDefs.Token memory token0 = getToken0();
-    IWeb3PacksDefs.Token memory token1 = getToken1();
+    IWeb3PacksDefs.Token memory token0 = reverse ? getToken1() : getToken0();
+    IWeb3PacksDefs.Token memory token1 = reverse ? getToken0() : getToken1();
     IWeb3PacksDefs.Route[] memory tokens = getTokenPath(reverse);
     IVelodrome.Route[] memory routes = new IVelodrome.Route[](tokens.length);
     for (uint i; i < tokens.length; i++) {
@@ -68,13 +68,7 @@ abstract contract VelodromeV1Router is Web3PacksRouterBase {
     amountOut = _performSwap(percentOfAmount, token0, token1, routes);
   }
 
-  function createLiquidityPosition(
-    uint256 balanceAmount0,
-    uint256 balanceAmount1,
-    uint256 minAmount0,
-    uint256 minAmount1,
-    bool stable
-  )
+  function createLiquidityPosition(bool stable)
     public
     virtual
     override
@@ -88,9 +82,18 @@ abstract contract VelodromeV1Router is Web3PacksRouterBase {
   {
     IWeb3PacksDefs.Token memory token0 = getToken0();
     IWeb3PacksDefs.Token memory token1 = getToken1();
+    (
+      uint256 balanceAmount0,
+      uint256 balanceAmount1,
+      uint256 minAmount0,
+      uint256 minAmount1
+    ) = getLiquidityAmounts();
+
+    TransferHelper.safeApprove(token0.tokenAddress, _liquidityRouter, balanceAmount0);
+    TransferHelper.safeApprove(token1.tokenAddress, _liquidityRouter, balanceAmount1);
 
     // Add Liquidity
-    (amount0, amount1, liquidity) = IVelodrome(_router).addLiquidity(
+    (amount0, amount1, liquidity) = IVelodrome(_liquidityRouter).addLiquidity(
       token0.tokenAddress,
       token1.tokenAddress,
       stable,
@@ -131,11 +134,11 @@ abstract contract VelodromeV1Router is Web3PacksRouterBase {
 
     TransferHelper.safeApprove(
       lpTokenAddress,
-      _router,
+      _liquidityRouter,
       liquidityPosition.liquidity
     );
 
-    (amount0, amount1) = IVelodrome(_router).removeLiquidity(
+    (amount0, amount1) = IVelodrome(_liquidityRouter).removeLiquidity(
       token0.tokenAddress,
       token1.tokenAddress,
       liquidityPosition.stable,
@@ -156,8 +159,8 @@ abstract contract VelodromeV1Router is Web3PacksRouterBase {
     uint256 swapAmount = (balance * percentOfAmount) / 10000;
 
     if (swapAmount > 0) {
-      TransferHelper.safeApprove(token0, _router, swapAmount);
-      IVelodrome(_router).swapExactTokensForTokens(
+      TransferHelper.safeApprove(token0, _swapRouter, swapAmount);
+      IVelodrome(_swapRouter).swapExactTokensForTokens(
         swapAmount,
         0,
         routes,
@@ -169,6 +172,6 @@ abstract contract VelodromeV1Router is Web3PacksRouterBase {
   }
 
   function _getVelodromePairAddress(address token0, address token1) internal view returns (address) {
-    return IVelodrome(_router).poolFor(token0, token1, false);
+    return IVelodrome(_liquidityRouter).poolFor(token0, token1, false);
   }
 }

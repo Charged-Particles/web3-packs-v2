@@ -2069,9 +2069,9 @@
     form-data "^4.0.0"
 
 "@types/node@*", "@types/node@>=13.7.0":
-  version "22.13.9"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.13.9.tgz#5d9a8f7a975a5bd3ef267352deb96fb13ec02eca"
-  integrity sha512-acBjXdRJ3A6Pb3tqnw9HZmyR3Fiol3aGxRCK1x3d+6CDAMjl7I649wpSd+yNURCjbOUGu9tqtLKnTGxmK6CyGw==
+  version "22.13.10"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.13.10.tgz#df9ea358c5ed991266becc3109dc2dc9125d77e4"
+  integrity sha512-I6LPUvlRH+O6VRUqYOcMudhaIdUVWfsjnZavnsraHvpBwaEyMN29ry+0UVJhImYL16xsscu0aske3yA+uPOWfw==
   dependencies:
     undici-types "~6.20.0"
 
@@ -2086,9 +2086,9 @@
   integrity sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==
 
 "@types/node@^18.11.18":
-  version "18.19.79"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.19.79.tgz#82fde7ac17809f4738a494b22273f0f7e6754f6e"
-  integrity sha512-90K8Oayimbctc5zTPHPfZloc/lGVs7f3phUAAMcTgEPtg8kKquGZDERC8K4vkBYkQQh48msiYUslYtxTWvqcAg==
+  version "18.19.80"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.19.80.tgz#6d6008e8920dddcd23f9dd33da24684ef57d487c"
+  integrity sha512-kEWeMwMeIvxYkeg1gTc01awpwLbfMRZXdIhwRcakd/KlK53jmRC26LqcbIt7fnAQTu5GzlnWmzA3H6+l1u6xxQ==
   dependencies:
     undici-types "~5.26.4"
 
@@ -2795,9 +2795,9 @@ axios@^0.24.0:
     follow-redirects "^1.14.4"
 
 axios@^1.5.1:
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.8.1.tgz#7c118d2146e9ebac512b7d1128771cdd738d11e3"
-  integrity sha512-NN+fvwH/kV01dYUQ3PTOZns4LWtWhOFCAhQ/pHb88WQ1hNe5V/dvFwc4VJcDL11LT9xSX0QtsR8sWUuyOuOq7g==
+  version "1.8.2"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.8.2.tgz#fabe06e241dfe83071d4edfbcaa7b1c3a40f7979"
+  integrity sha512-ls4GYBm5aig9vWx8AWDSGLpnpDQRtWAfrjU+EuytuODrFBkqesN2RkOQCBzrA1RQNHw1SmRMSDDDSwzNAYQ6Rg==
   dependencies:
     follow-redirects "^1.15.6"
     form-data "^4.0.0"
@@ -3359,9 +3359,9 @@ balanced-match@^1.0.0:
   integrity sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==
 
 base-x@^3.0.2, base-x@^3.0.8:
-  version "3.0.10"
-  resolved "https://registry.yarnpkg.com/base-x/-/base-x-3.0.10.tgz#62de58653f8762b5d6f8d9fe30fa75f7b2585a75"
-  integrity sha512-7d0s06rR9rYaIWHkpfLIFICM/tkSVdoPC9qYAQRpxn9DdKNWNsKC0uk++akckyLq16Tx2WIinnZ6WRriAt6njQ==
+  version "3.0.11"
+  resolved "https://registry.yarnpkg.com/base-x/-/base-x-3.0.11.tgz#40d80e2a1aeacba29792ccc6c5354806421287ff"
+  integrity sha512-xz7wQ8xDhdyP7tQxwdteLYeFfS68tSMNCZ/Y37WJ4bhGfKPpqEIlmIyueQHqOyoPhE6xNUqjzRr8ra0eF9VRvA==
   dependencies:
     safe-buffer "^5.0.1"
 

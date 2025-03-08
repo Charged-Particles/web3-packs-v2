@@ -23,12 +23,13 @@
 
 pragma solidity 0.8.17;
 
+import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "./BlackholePrevention.sol";
-import "../interfaces/IWETH9.sol";
 import "../interfaces/IWeb3PacksRouter.sol";
 import "../interfaces/IWeb3PacksDefs.sol";
 
@@ -37,17 +38,21 @@ abstract contract Web3PacksRouterBase is
   Ownable,
   BlackholePrevention
 {
+  using Address for address payable;
+
   address public _weth;
   address public _manager;
   address public _token0;
   address public _token1;
 
-  address public _router;
+  address public _swapRouter;
+  address public _liquidityRouter;
   bytes32 public _poolId;
 
   // The ID Associated with this Bundler (must be Registered with Web3Packs)
   bytes32 public _bundlerId;
 
+  uint256 public _slippage;
   int24 public _tickLower;
   int24 public _tickUpper;
 
@@ -59,12 +64,16 @@ abstract contract Web3PacksRouterBase is
     _token0 = config.token0;
     _token1 = config.token1;
     _manager = config.manager;
-    _router = config.router;
+    _swapRouter = config.swapRouter;
+    _liquidityRouter = config.liquidityRouter;
     _poolId = config.poolId;
     _bundlerId = config.bundlerId;
+    _slippage = config.slippage;
     _tickLower = config.tickLower;
     _tickUpper = config.tickUpper;
   }
+
+  receive() external payable {}
 
   /***********************************|
   |          Configuration            |
@@ -91,11 +100,6 @@ abstract contract Web3PacksRouterBase is
   }
 
   /// @dev This can be overridden to specify custom routes/paths for swapping
-  function getPoolId() public virtual view returns (bytes32 poolId) {
-    poolId = _poolId;
-  }
-
-  /// @dev This can be overridden to specify custom routes/paths for swapping
   function getTokenPath(bool reverse) public virtual view returns (IWeb3PacksDefs.Route[] memory tokenPath) {
     IWeb3PacksDefs.Route[] memory tokens = new IWeb3PacksDefs.Route[](1);
     tokens[0] = reverse
@@ -117,6 +121,14 @@ abstract contract Web3PacksRouterBase is
     return (assets, amounts);
   }
 
+  /// @dev This can be overridden to specify custom amounts for swapping
+  function getLiquidityAmounts() public virtual view returns (uint256 amount0, uint256 amount1, uint256 minAmount0, uint256 minAmount1) {
+    amount0 = getBalanceToken0();
+    amount1 = getBalanceToken1();
+    minAmount0 = (amount0 * (10000 - _slippage)) / 10000;
+    minAmount1 = (amount1 * (10000 - _slippage)) / 10000;
+  }
+
   /***********************************|
   |          Standard Code            |
   |__________________________________*/
@@ -134,14 +146,18 @@ abstract contract Web3PacksRouterBase is
   }
 
   function enterWeth(uint256 amount) public virtual {
-    IWETH9(_weth).deposit{value: amount}();
+    IWETH(_weth).deposit{value: amount}();
   }
 
   function exitWethAndTransfer(address payable receiver) public virtual returns (uint256 ethAmount) {
-    ethAmount = IERC20(_weth).balanceOf(address(this));
-    IWETH9(_weth).withdraw(ethAmount);
-    (bool sent, ) = receiver.call{value: ethAmount}("");
-    require(sent, "Failed to exit and transfer weth");
+    uint256 wethBalance = getBalanceWeth();
+    if (wethBalance > 0) {
+      IWETH(_weth).withdraw(wethBalance);
+    }
+    ethAmount = address(this).balance;
+    if (ethAmount > 0) {
+      receiver.sendValue(ethAmount);
+    }
   }
 
   function refundUnusedTokens(address sender) public virtual {
@@ -174,8 +190,12 @@ abstract contract Web3PacksRouterBase is
     _weth = weth;
   }
 
-  function setRouter(address router) external virtual onlyOwner {
-    _router = router;
+  function setSwapRouter(address router) external virtual onlyOwner {
+    _swapRouter = router;
+  }
+
+  function setLiquidityRouter(address router) external virtual onlyOwner {
+    _liquidityRouter = router;
   }
 
   function setManager(address manager) external virtual onlyOwner {

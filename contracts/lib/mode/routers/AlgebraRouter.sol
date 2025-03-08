@@ -59,13 +59,7 @@ abstract contract AlgebraRouter is Web3PacksRouterBase {
     amountOut = _performSwap(percentOfAmount, token0, token1);
   }
 
-  function createLiquidityPosition(
-    uint256 balanceAmount0,
-    uint256 balanceAmount1,
-    uint256 minAmount0,
-    uint256 minAmount1,
-    bool
-  )
+  function createLiquidityPosition(bool)
     public
     virtual
     override
@@ -79,6 +73,15 @@ abstract contract AlgebraRouter is Web3PacksRouterBase {
   {
     IWeb3PacksDefs.Token memory token0 = getToken0();
     IWeb3PacksDefs.Token memory token1 = getToken1();
+    (
+      uint256 balanceAmount0,
+      uint256 balanceAmount1,
+      uint256 minAmount0,
+      uint256 minAmount1
+    ) = getLiquidityAmounts();
+
+    TransferHelper.safeApprove(token0.tokenAddress, _liquidityRouter, balanceAmount0);
+    TransferHelper.safeApprove(token1.tokenAddress, _liquidityRouter, balanceAmount1);
 
     // Add Liquidity
     INonfungiblePositionManager.MintParams memory params =
@@ -94,7 +97,7 @@ abstract contract AlgebraRouter is Web3PacksRouterBase {
         recipient: address(this),
         deadline: block.timestamp
       });
-    (lpTokenId, liquidity, amount0, amount1) = INonfungiblePositionManager(_router).mint(params);
+    (lpTokenId, liquidity, amount0, amount1) = INonfungiblePositionManager(_liquidityRouter).mint(params);
   }
 
   function collectLpFees(IWeb3PacksDefs.LiquidityPosition memory liquidityPosition)
@@ -112,7 +115,7 @@ abstract contract AlgebraRouter is Web3PacksRouterBase {
         amount1Max: type(uint128).max
       });
 
-    (amount0, amount1) = INonfungiblePositionManager(_router).collect(params);
+    (amount0, amount1) = INonfungiblePositionManager(_liquidityRouter).collect(params);
   }
 
   function removeLiquidityPosition(IWeb3PacksDefs.LiquidityPosition memory liquidityPosition)
@@ -131,7 +134,7 @@ abstract contract AlgebraRouter is Web3PacksRouterBase {
         amount1Min: 0, // liquidityPairs.token1.amount,
         deadline: block.timestamp
       });
-    (amount0, amount1) = INonfungiblePositionManager(_router).decreaseLiquidity(params);
+    (amount0, amount1) = INonfungiblePositionManager(_liquidityRouter).decreaseLiquidity(params);
   }
 
 
@@ -144,9 +147,9 @@ abstract contract AlgebraRouter is Web3PacksRouterBase {
     uint256 swapAmount = (balance * percentOfAmount) / 10000;
 
     if (swapAmount > 0) {
-      TransferHelper.safeApprove(token0, _router, swapAmount);
+      TransferHelper.safeApprove(token0, _swapRouter, swapAmount);
       params = IAlgebraRouter.ExactInputSingleParams(token0, token1, address(this), block.timestamp, swapAmount, 0, 0);
-      IAlgebraRouter(_router).exactInputSingle(params);
+      IAlgebraRouter(_swapRouter).exactInputSingle(params);
       amountOut = IERC20(token1).balanceOf(address(this));
     }
   }
