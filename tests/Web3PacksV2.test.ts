@@ -6,11 +6,6 @@ import globals from '../js-helpers/globals';
 import { _findNearestValidTick } from './utils';
 
 import { Web3PacksV2, IWeb3PacksDefs } from '../typechain-types/contracts/Web3PacksV2';
-import { ERC721Mintable } from '../typechain-types/contracts/lib/ERC721Mintable';
-
-import IAlgebraRouterABI from '../build/contracts/contracts/interfaces/IAlgebraRouter.sol/IAlgebraRouter.json';
-import INonfungiblePositionManager from '../build/contracts/contracts/interfaces/INonfungiblePositionManager.sol/INonfungiblePositionManager.json';
-import IBalancerVaultABI from '../build/contracts/contracts/interfaces/IBalancerV2Vault.sol/IBalancerV2Vault.json';
 
 import {
   default as Charged,
@@ -87,18 +82,6 @@ describe('Web3PacksV2', async ()=> {
   let testSigner: Signer;
   let deployerSigner: Signer;
 
-  let IVelodromeRouter;
-  let velodromeRouter: Contract;
-
-  let IAlgebraRouter;
-  let kimRouter: Contract;
-
-  let IBalancerV2Vault;
-  let balancerVault: Contract;
-
-  let IKimManager;
-  let kimManager: Contract;
-
   let chainId;
   let routers;
   let contracts;
@@ -122,18 +105,6 @@ describe('Web3PacksV2', async ()=> {
     testSigner = ethers.Wallet.fromMnemonic(`${process.env.TESTNET_MNEMONIC}`.replace(/_/g, ' '));
     // @ts-ignore
     charged = new Charged({ providers: network.provider, signer: testSigner });
-
-    IVelodromeRouter = new ethers.utils.Interface(globals.velodromeRouterAbi);
-    velodromeRouter = new Contract(routers.velodrome, IVelodromeRouter, deployerSigner);
-
-    IAlgebraRouter = new ethers.utils.Interface(IAlgebraRouterABI.abi);
-    kimRouter = new Contract(routers.kim, IAlgebraRouter, deployerSigner);
-
-    IKimManager = new ethers.utils.Interface(INonfungiblePositionManager.abi);
-    kimManager = new Contract(routers.kimNft, IKimManager, deployerSigner);
-
-    IBalancerV2Vault = new ethers.utils.Interface(IBalancerVaultABI.abi);
-    balancerVault = new Contract(routers.balancer, IBalancerV2Vault, deployerSigner);
 
     Proton = new ethers.Contract(contracts.protonC, protonBAbi, ownerSigner);
   });
