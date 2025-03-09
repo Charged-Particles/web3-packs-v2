@@ -189,9 +189,9 @@ describe('Web3PacksV2', async ()=> {
             packType: 'ECOSYSTEM',
             ethPackPrice,
           });
-          const web3pack = charged.NFT(Proton.address, tokenId);
+          const particle = charged.NFT(Proton.address, tokenId);
 
-          const tokenMass = await web3pack.getMass(token1, 'generic.B');
+          const tokenMass = await particle.getMass(token1, 'generic.B');
           const tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
           expect(tokenAmount).to.be.gt(100);
 
@@ -238,9 +238,9 @@ describe('Web3PacksV2', async ()=> {
             packType: 'ECOSYSTEM',
             ethPackPrice,
           });
-          const web3pack = charged.NFT(Proton.address, tokenId);
+          const particle = charged.NFT(Proton.address, tokenId);
 
-          const tokenMass = await web3pack.getMass(token1, 'generic.B');
+          const tokenMass = await particle.getMass(token1, 'generic.B');
           const tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
           expect(tokenAmount).to.be.gt(100);
 
@@ -290,19 +290,19 @@ describe('Web3PacksV2', async ()=> {
             ethPackPrice,
           });
 
-          const web3pack = charged.NFT(Proton.address, tokenId);
+          const particle = charged.NFT(Proton.address, tokenId);
           const { tokenAddress: lpTokenAddress, tokenId: lpTokenId } = await bundlerContract.getLiquidityToken(tokenId);
 
           // Check Liquidity Type
           let liquidityTokenAmount;
           if (lpTokenId.toBigInt() > 0n) {
             // Check Pack for Liquidity NFT
-            const tokenBonds = await web3pack.getBonds('generic.B');
+            const tokenBonds = await particle.getBonds('generic.B');
             const bondCount = tokenBonds[network.config.chainId ?? '']?.value;
             expect(bondCount).to.eq(1);
           } else {
             // Check Pack for Liquidity Tokens
-            const tokenMass = await web3pack.getMass(lpTokenAddress, 'generic.B');
+            const tokenMass = await particle.getMass(lpTokenAddress, 'generic.B');
             liquidityTokenAmount = tokenMass[network.config.chainId ?? '']?.value;
             expect(liquidityTokenAmount).to.be.gt(100);
           }
@@ -362,19 +362,19 @@ describe('Web3PacksV2', async ()=> {
             ethPackPrice,
           });
 
-          const web3pack = charged.NFT(Proton.address, tokenId);
+          const particle = charged.NFT(Proton.address, tokenId);
           const { tokenAddress: lpTokenAddress, tokenId: lpTokenId } = await bundlerContract.getLiquidityToken(tokenId);
 
           // Check Liquidity Type
           let liquidityTokenAmount;
           if (lpTokenId.toBigInt() > 0n) {
             // Check Pack for Liquidity NFT
-            const tokenBonds = await web3pack.getBonds('generic.B');
+            const tokenBonds = await particle.getBonds('generic.B');
             const bondCount = tokenBonds[network.config.chainId ?? '']?.value;
             expect(bondCount).to.eq(1);
           } else {
             // Check Pack for Liquidity Tokens
-            const tokenMass = await web3pack.getMass(lpTokenAddress, 'generic.B');
+            const tokenMass = await particle.getMass(lpTokenAddress, 'generic.B');
             liquidityTokenAmount = tokenMass[network.config.chainId ?? '']?.value;
             expect(liquidityTokenAmount).to.be.gt(100);
           }
@@ -631,33 +631,33 @@ describe('Web3PacksV2', async ()=> {
           packType: 'ECOSYSTEM',
           ethPackPrice,
         });
-        const web3pack = charged.NFT(Proton.address, tokenId);
+        const particle = charged.NFT(Proton.address, tokenId);
 
-        let tokenMass = await web3pack.getMass(tokenAddresses.ionx, 'generic.B');
+        let tokenMass = await particle.getMass(tokenAddresses.ionx, 'generic.B');
         let tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
         expect(tokenAmount).to.be.gt(100);
 
-        tokenMass = await web3pack.getMass(tokenAddresses.kim, 'generic.B');
+        tokenMass = await particle.getMass(tokenAddresses.kim, 'generic.B');
         tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
         expect(tokenAmount).to.be.gt(100);
 
-        tokenMass = await web3pack.getMass(tokenAddresses.mode, 'generic.B');
+        tokenMass = await particle.getMass(tokenAddresses.mode, 'generic.B');
         tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
         expect(tokenAmount).to.be.gt(100);
 
-        tokenMass = await web3pack.getMass(tokenAddresses.bmx, 'generic.B');
+        tokenMass = await particle.getMass(tokenAddresses.bmx, 'generic.B');
         tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
         expect(tokenAmount).to.be.gt(100);
 
-        tokenMass = await web3pack.getMass(tokenAddresses.icl, 'generic.B');
+        tokenMass = await particle.getMass(tokenAddresses.icl, 'generic.B');
         tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
         expect(tokenAmount).to.be.gt(100);
 
-        tokenMass = await web3pack.getMass(tokenAddresses.smd, 'generic.B');
+        tokenMass = await particle.getMass(tokenAddresses.smd, 'generic.B');
         tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
         expect(tokenAmount).to.be.gt(100);
 
-        tokenMass = await web3pack.getMass(tokenAddresses.wmlt, 'generic.B');
+        tokenMass = await particle.getMass(tokenAddresses.wmlt, 'generic.B');
         tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
         expect(tokenAmount).to.be.gt(100);
 
@@ -701,10 +701,10 @@ describe('Web3PacksV2', async ()=> {
           packType: 'DEFI',
           ethPackPrice,
         });
-        const web3pack = charged.NFT(Proton.address, tokenId);
+        const particle = charged.NFT(Proton.address, tokenId);
 
         // Check Pack for Liquidity NFTs
-        const tokenBonds = await web3pack.getBonds('generic.B');
+        const tokenBonds = await particle.getBonds('generic.B');
         const bondCount = tokenBonds[network.config.chainId ?? '']?.value;
         expect(bondCount).to.eq(7);
 
@@ -744,23 +744,23 @@ describe('Web3PacksV2', async ()=> {
           packType: 'GOVERNANCE',
           ethPackPrice,
         });
-        const web3pack = charged.NFT(Proton.address, tokenId);
+        const particle = charged.NFT(Proton.address, tokenId);
 
         // @ts-ignore
         const bundlerContract = await ethers.getContract('LpWethMode8020');
         const { tokenAdddress: lpTokenAddress } = await bundlerContract.getLiquidityToken();
 
         // Check Pack for Liquidity NFTs
-        const tokenBonds = await web3pack.getBonds('generic.B');
+        const tokenBonds = await particle.getBonds('generic.B');
         const bondCount = tokenBonds[network.config.chainId ?? '']?.value;
         expect(bondCount).to.eq(1);
 
         // Check Pack for Liquidity Tokens
-        let tokenMass = await web3pack.getMass(tokenAddresses.ionx, 'generic.B');
+        let tokenMass = await particle.getMass(tokenAddresses.ionx, 'generic.B');
         let tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
         expect(tokenAmount).to.be.gt(100);
 
-        tokenMass = await web3pack.getMass(lpTokenAddress, 'generic.B');
+        tokenMass = await particle.getMass(lpTokenAddress, 'generic.B');
         tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
         expect(tokenAmount).to.be.gt(100);
 
@@ -800,18 +800,18 @@ describe('Web3PacksV2', async ()=> {
           packType: 'AI',
           ethPackPrice,
         });
-        const web3pack = charged.NFT(Proton.address, tokenId);
+        const particle = charged.NFT(Proton.address, tokenId);
 
         // Check Pack for Tokens
-        let tokenMass = await web3pack.getMass(tokenAddresses.packy, 'generic.B');
+        let tokenMass = await particle.getMass(tokenAddresses.packy, 'generic.B');
         let tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
         expect(tokenAmount).to.be.gt(100);
 
-        tokenMass = await web3pack.getMass(tokenAddresses.cartel, 'generic.B');
+        tokenMass = await particle.getMass(tokenAddresses.cartel, 'generic.B');
         tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
         expect(tokenAmount).to.be.gt(100);
 
-        tokenMass = await web3pack.getMass(tokenAddresses.gambl, 'generic.B');
+        tokenMass = await particle.getMass(tokenAddresses.gambl, 'generic.B');
         tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
         expect(tokenAmount).to.be.gt(100);
 

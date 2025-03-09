@@ -28,8 +28,8 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "../../Web3PacksRouterBase.sol";
 import "../../../interfaces/IWeb3PacksDefs.sol";
-import "../../../interfaces/IPancakeRouter02.sol";
-import "../../../interfaces/IPancakeFactory.sol";
+import "../../../interfaces/mode/IPancakeRouter02.sol";
+import "../../../interfaces/mode/IPancakeFactory.sol";
 
 
 // UniswapV2-like Router
