@@ -60,9 +60,9 @@ contract SSWethKim is IWeb3PacksBundler, AlgebraRouter {
   |__________________________________*/
 
   // NOTE: Call via "staticCall" for Quote
-  function quoteSwap(bool reverse) public payable virtual returns (uint256 amountOut) {
+  function quoteSwap() public payable virtual returns (uint256 amountOut) {
     enterWeth(msg.value);
-    amountOut = swapSingle(10000, reverse);
+    amountOut = swapSingle(10000, false);
   }
 
   function bundle(uint256, address sender)
