@@ -34,13 +34,16 @@ const globals = {
       wbtc: '0xcdd475325d6f564d27247d1dddbb0dac6fa0a5cf',
       stone: '0x80137510979822322193FC997d400D5A6C747bf7',
       smd: '0xFDa619b6d20975be80A10332cD39b9a4b0FAa8BB',
+      packy: '0x99abb182e574dad9e238a529126051f01db380d5',
       cartel: '0x98E0AD23382184338dDcEC0E13685358EF845f30',
+      gambl: '0x6bb4a37643e7613e812a8d1af5e675cc735ea1e2',
     },
   },
 
   router: {
     34443: {
       velodrome: '0x3a63171DD9BebF4D07BC782FECC7eb0b890C2A45',
+      velodromeV2: '0x652e53C6a4FE39B6B30426d9c96376a105C89A95',
       kim: '0xAc48FcF1049668B285f3dC72483DF5Ae2162f7e8',
       kimNft: '0x2e8614625226D26180aDf6530C3b1677d3D7cf10',
       balancer: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
