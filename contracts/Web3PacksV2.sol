@@ -286,6 +286,7 @@ contract Web3PacksV2 is
 
     // Clear Bundles for Pack
     delete _bundlesByPackId[packTokenId];
+    delete _packPriceByPackId[packTokenId];
   }
 
   function _getPackBalances(address tokenAddress, uint256 tokenId) internal returns (TokenAmount[] memory) {
