@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-// SSWethPacky.sol
+// SSWethGambl.sol
 // Copyright (c) 2025 Firma Lux, Inc. <https://charged.fi>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,12 +30,12 @@ import "../../../interfaces/IWeb3PacksBundler.sol";
 /*
   Performs a Single-Sided Swap on Velodrome Exchange using the Velodrome Universal Router
   Token 0 = WETH
-  Token 1 = PACKY
+  Token 1 = GAMBL
  */
-contract SSWethPacky is IWeb3PacksBundler, VelodromeV2Router {
+contract SSWethGambl is IWeb3PacksBundler, VelodromeV2Router {
   address public _mode;
 
-  // Inherit from the Algebra Router
+  // Inherit from the Velodrome Universal Router
   constructor(IWeb3PacksDefs.RouterConfig memory config, address mode) VelodromeV2Router(config) {
     _mode = mode;
   }
@@ -44,12 +44,12 @@ contract SSWethPacky is IWeb3PacksBundler, VelodromeV2Router {
   |          Configuration            |
   |__________________________________*/
 
-  // Token 1 = PACKY on Mode (Kim Exchange)
+  // Token 1 = GAMBL on Mode (Kim Exchange)
   function getToken1() public view override returns (IWeb3PacksDefs.Token memory token1) {
     IWeb3PacksDefs.Token memory token = IWeb3PacksDefs.Token({
       tokenAddress: _token1,
       tokenDecimals: 18,
-      tokenSymbol: "PACKY"
+      tokenSymbol: "GAMBL"
     });
     return token;
   }
@@ -93,7 +93,7 @@ contract SSWethPacky is IWeb3PacksBundler, VelodromeV2Router {
     )
   {
     // Perform Swap
-    amountOut = swapSingle(10000, false); // 100% WETH -> PACKY
+    amountOut = swapSingle(10000, false); // 100% WETH -> GAMBL
 
     // Transfer back to Manager
     tokenAddress = getToken1().tokenAddress;
@@ -112,7 +112,7 @@ contract SSWethPacky is IWeb3PacksBundler, VelodromeV2Router {
   {
     if (sellAll) {
       // Perform Swap
-      swapSingle(10000, true); // 100% PACKY -> WETH
+      swapSingle(10000, true); // 100% GAMBL -> WETH
 
       // Send ETH to Receiver
       ethAmountOut = exitWethAndTransfer(receiver);
