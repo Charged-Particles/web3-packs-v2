@@ -814,13 +814,7 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "bool",
-        "name": "reverse",
-        "type": "bool"
-      }
-    ],
+    "inputs": [],
     "name": "quoteSwap",
     "outputs": [
       {
