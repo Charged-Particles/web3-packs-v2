@@ -4,14 +4,8 @@ import { BigNumber, Contract, Signer } from 'ethers';
 
 import globals from '../js-helpers/globals';
 import { _findNearestValidTick } from './utils';
-
 import { Web3PacksV2, IWeb3PacksDefs } from '../typechain-types/contracts/Web3PacksV2';
-
-import {
-  default as Charged,
-  chargedStateAbi,
-  protonBAbi
-} from "@charged-particles/charged-js-sdk";
+import Charged, { chargedStateAbi, protonBAbi } from "@charged-particles/charged-js-sdk";
 
 interface BundleChunk extends IWeb3PacksDefs.BundleChunkStruct {}
 
@@ -704,7 +698,7 @@ describe('Web3PacksV2', async ()=> {
         // Bundle Pack
         const { tokenId, gasCost } = await _callBundle({
           bundleChunks,
-          packType: 'ECOSYSTEM',
+          packType: 'DEFI',
           ethPackPrice,
         });
         const web3pack = charged.NFT(Proton.address, tokenId);
@@ -739,15 +733,15 @@ describe('Web3PacksV2', async ()=> {
         const preBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
 
         const bundleChunks:IWeb3PacksDefs.BundleChunkStruct[] = [
-          { bundlerId: toBytes32('LP-WETH-IONX'),  percentBasisPoints: 300 },
-          { bundlerId: toBytes32('LP-WETH-MODE'),  percentBasisPoints: 4850 },
+          { bundlerId: toBytes32('SS-WETH-IONX'),  percentBasisPoints: 300 },
+          { bundlerId: toBytes32('SS-WETH-MODE'),  percentBasisPoints: 4850 },
           { bundlerId: toBytes32('LP-WETH-MODE-8020'),  percentBasisPoints: 4850 },
         ];
 
         // Bundle Pack
         const { tokenId, gasCost } = await _callBundle({
           bundleChunks,
-          packType: 'ECOSYSTEM',
+          packType: 'GOVERNANCE',
           ethPackPrice,
         });
         const web3pack = charged.NFT(Proton.address, tokenId);
@@ -813,9 +807,13 @@ describe('Web3PacksV2', async ()=> {
         let tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
         expect(tokenAmount).to.be.gt(100);
 
-        // tokenMass = await web3pack.getMass(lpTokenAddress, 'generic.B');
-        // tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
-        // expect(tokenAmount).to.be.gt(100);
+        tokenMass = await web3pack.getMass(tokenAddresses.cartel, 'generic.B');
+        tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
+        expect(tokenAmount).to.be.gt(100);
+
+        tokenMass = await web3pack.getMass(tokenAddresses.gambl, 'generic.B');
+        tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
+        expect(tokenAmount).to.be.gt(100);
 
         // Confirm ETH Balance
         const expectedBalance = preBalance - ethPackPrice.toBigInt() - globals.protocolFee.toBigInt() - gasCost.toBigInt();

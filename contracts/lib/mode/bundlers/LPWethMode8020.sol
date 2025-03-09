@@ -29,12 +29,12 @@ import "../routers/BalancerRouter.sol";
 import "../../../interfaces/IWeb3PacksBundler.sol";
 
 /*
-  Creates a Liquidity Position on Kim Exchange using the Algebra Router
-  Token 0 = WETH 50%
-  Token 1 = MODE 50%
+  Creates a Liquidity Position on Balancer Exchange using the Balancer Router
+  Token 0 = WETH 20%
+  Token 1 = MODE 80%
  */
 contract LPWethMode8020 is IWeb3PacksBundler, BalancerRouter {
-  // Inherit from the Algebra Router
+  // Inherit from the Balancer Router
   constructor(IWeb3PacksDefs.RouterConfig memory config) BalancerRouter(config) {}
 
   /***********************************|
