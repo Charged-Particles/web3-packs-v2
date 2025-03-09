@@ -99,7 +99,7 @@ describe('Web3PacksV2', async ()=> {
   let chainId;
   let routers;
   let contracts;
-  let tokenAddress;
+  let tokenAddresses;
 
   beforeEach(async () => {
     const { treasury: treasuryAccount, deployer: deployerAccount } = await getNamedAccounts();
@@ -109,7 +109,7 @@ describe('Web3PacksV2', async ()=> {
     chainId = 34443;
     routers = globals.router[chainId];
     contracts = globals.contracts[chainId];
-    tokenAddress = globals.tokenAddress[chainId];
+    tokenAddresses = globals.tokenAddress[chainId];
 
     // @ts-ignore
     web3packs = await ethers.getContract('Web3PacksV2') as Web3PacksV2;
@@ -428,17 +428,128 @@ describe('Web3PacksV2', async ()=> {
       });
     }
   });
+
   describe('Web3Packs Bundler Public Routines', () => {
-    it('Allows external checks on Balance/Address of Token 0');
-    it('Allows external checks on Balance/Address of Token 1');
-    it('Allows external checks on Liquidity Token');
-    it('Allows external Quotes for Primary Token for Swaps');
+    it('Allows external checks on Balance/Address of Tokens', () => {
+      (async () => {
+        const ethPackPrice = ethers.utils.parseUnits('0.1', 18);
+        const bundler = { bundlerId: 'LP-IUSD-USDC', contract: 'LPIusdUsdc' };
+
+        const bundleChunks:IWeb3PacksDefs.BundleChunkStruct[] = [
+          {bundlerId: toBytes32(bundler.bundlerId), percentBasisPoints: 10000},
+        ];
+
+        // Bundle Pack
+        await _callBundle({
+          bundleChunks,
+          packType: 'DEFI',
+          ethPackPrice,
+        });
+
+        // @ts-ignore
+        const bundlerContract = await ethers.getContract(bundler.contract);
+        const token0 = (await bundlerContract.getToken0())['tokenAddress'];
+        const token1 = (await bundlerContract.getToken1())['tokenAddress'];
+        const tokenBalance0 = await bundlerContract.getBalanceToken0();
+        const tokenBalance1 = await bundlerContract.getBalanceToken1();
+
+        expect(token0).to.eq(tokenAddresses.iusd);
+        expect(token1).to.eq(tokenAddresses.usdc);
+        expect(tokenBalance0).to.gte(1);
+        expect(tokenBalance1).to.gte(1);
+      })();
+    });
+
+    it('Allows external checks on Liquidity Token', () => {
+      (async () => {
+        const bundler = { bundlerId: 'SS-WETH-IONX', contract: 'SSWethIonx' };
+
+        // @ts-ignore
+        const bundlerContract = await ethers.getContract(bundler.contract);
+        const { tokenAdddress, tokenId } = await bundlerContract.getLiquidityToken();
+        expect(tokenAdddress).to.eq(tokenAddresses.ionx);
+        expect(tokenId).to.eq(0);
+      })();
+    });
+
+    it('Allows external Quotes for Primary Token for Swaps', () => {
+      (async () => {
+        const ethPackPrice = ethers.utils.parseUnits('0.1', 18);
+        const bundler = { bundlerId: 'SS-WETH-IONX', contract: 'SSWethIonx' };
+
+        // @ts-ignore
+        const bundlerContract = await ethers.getContract(bundler.contract);
+        const amountOut = await bundlerContract.quoteSwap({ value: ethPackPrice });
+        expect(amountOut).to.be.gte(1);
+      })();
+    });
   });
 
   describe('Web3Packs Public Routines', () => {
-    it('Collects Fees properly');
-    it('Allows external checks on Current Pack Balances');
-    it('Allows external checks on Original Pack Price');
+    it('Collects Fees properly', () => {
+      (async () => {
+        const ethPackPrice = ethers.utils.parseUnits('0.1', 18);
+        const bundler = { bundlerId: 'SS-WETH-IONX', contract: 'SSWethIonx' };
+
+        const bundleChunks:IWeb3PacksDefs.BundleChunkStruct[] = [
+          {bundlerId: toBytes32(bundler.bundlerId), percentBasisPoints: 10000},
+        ];
+
+        const treasuryBalanceBefore = (await ethers.provider.getBalance(treasury)).toBigInt();
+
+        // Bundle Pack
+        await _callBundle({
+          bundleChunks,
+          packType: 'ECOSYSTEM',
+          ethPackPrice,
+        });
+
+        const treasuryBalanceAfter = (await ethers.provider.getBalance(treasury)).toBigInt();
+        expect(treasuryBalanceAfter - treasuryBalanceBefore).to.be.gte(globals.protocolFee);
+      })();
+    });
+
+    it('Allows external checks on Current Pack Balances', async () => {
+      const ethPackPrice = ethers.utils.parseUnits('0.1', 18);
+      const bundler = { bundlerId: 'SS-WETH-IONX', contract: 'SSWethIonx' };
+
+      const bundleChunks:IWeb3PacksDefs.BundleChunkStruct[] = [
+        {bundlerId: toBytes32(bundler.bundlerId), percentBasisPoints: 10000},
+      ];
+
+      // Bundle Pack
+      const { tokenId } = await _callBundle({
+        bundleChunks,
+        packType: 'ECOSYSTEM',
+        ethPackPrice,
+      });
+
+      const { tokenAddress, balance, nftTokenId } = (await web3packs.callStatic.getPackBalances(contracts.protonC, tokenId))[0];
+
+      expect(tokenAddress).to.eq(tokenAddresses.ionx);
+      expect(balance).to.be.gte(1);
+      expect(nftTokenId).to.eq(0);
+    });
+
+    it('Allows external checks on Original Pack Price', async () => {
+      const ethPackPrice = ethers.utils.parseUnits('0.1', 18);
+      const bundler = { bundlerId: 'SS-WETH-IONX', contract: 'SSWethIonx' };
+
+      const bundleChunks:IWeb3PacksDefs.BundleChunkStruct[] = [
+        {bundlerId: toBytes32(bundler.bundlerId), percentBasisPoints: 10000},
+      ];
+
+      // Bundle Pack
+      const { tokenId } = await _callBundle({
+        bundleChunks,
+        packType: 'DEFI',
+        ethPackPrice,
+      });
+
+      // @ts-ignore
+      const originalPrice = await web3packs.callStatic.getPackPriceEth(tokenId);
+      expect(originalPrice).to.gte(ethPackPrice);
+    });
   });
 
   describe('Web3Packs Referrals', () => {
