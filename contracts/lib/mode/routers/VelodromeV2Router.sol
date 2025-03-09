@@ -28,7 +28,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "../../Web3PacksRouterBase.sol";
 import "../../../interfaces/IWeb3PacksDefs.sol";
-import {IUniversalRouter} from "../../../interfaces/IVelodromeUniversalRouter.sol";
+import {IUniversalRouter} from "../../../interfaces/mode/IVelodromeUniversalRouter.sol";
 import {Commands} from "./lib/VelodromeV2Commands.sol";
 import {Constants} from "./lib/VelodromeV2Constants.sol";
 
