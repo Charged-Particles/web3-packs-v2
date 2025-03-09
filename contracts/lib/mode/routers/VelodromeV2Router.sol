@@ -69,11 +69,8 @@ abstract contract VelodromeV2Router is Web3PacksRouterBase {
     onlyManagerOrSelf
     returns (uint256 amountOut)
   {
-    IWeb3PacksDefs.Route[] memory tokens = getTokenPath(false);
-    VRoute[] memory routes = new VRoute[](tokens.length);
-    for (uint i; i < tokens.length; i++) {
-      routes[i] = VRoute({from: tokens[i].token0, to: tokens[i].token1, stable: tokens[i].stable});
-    }
+    VRoute[] memory routes = new VRoute[](1);
+    routes[0] = VRoute({from: token0, to: token1, stable: false});
     amountOut = _performSwap(percentOfAmount, token0, token1, routes);
   }
 
