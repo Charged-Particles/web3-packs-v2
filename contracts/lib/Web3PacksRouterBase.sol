@@ -145,11 +145,11 @@ abstract contract Web3PacksRouterBase is
     return IERC20(getToken1().tokenAddress).balanceOf(address(this));
   }
 
-  function enterWeth(uint256 amount) public virtual {
+  function enterWeth(uint256 amount) internal virtual {
     IWETH(_weth).deposit{value: amount}();
   }
 
-  function exitWethAndTransfer(address payable receiver) public virtual returns (uint256 ethAmount) {
+  function exitWethAndTransfer(address payable receiver) internal virtual returns (uint256 ethAmount) {
     uint256 wethBalance = getBalanceWeth();
     if (wethBalance > 0) {
       IWETH(_weth).withdraw(wethBalance);
@@ -160,7 +160,7 @@ abstract contract Web3PacksRouterBase is
     }
   }
 
-  function refundUnusedTokens(address sender) public virtual {
+  function refundUnusedTokens(address sender) internal virtual {
     // Refund Unused Amounts
     uint256 unusedAmount0 = getBalanceToken0();
     if (unusedAmount0 > 0) {
@@ -200,6 +200,10 @@ abstract contract Web3PacksRouterBase is
 
   function setManager(address manager) external virtual onlyOwner {
     _manager = manager;
+  }
+
+  function setSlippage(uint256 slippage) external virtual onlyOwner {
+    _slippage = slippage;
   }
 
   function setTickLower(int24 tickLower) external virtual onlyOwner {

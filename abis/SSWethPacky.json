@@ -62,6 +62,11 @@
         "internalType": "struct IWeb3PacksDefs.RouterConfig",
         "name": "config",
         "type": "tuple"
+      },
+      {
+        "internalType": "address",
+        "name": "mode",
+        "type": "address"
       }
     ],
     "stateMutability": "nonpayable",
@@ -326,6 +331,19 @@
   },
   {
     "inputs": [],
+    "name": "_mode",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "_poolId",
     "outputs": [
       {
@@ -483,7 +501,7 @@
           }
         ],
         "internalType": "struct IWeb3PacksDefs.LiquidityPosition",
-        "name": "liquidityPosition",
+        "name": "",
         "type": "tuple"
       }
     ],
@@ -835,7 +853,7 @@
           }
         ],
         "internalType": "struct IWeb3PacksDefs.LiquidityPosition",
-        "name": "liquidityPosition",
+        "name": "",
         "type": "tuple"
       }
     ],
