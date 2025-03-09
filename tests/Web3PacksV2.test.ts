@@ -547,30 +547,101 @@ describe('Web3PacksV2', async ()=> {
       });
 
       // @ts-ignore
-      const originalPrice = await web3packs.callStatic.getPackPriceEth(tokenId);
+      const originalPrice = await web3packs.getPackPriceEth(tokenId);
       expect(originalPrice).to.gte(ethPackPrice);
     });
   });
 
   describe('Web3Packs Referrals', () => {
-    it('Allows external checks on Referral Rewards');
-    it('Allows external Claim on Rewards from Referrals');
-    it('Properly Accounts for 1 Referrer');
-    it('Properly Accounts for 2 Referrers');
-    it('Properly Accounts for 3 Referrers');
+    it('Properly Accounts for 1 Referrer', async () => {
+      const { user1 } = await getNamedAccounts();
+      const ethPackPrice = ethers.utils.parseUnits('0.1', 18);
+      const bundler = { bundlerId: 'SS-WETH-IONX', contract: 'SSWethIonx' };
+
+      const bundleChunks:IWeb3PacksDefs.BundleChunkStruct[] = [
+        {bundlerId: toBytes32(bundler.bundlerId), percentBasisPoints: 10000},
+      ];
+
+      const referrals = [ user1 ];
+      const expectedRewards1 = (ethPackPrice.toBigInt() * 330n) / 10000n;
+
+      // Bundle Pack
+      await _callBundle({
+        bundleChunks,
+        referrals,
+        packType: 'DEFI',
+        ethPackPrice,
+      });
+
+      const referralRewards = await web3packs.getReferralRewardsOf(user1);
+      expect(referralRewards).to.gte(expectedRewards1);
+    });
+
+    it('Properly Accounts for 2 Referrers', async () => {
+      const { user1, user2 } = await getNamedAccounts();
+      const ethPackPrice = ethers.utils.parseUnits('0.1', 18);
+      const bundler = { bundlerId: 'SS-WETH-IONX', contract: 'SSWethIonx' };
+
+      const bundleChunks:IWeb3PacksDefs.BundleChunkStruct[] = [
+        {bundlerId: toBytes32(bundler.bundlerId), percentBasisPoints: 10000},
+      ];
+
+      const referrals = [ user1, user2 ];
+      const expectedRewards1 = (ethPackPrice.toBigInt() * 30n) / 10000n;
+      const expectedRewards2 = (ethPackPrice.toBigInt() * 300n) / 10000n;
+
+      // Bundle Pack
+      await _callBundle({
+        bundleChunks,
+        referrals,
+        packType: 'DEFI',
+        ethPackPrice,
+      });
+
+      const referralRewards1 = await web3packs.getReferralRewardsOf(user1);
+      expect(referralRewards1).to.gte(expectedRewards1);
+
+      const referralRewards2 = await web3packs.getReferralRewardsOf(user2);
+      expect(referralRewards2).to.gte(expectedRewards2);
+    });
+
+    it('Properly Accounts for 3 Referrers', async () => {
+      const { user1, user2, user3 } = await getNamedAccounts();
+      const ethPackPrice = ethers.utils.parseUnits('0.1', 18);
+      const bundler = { bundlerId: 'SS-WETH-IONX', contract: 'SSWethIonx' };
+
+      const bundleChunks:IWeb3PacksDefs.BundleChunkStruct[] = [
+        {bundlerId: toBytes32(bundler.bundlerId), percentBasisPoints: 10000},
+      ];
+
+      const referrals = [ user1, user2, user3 ];
+      const expectedRewards1 = (ethPackPrice.toBigInt() * 30n) / 10000n;
+      const expectedRewards2 = (ethPackPrice.toBigInt() * 30n) / 10000n;
+      const expectedRewards3 = (ethPackPrice.toBigInt() * 270n) / 10000n;
+
+      // Bundle Pack
+      await _callBundle({
+        bundleChunks,
+        referrals,
+        packType: 'DEFI',
+        ethPackPrice,
+      });
+
+      const referralRewards1 = await web3packs.getReferralRewardsOf(user1);
+      expect(referralRewards1).to.gte(expectedRewards1);
+
+      const referralRewards2 = await web3packs.getReferralRewardsOf(user2);
+      expect(referralRewards2).to.gte(expectedRewards2);
+
+      const referralRewards3 = await web3packs.getReferralRewardsOf(user3);
+      expect(referralRewards3).to.gte(expectedRewards3);
+    });
   });
 
   describe('Web3Packs Custom Packs', () => {
-    it('Bundles an Ecosystem Pack');
-    it('Bundles a Defi Pack');
-    it('Bundles a Governance Pack');
-    it('Bundles an AI Pack');
-  });
-
-  describe('Web3Packs Error Tests', () => {
-    it('Bundles an Ecosystem Pack');
-    it('Bundles a Defi Pack');
-    it('Bundles a Governance Pack');
-    it('Bundles an AI Pack');
+    it('Bundles/Unbundles an Ecosystem Pack');
+    it('Bundles/Unbundles a Defi Pack');
+    it('Bundles/Unbundles a Governance Pack');
+    it('Bundles/Unbundles an AI Pack');
   });
 });
