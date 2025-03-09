@@ -56,6 +56,8 @@ const singleSidedBundlers = [
   { bundlerId: 'SS-WETH-SMD',  contract: 'SSWethSmd' },
   { bundlerId: 'SS-WETH-WMLT', contract: 'SSWethWmlt' },
   { bundlerId: 'SS-WETH-PACKY', contract: 'SSWethPacky' },
+  { bundlerId: 'SS-WETH-CARTEL', contract: 'SSWethCartel' },
+  { bundlerId: 'SS-WETH-GAMBL', contract: 'SSWethGambl' },
 ];
 
 const liqPosBundlers = [
@@ -822,7 +824,9 @@ describe('Web3PacksV2', async ()=> {
         const preBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
 
         const bundleChunks:IWeb3PacksDefs.BundleChunkStruct[] = [
-          { bundlerId: toBytes32('SS-WETH-PACKY'),  percentBasisPoints: 10000 },
+          { bundlerId: toBytes32('SS-WETH-PACKY'),  percentBasisPoints: 3400 },
+          { bundlerId: toBytes32('SS-WETH-CARTEL'), percentBasisPoints: 3300 },
+          { bundlerId: toBytes32('SS-WETH-GAMBL'),  percentBasisPoints: 3300 },
         ];
 
         // Bundle Pack
