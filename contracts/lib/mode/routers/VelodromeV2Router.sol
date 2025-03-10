@@ -45,6 +45,12 @@ abstract contract VelodromeV2Router is Web3PacksRouterBase {
   // Pass constructor data
   constructor(IWeb3PacksDefs.RouterConfig memory config) Web3PacksRouterBase(config) {}
 
+  // NOTE: Call via "staticCall" for Quote
+  function quoteSwap() public payable virtual returns (uint256 amountOut) {
+    enterWeth(msg.value);
+    amountOut = swapSingle(10000, false);
+  }
+
   function swapSingle(uint256 percentOfAmount, bool reverse)
     public
     virtual
