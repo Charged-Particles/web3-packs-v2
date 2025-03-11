@@ -29,6 +29,7 @@ import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "../../Web3PacksRouterBase.sol";
 import "../../../interfaces/IWeb3PacksDefs.sol";
 import {IAsset, IBalancerV2Vault} from "../../../interfaces/mode/IBalancerV2Vault.sol";
+import {IBalancerQueries} from "../../../interfaces/mode/IBalancerQueries.sol";
 
 abstract contract BalancerRouter is Web3PacksRouterBase {
   // Pass constructor data

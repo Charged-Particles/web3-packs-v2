@@ -106,7 +106,7 @@ abstract contract VelodromeV1Router is Web3PacksRouterBase {
     );
 
     // Deposit the LP tokens into the Web3Packs NFT
-    address lpTokenAddress = _getVelodromePairAddress(token0.tokenAddress, token1.tokenAddress);
+    address lpTokenAddress = _getVelodromePairAddress();
     lpTokenId = uint256(uint160(lpTokenAddress));
   }
 
@@ -130,7 +130,7 @@ abstract contract VelodromeV1Router is Web3PacksRouterBase {
   {
     IWeb3PacksDefs.Token memory token0 = getToken0();
     IWeb3PacksDefs.Token memory token1 = getToken1();
-    address lpTokenAddress = _getVelodromePairAddress(token0.tokenAddress, token1.tokenAddress);
+    address lpTokenAddress = _getVelodromePairAddress();
 
     TransferHelper.safeApprove(
       lpTokenAddress,
@@ -171,7 +171,9 @@ abstract contract VelodromeV1Router is Web3PacksRouterBase {
     }
   }
 
-  function _getVelodromePairAddress(address token0, address token1) internal view returns (address) {
-    return IVelodrome(_liquidityRouter).poolFor(token0, token1, false);
+  function _getVelodromePairAddress() internal view returns (address) {
+    IWeb3PacksDefs.Token memory token0 = getToken0();
+    IWeb3PacksDefs.Token memory token1 = getToken1();
+    return IVelodrome(_liquidityRouter).poolFor(token0.tokenAddress, token1.tokenAddress, false);
   }
 }
