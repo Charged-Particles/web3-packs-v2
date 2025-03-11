@@ -75,12 +75,6 @@ contract SSWethGambl is IWeb3PacksBundler, VelodromeV2Router {
   |          Standard Code            |
   |__________________________________*/
 
-  // NOTE: Call via "staticCall" for Quote
-  function quoteSwap() public payable virtual returns (uint256 amountOut) {
-    enterWeth(msg.value);
-    amountOut = swapSingle(10000, false);
-  }
-
   function bundle(uint256, address sender)
     payable
     external

@@ -27,6 +27,8 @@ import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "../routers/VelodromeV1Router.sol";
 import "../../../interfaces/IWeb3PacksBundler.sol";
 import "../../../interfaces/mode/IVelodrome.sol";
+import "../../../interfaces/mode/IVelodromeV1Quoter.sol";
+import "hardhat/console.sol";
 
 /*
   Performs a Single-Sided Swap on Velodrome Exchange using the Velodrome V1 Router
@@ -79,12 +81,6 @@ contract SSWethBmx is IWeb3PacksBundler, VelodromeV1Router {
   /***********************************|
   |          Standard Code            |
   |__________________________________*/
-
-  // NOTE: Call via "staticCall" for Quote
-  function quoteSwap() public payable virtual returns (uint256 amountOut) {
-    enterWeth(msg.value);
-    amountOut = swapSingle(10000, false);
-  }
 
   function bundle(uint256, address sender)
     payable
