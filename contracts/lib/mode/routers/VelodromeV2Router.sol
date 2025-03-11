@@ -28,9 +28,11 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "../../Web3PacksRouterBase.sol";
 import "../../../interfaces/IWeb3PacksDefs.sol";
+import "../../../interfaces/mode/IVelodrome.sol";
 import {IUniversalRouter} from "../../../interfaces/mode/IVelodromeUniversalRouter.sol";
 import {Commands} from "./lib/VelodromeV2Commands.sol";
 import {Constants} from "./lib/VelodromeV2Constants.sol";
+import "hardhat/console.sol";
 
 // REF: https://github.com/velodrome-finance/universal-router/blob/main/test/foundry-tests/v2/UniswapV2MultiHop.t.sol#L68
 
@@ -44,12 +46,6 @@ abstract contract VelodromeV2Router is Web3PacksRouterBase {
 
   // Pass constructor data
   constructor(IWeb3PacksDefs.RouterConfig memory config) Web3PacksRouterBase(config) {}
-
-  // NOTE: Call via "staticCall" for Quote
-  function quoteSwap() public payable virtual returns (uint256 amountOut) {
-    enterWeth(msg.value);
-    amountOut = swapSingle(10000, false);
-  }
 
   function swapSingle(uint256 percentOfAmount, bool reverse)
     public

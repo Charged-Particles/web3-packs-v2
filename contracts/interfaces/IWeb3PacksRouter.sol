@@ -36,9 +36,6 @@ interface IWeb3PacksRouter is IWeb3PacksDefs {
   function getBalanceToken1() external returns (uint256 balanceToken1);
   function getBalanceWeth() external returns (uint256 balanceWeth);
 
-  // NOTE: Call via "staticCall" for Quote
-  function quoteSwap() external payable returns (uint256 amountOut);
-
   function swapSingle(uint256 percentOfAmount, bool reverse)
     external
     returns (uint256 amountOut);

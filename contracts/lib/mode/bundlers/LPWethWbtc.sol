@@ -46,7 +46,7 @@ contract LPWethWbtc is IWeb3PacksBundler, AlgebraRouter {
   function getToken1() public view override returns (IWeb3PacksDefs.Token memory token1) {
     IWeb3PacksDefs.Token memory token = IWeb3PacksDefs.Token({
       tokenAddress: _token1,
-      tokenDecimals: 18,
+      tokenDecimals: 8,
       tokenSymbol: "WBTC"
     });
     return token;

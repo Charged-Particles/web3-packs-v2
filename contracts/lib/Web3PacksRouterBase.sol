@@ -45,6 +45,7 @@ abstract contract Web3PacksRouterBase is
   address public _token0;
   address public _token1;
 
+  address public _swapQuoter;
   address public _swapRouter;
   address public _liquidityRouter;
   bytes32 public _poolId;
@@ -64,6 +65,7 @@ abstract contract Web3PacksRouterBase is
     _token0 = config.token0;
     _token1 = config.token1;
     _manager = config.manager;
+    _swapQuoter = config.swapQuoter;
     _swapRouter = config.swapRouter;
     _liquidityRouter = config.liquidityRouter;
     _poolId = config.poolId;

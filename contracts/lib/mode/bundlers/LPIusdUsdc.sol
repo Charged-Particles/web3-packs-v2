@@ -70,22 +70,6 @@ contract LPIusdUsdc is IWeb3PacksBundler, AlgebraRouter {
   |          Standard Code            |
   |__________________________________*/
 
-  // NOTE: Call via "staticCall" for Quote
-  function quoteSwapToken0(bool reverse) public payable virtual returns (uint256 amountOut) {
-    enterWeth(msg.value);
-    amountOut = reverse
-      ? swapCustom(10000, getToken0().tokenAddress, _weth)
-      : swapCustom(10000, _weth, getToken0().tokenAddress);
-  }
-
-  // NOTE: Call via "staticCall" for Quote
-  function quoteSwapToken1(bool reverse) public payable virtual returns (uint256 amountOut) {
-    enterWeth(msg.value);
-    amountOut = reverse
-      ? swapCustom(10000, getToken1().tokenAddress, _weth)
-      : swapCustom(10000, _weth, getToken1().tokenAddress);
-  }
-
   function bundle(uint256 packTokenId, address sender)
     payable
     external

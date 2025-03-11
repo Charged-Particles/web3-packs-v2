@@ -29,6 +29,7 @@ import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "../../Web3PacksRouterBase.sol";
 import "../../../interfaces/IWeb3PacksDefs.sol";
 import "../../../interfaces/mode/IAlgebraRouter.sol";
+import "../../../interfaces/mode/IAlgebraQuoter.sol";
 import "../../../interfaces/mode/INonfungiblePositionManager.sol";
 
 
@@ -36,12 +37,6 @@ import "../../../interfaces/mode/INonfungiblePositionManager.sol";
 abstract contract AlgebraRouter is Web3PacksRouterBase {
   // Pass constructor data
   constructor(IWeb3PacksDefs.RouterConfig memory config) Web3PacksRouterBase(config) {}
-
-  // NOTE: Call via "staticCall" for Quote
-  function quoteSwap() public payable virtual returns (uint256 amountOut) {
-    enterWeth(msg.value);
-    amountOut = swapSingle(10000, false);
-  }
 
   function swapSingle(uint256 percentOfAmount, bool reverse)
     public

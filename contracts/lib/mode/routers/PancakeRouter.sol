@@ -37,12 +37,6 @@ abstract contract PancakeRouter is Web3PacksRouterBase {
   // Pass constructor data
   constructor(IWeb3PacksDefs.RouterConfig memory config) Web3PacksRouterBase(config) {}
 
-  // NOTE: Call via "staticCall" for Quote
-  function quoteSwap() public payable virtual returns (uint256 amountOut) {
-    enterWeth(msg.value);
-    amountOut = swapSingle(10000, false);
-  }
-
   function swapSingle(uint256 percentOfAmount, bool reverse)
     public
     virtual
@@ -102,7 +96,7 @@ abstract contract PancakeRouter is Web3PacksRouterBase {
     );
 
     // Deposit the LP tokens into the Web3Packs NFT
-    address lpTokenAddress = _getPancakePairAddress(token0.tokenAddress, token1.tokenAddress);
+    address lpTokenAddress = _getPancakePairAddress();
     lpTokenId = uint256(uint160(lpTokenAddress));
   }
 
@@ -126,7 +120,7 @@ abstract contract PancakeRouter is Web3PacksRouterBase {
   {
     IWeb3PacksDefs.Token memory token0 = getToken0();
     IWeb3PacksDefs.Token memory token1 = getToken1();
-    address lpTokenAddress = _getPancakePairAddress(token0.tokenAddress, token1.tokenAddress);
+    address lpTokenAddress = _getPancakePairAddress();
 
     TransferHelper.safeApprove(
       lpTokenAddress,
@@ -174,8 +168,10 @@ abstract contract PancakeRouter is Web3PacksRouterBase {
     return IPancakeRouter02(_liquidityRouter).factory();
   }
 
-  function _getPancakePairAddress(address token0, address token1) internal view returns (address) {
+  function _getPancakePairAddress() internal view returns (address) {
+    IWeb3PacksDefs.Token memory token0 = getToken0();
+    IWeb3PacksDefs.Token memory token1 = getToken1();
     IPancakeFactory _factory = IPancakeFactory(_getPancakeFactory());
-    return _factory.getPair(token0, token1);
+    return _factory.getPair(token0.tokenAddress, token1.tokenAddress);
   }
 }

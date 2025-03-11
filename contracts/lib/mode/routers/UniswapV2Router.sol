@@ -36,12 +36,6 @@ abstract contract UniswapV2Router is Web3PacksRouterBase {
   // Pass constructor data
   constructor(IWeb3PacksDefs.RouterConfig memory config) Web3PacksRouterBase(config) {}
 
-  // NOTE: Call via "staticCall" for Quote
-  function quoteSwap() public payable virtual returns (uint256 amountOut) {
-    enterWeth(msg.value);
-    amountOut = swapSingle(10000, false);
-  }
-
   function swapSingle(uint256 percentOfAmount, bool reverse)
     public
     virtual
@@ -101,7 +95,7 @@ abstract contract UniswapV2Router is Web3PacksRouterBase {
     );
 
     // Deposit the LP tokens into the Web3Packs NFT
-    address lpTokenAddress = _getUniswapV2PairAddress(token0.tokenAddress, token1.tokenAddress);
+    address lpTokenAddress = _getUniswapV2PairAddress();
     lpTokenId = uint256(uint160(lpTokenAddress));
   }
 
@@ -126,7 +120,7 @@ abstract contract UniswapV2Router is Web3PacksRouterBase {
     IWeb3PacksDefs.Token memory token0 = getToken0();
     IWeb3PacksDefs.Token memory token1 = getToken1();
 
-    address lpTokenAddress = _getUniswapV2PairAddress(token0.tokenAddress, token1.tokenAddress);
+    address lpTokenAddress = _getUniswapV2PairAddress();
     TransferHelper.safeApprove(
       lpTokenAddress,
       _liquidityRouter,
@@ -173,8 +167,10 @@ abstract contract UniswapV2Router is Web3PacksRouterBase {
     return IUniswapV2Router02(_liquidityRouter).factory();
   }
 
-  function _getUniswapV2PairAddress(address token0, address token1) internal view returns (address) {
+  function _getUniswapV2PairAddress() internal view returns (address) {
+    IWeb3PacksDefs.Token memory token0 = getToken0();
+    IWeb3PacksDefs.Token memory token1 = getToken1();
     IUniswapV2Factory _factory = IUniswapV2Factory(_getUniswapV2Factory());
-    return _factory.getPair(token0, token1);
+    return _factory.getPair(token0.tokenAddress, token1.tokenAddress);
   }
 }
