@@ -479,10 +479,11 @@ describe('Web3PacksV2', async ()=> {
 
     it('Allows external checks on Current Pack Balances', async () => {
       const ethPackPrice = ethers.utils.parseUnits('0.1', 18);
-      const bundler = { bundlerId: 'SS-WETH-IONX', contract: 'SSWethIonx' };
 
       const bundleChunks:IWeb3PacksDefs.BundleChunkStruct[] = [
-        {bundlerId: toBytes32(bundler.bundlerId), percentBasisPoints: 10000},
+        {bundlerId: toBytes32('SS-WETH-IONX'), percentBasisPoints: 3400},
+        {bundlerId: toBytes32('SS-WETH-MODE'), percentBasisPoints: 3300},
+        {bundlerId: toBytes32('SS-WETH-SMD'),  percentBasisPoints: 3300},
       ];
 
       // Bundle Pack
@@ -492,11 +493,22 @@ describe('Web3PacksV2', async ()=> {
         ethPackPrice,
       });
 
-      const { tokenAddress, balance, nftTokenId } = (await web3packs.callStatic.getPackBalances(contracts.protonC, tokenId))[0];
+      const balances = (await web3packs.callStatic.getPackBalances(contracts.protonC, tokenId));
 
-      expect(tokenAddress).to.eq(tokenAddresses.ionx);
-      expect(balance).to.be.gte(1);
-      expect(nftTokenId).to.eq(0);
+      // IONX
+      expect(balances[0].tokenAddress).to.eq(tokenAddresses.ionx);
+      expect(balances[0].balance).to.be.gte(1);
+      expect(balances[0].nftTokenId).to.eq(0);
+
+      // MODE
+      expect(balances[1].tokenAddress).to.eq(tokenAddresses.mode);
+      expect(balances[1].balance).to.be.gte(1);
+      expect(balances[1].nftTokenId).to.eq(0);
+
+      // SMD
+      expect(balances[2].tokenAddress).to.eq(tokenAddresses.smd);
+      expect(balances[2].balance).to.be.gte(1);
+      expect(balances[2].nftTokenId).to.eq(0);
     });
 
     it('Allows external checks on Original Pack Price', async () => {
