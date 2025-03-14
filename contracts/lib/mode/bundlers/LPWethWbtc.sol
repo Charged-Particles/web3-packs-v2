@@ -73,9 +73,10 @@ contract LPWethWbtc is IWeb3PacksBundler, AlgebraRouter {
     )
   {
     // Perform Swap
-    swapSingle(5000, false); // 50% WETH -> WBTC
+    swapSingle(5000, false); // 50% token0 -> token1
 
     // Deposit Liquidity
+    (uint256 amount0, uint256 amount1, , ) = getLiquidityAmounts();
     (uint256 lpTokenId, uint256 liquidity, , ) = createLiquidityPosition(false);
     nftTokenId = lpTokenId;
     amountOut = liquidity;
@@ -92,7 +93,14 @@ contract LPWethWbtc is IWeb3PacksBundler, AlgebraRouter {
     });
 
     // Refund Unused Amounts
-    refundUnusedTokens(sender);
+    (uint256 unusedAmount0, uint256 unusedAmount1) = refundUnusedTokens(sender);
+    emit BundledTokenLP(
+      getToken0().tokenAddress,
+      getToken1().tokenAddress,
+      amount0 - unusedAmount0,
+      amount1 - unusedAmount1,
+      liquidity
+    );
   }
 
   function unbundle(address payable receiver, uint256 packTokenId, bool sellAll)
@@ -109,7 +117,7 @@ contract LPWethWbtc is IWeb3PacksBundler, AlgebraRouter {
     // Perform Swap
     if (sellAll) {
       // Swap Assets back to WETH
-      swapSingle(10000, true); // 100% WBTC -> WETH
+      swapSingle(10000, true); // 100% token1 -> token0
       ethAmountOut = exitWethAndTransfer(receiver);
     } else {
       // Transfer Assets to Receiver

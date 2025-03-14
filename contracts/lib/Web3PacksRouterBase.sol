@@ -45,7 +45,6 @@ abstract contract Web3PacksRouterBase is
   address public _token0;
   address public _token1;
 
-  address public _swapQuoter;
   address public _swapRouter;
   address public _liquidityRouter;
   bytes32 public _poolId;
@@ -65,7 +64,6 @@ abstract contract Web3PacksRouterBase is
     _token0 = config.token0;
     _token1 = config.token1;
     _manager = config.manager;
-    _swapQuoter = config.swapQuoter;
     _swapRouter = config.swapRouter;
     _liquidityRouter = config.liquidityRouter;
     _poolId = config.poolId;
@@ -162,13 +160,13 @@ abstract contract Web3PacksRouterBase is
     }
   }
 
-  function refundUnusedTokens(address sender) internal virtual {
+  function refundUnusedTokens(address sender) internal virtual returns (uint256 unusedAmount0, uint256 unusedAmount1) {
     // Refund Unused Amounts
-    uint256 unusedAmount0 = getBalanceToken0();
+    unusedAmount0 = getBalanceToken0();
     if (unusedAmount0 > 0) {
       TransferHelper.safeTransfer(getToken0().tokenAddress, sender, unusedAmount0);
     }
-    uint256 unusedAmount1 = getBalanceToken1();
+    unusedAmount1 = getBalanceToken1();
     if (unusedAmount1 > 0) {
       TransferHelper.safeTransfer(getToken1().tokenAddress, sender, unusedAmount1);
     }

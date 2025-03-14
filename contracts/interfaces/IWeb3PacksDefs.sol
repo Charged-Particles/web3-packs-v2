@@ -42,7 +42,6 @@ interface IWeb3PacksDefs {
     address token0;
     address token1;
     address manager;
-    address swapQuoter;
     address swapRouter;
     address liquidityRouter;
     bytes32 poolId;

@@ -50,7 +50,8 @@ contract SSWethSmd is IWeb3PacksBundler, PancakeRouter {
     return token;
   }
 
-  function getLiquidityToken(uint256) public override view returns (address tokenAddress, uint256 tokenId) {
+  /// @dev This can be overridden to specify custom liquidity tokens
+  function getLiquidityToken(uint256) public virtual view returns (address tokenAddress, uint256 tokenId) {
     tokenAddress = getToken1().tokenAddress;
     tokenId = 0;
   }
@@ -71,7 +72,7 @@ contract SSWethSmd is IWeb3PacksBundler, PancakeRouter {
     )
   {
     // Perform Swap
-    amountOut = swapSingle(10000, false); // 100% WETH -> SMD
+    amountOut = swapSingle(10000, false); // 100% token0 -> token1
 
     // Transfer back to Manager
     tokenAddress = getToken1().tokenAddress;
@@ -80,6 +81,7 @@ contract SSWethSmd is IWeb3PacksBundler, PancakeRouter {
 
     // Refund Unused Amounts
     refundUnusedTokens(sender);
+    emit BundledTokenSS(tokenAddress, amountOut);
   }
 
   function unbundle(address payable receiver, uint256, bool sellAll)
@@ -90,7 +92,7 @@ contract SSWethSmd is IWeb3PacksBundler, PancakeRouter {
   {
     if (sellAll) {
       // Perform Swap
-      swapSingle(10000, true); // 100% SMD -> WETH
+      swapSingle(10000, true); // 100% token1 -> token0
 
       // Send ETH to Receiver
       ethAmountOut = exitWethAndTransfer(receiver);
