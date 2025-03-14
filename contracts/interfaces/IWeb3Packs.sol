@@ -25,6 +25,9 @@ pragma solidity 0.8.17;
 import "./IWeb3PacksDefs.sol";
 
 interface IWeb3Packs is IWeb3PacksDefs {
+  event BundledERC20(address indexed tokenAddress, uint256 amountOut);
+  event BundledERC721(address indexed tokenAddress, uint256 nftTokenId);
+
   // BUNDLE
   function bundle(
     IWeb3PacksDefs.BundleChunk[] calldata bundleChunks,

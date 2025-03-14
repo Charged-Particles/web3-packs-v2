@@ -74,9 +74,10 @@ contract LPWethMode8020 is IWeb3PacksBundler, BalancerRouter {
     )
   {
     // Perform Swap
-    swapSingle(8000, false); // 80% WETH -> MODE
+    swapSingle(8000, false); // 80% token0 -> token1
 
     // Deposit Liquidity
+    (uint256 amount0, uint256 amount1, , ) = getLiquidityAmounts();
     (uint256 lpTokenId, uint256 liquidity, , ) = createLiquidityPosition(false);
     address poolAddress = address(uint160(lpTokenId));
     nftTokenId = 0;
@@ -94,7 +95,14 @@ contract LPWethMode8020 is IWeb3PacksBundler, BalancerRouter {
     });
 
     // Refund Unused Amounts
-    refundUnusedTokens(sender);
+    (uint256 unusedAmount0, uint256 unusedAmount1) = refundUnusedTokens(sender);
+    emit BundledTokenLP(
+      getToken0().tokenAddress,
+      getToken1().tokenAddress,
+      amount0 - unusedAmount0,
+      amount1 - unusedAmount1,
+      liquidity
+    );
   }
 
   function unbundle(address payable receiver, uint256 packTokenId, bool sellAll)
@@ -112,7 +120,7 @@ contract LPWethMode8020 is IWeb3PacksBundler, BalancerRouter {
       collectLpFees(liquidityPosition);
 
       // Swap Assets back to WETH
-      swapSingle(10000, true); // 100% MODE -> WETH
+      swapSingle(10000, true); // 100% token1 -> token0
       ethAmountOut = exitWethAndTransfer(receiver);
     } else {
       // NOTE: For this Bundle, we want users to be able to Unbundle and receive the actual Liquidity for Voting Purposes

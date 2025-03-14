@@ -12,7 +12,6 @@ module.exports = async (hre) => {
     const network = await hre.network;
     const chainId = chainIdByName(network.name);
 
-    const quoters = globals.quoter[chainId];
     const routers = globals.router[chainId];
     const tokenAddress = globals.tokenAddress[chainId];
     const web3packs = await ethers.getContract('Web3PacksV2');
@@ -23,7 +22,6 @@ module.exports = async (hre) => {
         token0: tokenAddress.weth,
         token1: tokenAddress.wmlt,
         manager: web3packs.address,
-        swapQuoter: quoters.velodrome,
         swapRouter: routers.velodrome,
         liquidityRouter: routers.velodrome,
         poolId: toBytes(''),

@@ -67,23 +67,6 @@ const globals = {
     },
   },
 
-  quoter: {
-    919: {
-      velodrome: '',
-      velodromeV2: '',
-      kim: '',
-      balancer: '',
-      swapMode: '',
-    },
-    34443: {
-      velodrome: '0x3a63171DD9BebF4D07BC782FECC7eb0b890C2A45',
-      velodromeV2: '0x3a63171DD9BebF4D07BC782FECC7eb0b890C2A45',
-      kim: '0x8678f0aBe08D30dC555F27c488551569A29B31Eb',
-      balancer: '0x36caC20dd805d128c1a6Dd16eeA845C574b5A17C',
-      swapMode: '0xc1e624C810D297FD70eF53B0E08F44FABE468591',
-    },
-  },
-
   router: {
     919: {
       velodrome: '',

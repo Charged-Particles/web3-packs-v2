@@ -44,7 +44,7 @@ contract SSWethPacky is IWeb3PacksBundler, VelodromeV2Router {
   |          Configuration            |
   |__________________________________*/
 
-  // Token 1 = PACKY on Mode (Kim Exchange)
+  // Token 1 = PACKY on Mode (Velodrome Exchange)
   function getToken1() public view override returns (IWeb3PacksDefs.Token memory token1) {
     IWeb3PacksDefs.Token memory token = IWeb3PacksDefs.Token({
       tokenAddress: _token1,
@@ -52,11 +52,6 @@ contract SSWethPacky is IWeb3PacksBundler, VelodromeV2Router {
       tokenSymbol: "PACKY"
     });
     return token;
-  }
-
-  function getLiquidityToken(uint256) public override view returns (address tokenAddress, uint256 tokenId) {
-    tokenAddress = getToken1().tokenAddress;
-    tokenId = 0;
   }
 
   function getTokenPath(bool reverse) public override view returns (IWeb3PacksDefs.Route[] memory tokenPath) {
@@ -69,6 +64,12 @@ contract SSWethPacky is IWeb3PacksBundler, VelodromeV2Router {
       tokens[1] = IWeb3PacksDefs.Route({token0: _mode, token1: getToken1().tokenAddress, stable: false});
     }
     return tokens;
+  }
+
+  /// @dev This can be overridden to specify custom liquidity tokens
+  function getLiquidityToken(uint256) public virtual view returns (address tokenAddress, uint256 tokenId) {
+    tokenAddress = getToken1().tokenAddress;
+    tokenId = 0;
   }
 
   /***********************************|
@@ -87,7 +88,7 @@ contract SSWethPacky is IWeb3PacksBundler, VelodromeV2Router {
     )
   {
     // Perform Swap
-    amountOut = swapSingle(10000, false); // 100% WETH -> PACKY
+    amountOut = swapSingle(10000, false); // 100% token0 -> token1
 
     // Transfer back to Manager
     tokenAddress = getToken1().tokenAddress;
@@ -96,6 +97,7 @@ contract SSWethPacky is IWeb3PacksBundler, VelodromeV2Router {
 
     // Refund Unused Amounts
     refundUnusedTokens(sender);
+    emit BundledTokenSS(tokenAddress, amountOut);
   }
 
   function unbundle(address payable receiver, uint256, bool sellAll)
@@ -106,7 +108,7 @@ contract SSWethPacky is IWeb3PacksBundler, VelodromeV2Router {
   {
     if (sellAll) {
       // Perform Swap
-      swapSingle(10000, true); // 100% PACKY -> WETH
+      swapSingle(10000, true); // 100% token1 -> token0
 
       // Send ETH to Receiver
       ethAmountOut = exitWethAndTransfer(receiver);
