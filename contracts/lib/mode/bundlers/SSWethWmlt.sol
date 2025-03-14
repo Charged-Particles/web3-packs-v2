@@ -55,11 +55,6 @@ contract SSWethWmlt is IWeb3PacksBundler, VelodromeV1Router {
     return token;
   }
 
-  function getLiquidityToken(uint256) public override view returns (address tokenAddress, uint256 tokenId) {
-    tokenAddress = getToken1().tokenAddress;
-    tokenId = 0;
-  }
-
   function getTokenPath(bool reverse) public override view returns (IWeb3PacksDefs.Route[] memory tokenPath) {
     IWeb3PacksDefs.Route[] memory tokens = new IWeb3PacksDefs.Route[](2);
     if (reverse) {
@@ -70,6 +65,12 @@ contract SSWethWmlt is IWeb3PacksBundler, VelodromeV1Router {
       tokens[1] = IWeb3PacksDefs.Route({token0: _usdc, token1: getToken1().tokenAddress, stable: false});
     }
     return tokens;
+  }
+
+  /// @dev This can be overridden to specify custom liquidity tokens
+  function getLiquidityToken(uint256) public virtual view returns (address tokenAddress, uint256 tokenId) {
+    tokenAddress = getToken1().tokenAddress;
+    tokenId = 0;
   }
 
   /***********************************|
@@ -88,7 +89,7 @@ contract SSWethWmlt is IWeb3PacksBundler, VelodromeV1Router {
     )
   {
     // Perform Swap
-    amountOut = swapSingle(10000, false); // 100% WETH -> wMLT
+    amountOut = swapSingle(10000, false); // 100% token0 -> token1
 
     // Transfer back to Manager
     tokenAddress = getToken1().tokenAddress;
@@ -97,6 +98,7 @@ contract SSWethWmlt is IWeb3PacksBundler, VelodromeV1Router {
 
     // Refund Unused Amounts
     refundUnusedTokens(sender);
+    emit BundledTokenSS(tokenAddress, amountOut);
   }
 
   function unbundle(address payable receiver, uint256, bool sellAll)
@@ -107,7 +109,7 @@ contract SSWethWmlt is IWeb3PacksBundler, VelodromeV1Router {
   {
     if (sellAll) {
       // Perform Swap
-      swapSingle(10000, true); // 100% wMLT -> WETH
+      swapSingle(10000, true); // 100% token1 -> token0
 
       // Send ETH to Receiver
       ethAmountOut = exitWethAndTransfer(receiver);

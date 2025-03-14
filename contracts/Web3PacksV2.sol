@@ -224,8 +224,10 @@ contract Web3PacksV2 is
       // Deposit the Assets into the Web3Packs NFT
       if (nftTokenId == 0) {
         _energize(tokenId, tokenAddress, amountOut);
+        emit BundledERC20(tokenAddress, amountOut);
       } else {
         _bond(tokenId, tokenAddress, nftTokenId);
+        emit BundledERC721(tokenAddress, nftTokenId);
       }
     }
 

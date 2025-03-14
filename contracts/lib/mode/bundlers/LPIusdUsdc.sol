@@ -82,10 +82,11 @@ contract LPIusdUsdc is IWeb3PacksBundler, AlgebraRouter {
     )
   {
     // Perform Swaps
-    swapCustom(5000, _weth, getToken0().tokenAddress); // 50% WETH -> iUSD
-    swapCustom(10000, _weth, getToken1().tokenAddress); // Remaining WETH -> USDC
+    swapCustom(5000, _weth, getToken0().tokenAddress); // 50% WETH -> token0
+    swapCustom(10000, _weth, getToken1().tokenAddress); // Remaining WETH -> token1
 
     // Deposit Liquidity
+    (uint256 amount0, uint256 amount1, , ) = getLiquidityAmounts();
     (uint256 lpTokenId, uint256 liquidity, , ) = createLiquidityPosition(false);
     nftTokenId = lpTokenId;
     amountOut = liquidity;
@@ -102,7 +103,14 @@ contract LPIusdUsdc is IWeb3PacksBundler, AlgebraRouter {
     });
 
     // Refund Unused Amounts
-    refundUnusedTokens(sender);
+    (uint256 unusedAmount0, uint256 unusedAmount1) = refundUnusedTokens(sender);
+    emit BundledTokenLP(
+      getToken0().tokenAddress,
+      getToken1().tokenAddress,
+      amount0 - unusedAmount0,
+      amount1 - unusedAmount1,
+      liquidity
+    );
   }
 
   function unbundle(address payable receiver, uint256 packTokenId, bool sellAll)
@@ -119,8 +127,8 @@ contract LPIusdUsdc is IWeb3PacksBundler, AlgebraRouter {
     // Perform Swap
     if (sellAll) {
       // Swap Assets back to WETH
-      swapCustom(10000, getToken0().tokenAddress, _weth); // 100% iUSD -> WETH
-      swapCustom(10000, getToken1().tokenAddress, _weth); // 100% USDC -> WETH
+      swapCustom(10000, getToken0().tokenAddress, _weth); // 100% token0 -> WETH
+      swapCustom(10000, getToken1().tokenAddress, _weth); // 100% token1 -> WETH
       ethAmountOut = exitWethAndTransfer(receiver);
     } else {
       // Transfer Assets to Receiver

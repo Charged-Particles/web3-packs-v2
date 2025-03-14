@@ -24,6 +24,9 @@ pragma solidity 0.8.17;
 
 
 interface IWeb3PacksBundler {
+  event BundledTokenSS(address indexed token, uint256 amount);
+  event BundledTokenLP(address indexed token0, address indexed token1, uint256 amount0, uint256 amount1, uint256 liquidity);
+
   function getLiquidityToken(uint256 packTokenId) external returns (address tokenAddress, uint256 tokenId);
 
   function bundle(uint256 packTokenId, address sender)
