@@ -23,6 +23,7 @@
 
 pragma solidity 0.8.17;
 
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "../routers/VelodromeV2Router.sol";
 import "../../../interfaces/IWeb3PacksBundler.sol";
@@ -34,6 +35,7 @@ import "hardhat/console.sol";
   Token 1 = CARTEL
  */
 contract SSWethCartel is IWeb3PacksBundler, VelodromeV2Router {
+  // int24 constant TICK_SPACING = 200;
   address public _mode;
 
   // Inherit from the Velodrome Universal Router
@@ -61,16 +63,29 @@ contract SSWethCartel is IWeb3PacksBundler, VelodromeV2Router {
     tokenId = 0;
   }
 
-  function getTokenPath(bool reverse) public override view returns (IWeb3PacksDefs.Route[] memory tokenPath) {
-    IWeb3PacksDefs.Route[] memory tokens = new IWeb3PacksDefs.Route[](2);
-    if (reverse) {
-      tokens[0] = IWeb3PacksDefs.Route({token0: getToken1().tokenAddress, token1: _mode, stable: false});
-      tokens[1] = IWeb3PacksDefs.Route({token0: _mode, token1: getToken0().tokenAddress, stable: false});
-    } else {
-      tokens[0] = IWeb3PacksDefs.Route({token0: getToken0().tokenAddress, token1: _mode, stable: false});
-      tokens[1] = IWeb3PacksDefs.Route({token0: _mode, token1: getToken1().tokenAddress, stable: false});
+  function swapSingle(uint256 percentOfAmount, bool)
+    public
+    virtual
+    override
+    onlyManagerOrSelf
+    returns (uint256 amountOut)
+  {
+    IWeb3PacksDefs.Token memory token0 = getToken0();
+    IWeb3PacksDefs.Token memory token1 = getToken1();
+
+    uint256 balance = IERC20(token0.tokenAddress).balanceOf(address(this));
+    uint256 swapAmount = (balance * percentOfAmount) / 10000;
+
+    if (swapAmount > 0) {
+      TransferHelper.safeApprove(token0.tokenAddress, _swapRouter, swapAmount);
+      // CARTEL is a Concentrated Volatility Pool and requires V3 Routing
+      bytes memory commands = abi.encodePacked(bytes1(uint8(Commands.V3_SWAP_EXACT_IN)));
+      bytes memory path = abi.encodePacked(token0.tokenAddress, _tickLower, _mode, _tickLower, token1.tokenAddress);
+      bytes[] memory inputs = new bytes[](1);
+      inputs[0] = abi.encode(Constants.MSG_SENDER, swapAmount, 0, path, true);
+      IUniversalRouter(_swapRouter).execute(commands, inputs, block.timestamp);
+      amountOut = IERC20(token1.tokenAddress).balanceOf(address(this));
     }
-    return tokens;
   }
 
   /***********************************|

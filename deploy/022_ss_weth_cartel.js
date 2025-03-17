@@ -1,4 +1,5 @@
 const { chainIdByName, toBytes, isHardhat, findNearestValidTick, log } = require('../js-helpers/utils');
+const { verifyContract } = require('../js-helpers/verifyContract');
 const globals = require('../js-helpers/globals');
 
 const bundlerContractName = 'SSWethCartel';
@@ -27,8 +28,8 @@ module.exports = async (hre) => {
         poolId: toBytes(''),
         bundlerId: toBytes(bundlerId),
         slippage: priceSlippage,
-        tickLower: BigInt(findNearestValidTick(60, true)),
-        tickUpper: BigInt(findNearestValidTick(60, false)),
+        tickLower: 200n,
+        tickUpper: 0n,
       },
       tokenAddress.mode,
     ];
