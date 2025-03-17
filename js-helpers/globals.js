@@ -16,10 +16,10 @@ const globals = {
 
   tokenAddress: {
     919: {
-      weth: '',
+      weth: '0xeb72756ee12309Eae82a0deb9787e69f5b62949c',
       usdc: '',
       usdt: '',
-      mode: '',
+      mode: '0x4FFa6cDEB4deF980b75e3F4764797A2CAd1fAEF3',
       ion: '',
       icl: '',
       ezeth: '',
