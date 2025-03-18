@@ -85,6 +85,11 @@
   },
   {
     "inputs": [],
+    "name": "FailedToExitWeth",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "FundingFailed",
     "type": "error"
   },
@@ -143,6 +148,11 @@
   {
     "inputs": [],
     "name": "NullReceiver",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "SwapFailed",
     "type": "error"
   },
   {
@@ -228,6 +238,25 @@
       {
         "indexed": true,
         "internalType": "address",
+        "name": "receiver",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "EthTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
         "name": "previousOwner",
         "type": "address"
       },
@@ -239,6 +268,37 @@
       }
     ],
     "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "token0",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "token1",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount0",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount1",
+        "type": "uint256"
+      }
+    ],
+    "name": "SwappedTokens",
     "type": "event"
   },
   {

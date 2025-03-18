@@ -43,6 +43,11 @@
   },
   {
     "inputs": [],
+    "name": "FailedToExitWeth",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "FundingFailed",
     "type": "error"
   },
@@ -101,6 +106,11 @@
   {
     "inputs": [],
     "name": "NullReceiver",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "SwapFailed",
     "type": "error"
   },
   {
