@@ -160,6 +160,8 @@ abstract contract UniswapV2Router is Web3PacksRouterBase {
         block.timestamp
       );
       amountOut = IERC20(token1).balanceOf(address(this));
+      if (amountOut == 0) { revert SwapFailed(); }
+      emit SwappedTokens(token0, token1, swapAmount, amountOut);
     }
   }
 

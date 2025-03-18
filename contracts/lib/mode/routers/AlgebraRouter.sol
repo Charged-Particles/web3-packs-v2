@@ -152,6 +152,8 @@ abstract contract AlgebraRouter is Web3PacksRouterBase {
       params = IAlgebraRouter.ExactInputSingleParams(token0, token1, address(this), block.timestamp, swapAmount, 0, 0);
       IAlgebraRouter(_swapRouter).exactInputSingle(params);
       amountOut = IERC20(token1).balanceOf(address(this));
+      if (amountOut == 0) { revert SwapFailed(); }
+      emit SwappedTokens(token0, token1, swapAmount, amountOut);
     }
   }
 }

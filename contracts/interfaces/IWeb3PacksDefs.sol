@@ -27,11 +27,13 @@ interface IWeb3PacksDefs {
   // Custom Errors
   error NotOwnerOrApproved();
   error FundingFailed();
+  error SwapFailed();
   error NullReceiver();
   error ContractNotAllowed();
   error NativeAssetTransferFailed();
   error MismatchedTokens();
   error NoBundlesInPack();
+  error FailedToExitWeth();
   error BundlerNotRegistered(bytes32 bundlerId);
   error MissingLiquidityUUID(address tokenAddress);
   error UnsucessfulSwap(address tokenOut, uint256 amountIn, address router);

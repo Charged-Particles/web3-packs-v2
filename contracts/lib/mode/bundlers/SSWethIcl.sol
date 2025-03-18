@@ -27,7 +27,6 @@ import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "../routers/VelodromeV1Router.sol";
 import "../../../interfaces/IWeb3PacksBundler.sol";
 import "../../../interfaces/mode/IVelodrome.sol";
-import "hardhat/console.sol";
 
 /*
   Performs a Single-Sided Swap on Velodrome Exchange using the Velodrome V1 Router

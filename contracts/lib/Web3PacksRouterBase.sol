@@ -155,8 +155,12 @@ abstract contract Web3PacksRouterBase is
       IWETH(_weth).withdraw(wethBalance);
     }
     ethAmount = address(this).balance;
+    if (ethAmount != wethBalance) {
+      revert FailedToExitWeth();
+    }
     if (ethAmount > 0) {
       receiver.sendValue(ethAmount);
+      emit EthTransferred(receiver, ethAmount);
     }
   }
 
