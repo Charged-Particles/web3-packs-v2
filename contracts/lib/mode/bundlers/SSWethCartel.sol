@@ -35,7 +35,6 @@ import "hardhat/console.sol";
   Token 1 = CARTEL
  */
 contract SSWethCartel is IWeb3PacksBundler, VelodromeV2Router {
-  // int24 constant TICK_SPACING = 200;
   address public _mode;
 
   // Inherit from the Velodrome Universal Router
@@ -63,9 +62,8 @@ contract SSWethCartel is IWeb3PacksBundler, VelodromeV2Router {
     tokenId = 0;
   }
 
-  function swapSingle(uint256 percentOfAmount, bool)
+  function swapSingle(uint256 percentOfAmount, bool reverse)
     public
-    virtual
     override
     onlyManagerOrSelf
     returns (uint256 amountOut)
@@ -73,18 +71,33 @@ contract SSWethCartel is IWeb3PacksBundler, VelodromeV2Router {
     IWeb3PacksDefs.Token memory token0 = getToken0();
     IWeb3PacksDefs.Token memory token1 = getToken1();
 
-    uint256 balance = IERC20(token0.tokenAddress).balanceOf(address(this));
+    uint256 balance = reverse
+      ? IERC20(token1.tokenAddress).balanceOf(address(this))
+      : IERC20(token0.tokenAddress).balanceOf(address(this));
+
     uint256 swapAmount = (balance * percentOfAmount) / 10000;
+    bytes memory path;
 
     if (swapAmount > 0) {
-      TransferHelper.safeApprove(token0.tokenAddress, _swapRouter, swapAmount);
+      if (reverse) {
+        TransferHelper.safeApprove(token1.tokenAddress, _swapRouter, swapAmount);
+        path = abi.encodePacked(token1.tokenAddress, _tickLower, _mode, _tickUpper, token0.tokenAddress);
+      } else {
+        TransferHelper.safeApprove(token0.tokenAddress, _swapRouter, swapAmount);
+        path = abi.encodePacked(token0.tokenAddress, _tickUpper, _mode, _tickLower, token1.tokenAddress);
+      }
+
       // CARTEL is a Concentrated Volatility Pool and requires V3 Routing
       bytes memory commands = abi.encodePacked(bytes1(uint8(Commands.V3_SWAP_EXACT_IN)));
-      bytes memory path = abi.encodePacked(token0.tokenAddress, _tickLower, _mode, _tickLower, token1.tokenAddress);
       bytes[] memory inputs = new bytes[](1);
       inputs[0] = abi.encode(Constants.MSG_SENDER, swapAmount, 0, path, true);
       IUniversalRouter(_swapRouter).execute(commands, inputs, block.timestamp);
-      amountOut = IERC20(token1.tokenAddress).balanceOf(address(this));
+
+      if (reverse) {
+        amountOut = IERC20(token0.tokenAddress).balanceOf(address(this));
+      } else {
+        amountOut = IERC20(token1.tokenAddress).balanceOf(address(this));
+      }
     }
   }
 
