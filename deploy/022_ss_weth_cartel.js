@@ -29,7 +29,7 @@ module.exports = async (hre) => {
         bundlerId: toBytes(bundlerId),
         slippage: priceSlippage,
         tickLower: 100n, // Cartel/Mode is 100 Tick Spacing
-        tickUpper: 200n, // Weth/Mode is 200 Tick Spacing
+        tickUpper: 200n, // Weth/Mode is 200 Tick Spacing (Standard)
       },
       tokenAddress.mode,
     ];
