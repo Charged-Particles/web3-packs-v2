@@ -12,33 +12,17 @@ const globals = {
       chargedState: '0x2691B4f4251408bA4b8bf9530B6961b9D0C1231F',
       protonC: '0x76a5df1c6F53A4B80c8c8177edf52FBbC368E825',
     },
+    97: {
+      chargedParticles: '0x4a7b80e418454a21A49885b009d51f0d0A6Ed77A',
+      chargedState: '0xc42De19eB6eB8fa3eCCcA9Ad0F2E4795c468310f',
+      protonC: '0xE0dbEc1fE9c4148c85815abE93D496F5f909EB65',
+    },
   },
 
   tokenAddress: {
     919: {
       weth: '0xeb72756ee12309Eae82a0deb9787e69f5b62949c',
-      usdc: '',
-      usdt: '',
       mode: '0x4FFa6cDEB4deF980b75e3F4764797A2CAd1fAEF3',
-      ion: '',
-      icl: '',
-      ezeth: '',
-      ionx: '',
-      kim: '',
-      djump: '',
-      wmlt: '',
-      bmx: '',
-      mochad: '',
-      peas: '',
-      ppeas: '',
-      susde: '',
-      iusd: '',
-      wbtc: '',
-      stone: '',
-      smd: '',
-      packy: '',
-      cartel: '',
-      gambl: '',
     },
     34443: {
       weth: '0x4200000000000000000000000000000000000006',
@@ -65,6 +49,13 @@ const globals = {
       cartel: '0x98E0AD23382184338dDcEC0E13685358EF845f30',
       gambl: '0x6bb4a37643e7613e812a8d1af5e675cc735ea1e2',
     },
+    97: {
+      weth: '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd', // WBNB on BSC
+      busd: '0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee',
+      usdt: '0x64544969ed7EBf5f083679233325356EbE738930',
+      tusd: '0x337610d27c682E347C9cD60BD4b3b107C9d34dDd',
+      cake: '0xFa60D973F7642B748046464e165A65B7323b0DEE',
+    },
   },
 
   router: {
@@ -83,6 +74,12 @@ const globals = {
       kimNft: '0x2e8614625226D26180aDf6530C3b1677d3D7cf10',
       balancer: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
       swapMode: '0xc1e624C810D297FD70eF53B0E08F44FABE468591',
+    },
+    97: {
+      pancakeSwapUni: '0x9A082015c919AD0E47861e5Db9A1c7070E81A2C7',
+      pancakeSwapV3: '0x1b81D678ffb9C0263b24A97847620C99d213eB14',
+      pancakeSwapV3Nft: '0x46A15B0b27311cedF172AB29E4f4766fbE7F4364',
+      pancakeSwapV2: '0xD99D1c33F9fC3444f8101754aBC46c52416550D1',
     },
   },
 

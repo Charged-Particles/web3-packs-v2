@@ -140,25 +140,6 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "account",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "balance",
-        "type": "uint256"
-      }
-    ],
-    "name": "BalanceClaimed",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
         "name": "tokenAddress",
         "type": "address"
       },
@@ -189,25 +170,6 @@
       }
     ],
     "name": "BundledERC721",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "bundlerAddress",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes32",
-        "name": "bundlerId",
-        "type": "bytes32"
-      }
-    ],
-    "name": "BundlerRegistered",
     "type": "event"
   },
   {
@@ -369,6 +331,19 @@
       {
         "indexed": true,
         "internalType": "address",
+        "name": "web3state",
+        "type": "address"
+      }
+    ],
+    "name": "Web3PacksStateSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
         "name": "treasury",
         "type": "address"
       }
@@ -477,25 +452,6 @@
     "type": "event"
   },
   {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "name": "_bundlersById",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "_chargedParticles",
     "outputs": [
@@ -563,6 +519,19 @@
   {
     "inputs": [],
     "name": "_proton",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "_web3state",
     "outputs": [
       {
         "internalType": "address",
@@ -652,19 +621,6 @@
       }
     ],
     "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address payable",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "claimReferralRewards",
-    "outputs": [],
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -814,24 +770,6 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "bundlerId",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "address",
-        "name": "bundlerAddress",
-        "type": "address"
-      }
-    ],
-    "name": "registerBundlerId",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "renounceOwnership",
     "outputs": [],
@@ -907,6 +845,19 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "web3state",
+        "type": "address"
+      }
+    ],
+    "name": "setWeb3PacksState",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "newOwner",
         "type": "address"
       }
@@ -940,6 +891,39 @@
       }
     ],
     "name": "unbundle",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address payable",
+        "name": "receiver",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "tokenAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32[]",
+        "name": "packBundles",
+        "type": "bytes32[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "sellAll",
+        "type": "bool"
+      }
+    ],
+    "name": "unbundleUnknown",
     "outputs": [],
     "stateMutability": "payable",
     "type": "function"
@@ -1042,5 +1026,9 @@
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
+  },
+  {
+    "stateMutability": "payable",
+    "type": "receive"
   }
 ]

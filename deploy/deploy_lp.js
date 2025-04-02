@@ -1,10 +1,6 @@
 const { log } = require('../js-helpers/utils');
 
-module.exports = async (hre) => {
-    log('\n---\nLiquidity-Position Bundlers Deployed!');
-};
-
-module.exports.dependencies = [
+const _MODE_BUNDLES = [
   'LP-IUSD-USDC',
   'LP-WETH-IONX',
   'LP-WETH-KIM',
@@ -14,4 +10,13 @@ module.exports.dependencies = [
   'LP-WETH-USDC',
   'LP-WETH-WBTC'
 ];
+
+const _BSC_BUNDLES = [
+];
+
+module.exports = async (hre) => {
+    log('\n---\nLiquidity-Position Bundlers Deployed!');
+};
+
+module.exports.dependencies = _MODE_BUNDLES;
 module.exports.tags = ['deployLP']

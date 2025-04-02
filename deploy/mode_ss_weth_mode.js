@@ -2,8 +2,8 @@ const { chainIdByName, toBytes, isHardhat, findNearestValidTick, log } = require
 const { verifyContract } = require('../js-helpers/verifyContract');
 const globals = require('../js-helpers/globals');
 
-const bundlerContractName = 'LPWethMode';
-const bundlerId = 'LP-WETH-MODE';
+const bundlerContractName = 'SSWethMode';
+const bundlerId = 'SS-WETH-MODE';
 const priceSlippage = 300n; // 3%
 
 module.exports = async (hre) => {
@@ -16,6 +16,7 @@ module.exports = async (hre) => {
     const routers = globals.router[chainId];
     const tokenAddress = globals.tokenAddress[chainId];
     const web3packs = await ethers.getContract('Web3PacksV2');
+    const web3packsState = await ethers.getContract('Web3PacksState');
 
     const constructorArgs = [{
       weth: tokenAddress.weth,
@@ -48,7 +49,7 @@ module.exports = async (hre) => {
     }
 
     log(`  Registering Bundler in Web3Packs: ${bundlerId} = ${bundler.address}`);
-    await web3packs.registerBundlerId(toBytes(bundlerId), bundler.address).then(tx => tx.wait());
+    await web3packsState.registerBundlerId(toBytes(bundlerId), bundler.address).then(tx => tx.wait());
 };
 
 module.exports.tags = [bundlerId];

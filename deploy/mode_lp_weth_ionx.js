@@ -2,9 +2,9 @@ const { chainIdByName, toBytes, isHardhat, findNearestValidTick, log } = require
 const { verifyContract } = require('../js-helpers/verifyContract');
 const globals = require('../js-helpers/globals');
 
-const bundlerContractName = 'LPWethMode8020';
-const bundlerId = 'LP-WETH-MODE-8020';
-const priceSlippage = 9000n; // 3%
+const bundlerContractName = 'LPWethIonx';
+const bundlerId = 'LP-WETH-IONX';
+const priceSlippage = 300n; // 3%
 
 module.exports = async (hre) => {
     const { ethers, getNamedAccounts, deployments } = hre;
@@ -13,19 +13,19 @@ module.exports = async (hre) => {
     const network = await hre.network;
     const chainId = chainIdByName(network.name);
 
-    const pools = globals.poolId[chainId];
     const routers = globals.router[chainId];
     const tokenAddress = globals.tokenAddress[chainId];
     const web3packs = await ethers.getContract('Web3PacksV2');
+    const web3packsState = await ethers.getContract('Web3PacksState');
 
     const constructorArgs = [{
       weth: tokenAddress.weth,
       token0: tokenAddress.weth,
-      token1: tokenAddress.mode,
+      token1: tokenAddress.ionx,
       manager: web3packs.address,
-      swapRouter: routers.balancer,
-      liquidityRouter: routers.balancer,
-      poolId: pools.balancerMode,
+      swapRouter: routers.kim,
+      liquidityRouter: routers.kimNft,
+      poolId: toBytes(''),
       bundlerId: toBytes(bundlerId),
       slippage: priceSlippage,
       tickLower: BigInt(findNearestValidTick(60, true)),
@@ -49,7 +49,7 @@ module.exports = async (hre) => {
     }
 
     log(`  Registering Bundler in Web3Packs: ${bundlerId} = ${bundler.address}`);
-    await web3packs.registerBundlerId(toBytes(bundlerId), bundler.address).then(tx => tx.wait());
+    await web3packsState.registerBundlerId(toBytes(bundlerId), bundler.address).then(tx => tx.wait());
 };
 
 module.exports.tags = [bundlerId];

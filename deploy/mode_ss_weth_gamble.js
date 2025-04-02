@@ -2,8 +2,8 @@ const { chainIdByName, toBytes, isHardhat, findNearestValidTick, log } = require
 const { verifyContract } = require('../js-helpers/verifyContract');
 const globals = require('../js-helpers/globals');
 
-const bundlerContractName = 'SSWethIonx';
-const bundlerId = 'SS-WETH-IONX';
+const bundlerContractName = 'SSWethGambl';
+const bundlerId = 'SS-WETH-GAMBL';
 const priceSlippage = 300n; // 3%
 
 module.exports = async (hre) => {
@@ -16,20 +16,24 @@ module.exports = async (hre) => {
     const routers = globals.router[chainId];
     const tokenAddress = globals.tokenAddress[chainId];
     const web3packs = await ethers.getContract('Web3PacksV2');
+    const web3packsState = await ethers.getContract('Web3PacksState');
 
-    const constructorArgs = [{
-      weth: tokenAddress.weth,
-      token0: tokenAddress.weth,
-      token1: tokenAddress.ionx,
-      manager: web3packs.address,
-      swapRouter: routers.kim,
-      liquidityRouter: routers.kimNft,
-      poolId: toBytes(''),
-      bundlerId: toBytes(bundlerId),
-      slippage: priceSlippage,
-      tickLower: BigInt(findNearestValidTick(60, true)),
-      tickUpper: BigInt(findNearestValidTick(60, false)),
-    }];
+    const constructorArgs = [
+      {
+        weth: tokenAddress.weth,
+        token0: tokenAddress.weth,
+        token1: tokenAddress.gambl,
+        manager: web3packs.address,
+        swapRouter: routers.velodromeV2,
+        liquidityRouter: routers.velodromeV2,
+        poolId: toBytes(''),
+        bundlerId: toBytes(bundlerId),
+        slippage: priceSlippage,
+        tickLower: BigInt(findNearestValidTick(60, true)),
+        tickUpper: BigInt(findNearestValidTick(60, false)),
+      },
+      tokenAddress.mode,
+    ];
 
     //
     // Deploy Contracts
@@ -48,7 +52,7 @@ module.exports = async (hre) => {
     }
 
     log(`  Registering Bundler in Web3Packs: ${bundlerId} = ${bundler.address}`);
-    await web3packs.registerBundlerId(toBytes(bundlerId), bundler.address).then(tx => tx.wait());
+    await web3packsState.registerBundlerId(toBytes(bundlerId), bundler.address).then(tx => tx.wait());
 };
 
 module.exports.tags = [bundlerId];

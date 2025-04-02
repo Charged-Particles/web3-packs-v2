@@ -1,10 +1,6 @@
 const { log } = require('../js-helpers/utils');
 
-module.exports = async (hre) => {
-    log('\n---\nSingle-Sided Bundlers Deployed!');
-};
-
-module.exports.dependencies = [
+const _MODE_BUNDLES = [
   'SS-WETH-BMX',
   'SS-WETH-ICL',
   'SS-WETH-IONX',
@@ -16,4 +12,14 @@ module.exports.dependencies = [
   'SS-WETH-CARTEL',
   'SS-WETH-GAMBL'
 ];
+
+const _BSC_BUNDLES = [
+  'SS-BSC-WETH-BUSD',
+];
+
+module.exports = async (hre) => {
+    log('\n---\nSingle-Sided Bundlers Deployed!');
+};
+
+module.exports.dependencies = _MODE_BUNDLES;
 module.exports.tags = ['deploySS']
