@@ -1,4 +1,4 @@
-const { chainNameById, chainIdByName, log } = require('../js-helpers/utils');
+const { chainNameById, chainIdByName, toBytes, log } = require('../js-helpers/utils');
 const globals = require('../js-helpers/globals');
 const _ = require('lodash');
 
@@ -21,26 +21,35 @@ module.exports = async (hre) => {
   log(' ');
 
 
-  const ECO = [ 'SS-WETH-MODE', 'SS-WETH-WMLT', 'SS-WETH-IONX', 'SS-WETH-KIM', 'SS-WETH-ICL', 'SS-WETH-SMD', 'SS-WETH-BMX' ];
-  const DEFI = [ 'LP-WETH-KIM', 'LP-WETH-MODE', 'LP-WETH-IONX', 'LP-WETH-WBTC', 'LP-WETH-USDC', 'LP-WETH-STONE' ];
-  const DEFI_OLD = [ 'LP-WETH-KIM', 'LP-WETH-MODE', 'LP-WETH-IONX', 'LP-WETH-WBTC', 'LP-WETH-USDC', 'LP-WETH-STONE', 'LP-IUSD-USDC' ];
-  const GOV = [ 'SS-WETH-IONX', 'SS-WETH-MODE', 'LP-WETH-MODE-8020' ];
-  const AI = [ 'SS-WETH-PACKY', 'SS-WETH-CARTEL', 'SS-WETH-GAMBL' ];
+  const ECO = _.map([ 'SS-WETH-MODE', 'SS-WETH-WMLT', 'SS-WETH-IONX', 'SS-WETH-KIM', 'SS-WETH-ICL', 'SS-WETH-SMD', 'SS-WETH-BMX' ], bundleId => toBytes(bundleId));
+  const DEFI = _.map([ 'LP-WETH-KIM', 'LP-WETH-MODE', 'LP-WETH-IONX', 'LP-WETH-WBTC', 'LP-WETH-USDC', 'LP-WETH-STONE' ], bundleId => toBytes(bundleId));
+  const DEFI_OLD = _.map([ 'LP-WETH-KIM', 'LP-WETH-MODE', 'LP-WETH-IONX', 'LP-WETH-WBTC', 'LP-WETH-USDC', 'LP-WETH-STONE', 'LP-IUSD-USDC' ], bundleId => toBytes(bundleId));
+  const GOV = _.map([ 'SS-WETH-IONX', 'SS-WETH-MODE', 'LP-WETH-MODE-8020' ], bundleId => toBytes(bundleId));
+  const AI = _.map([ 'SS-WETH-PACKY', 'SS-WETH-CARTEL', 'SS-WETH-GAMBL' ], bundleId => toBytes(bundleId));
+
+  const _getPackBalance = async (tokenId) => {
+    try {
+      return await web3packs.callStatic.getPackBalances(contracts.protonC, tokenId);
+    } catch (err) {
+      return [];
+    }
+  };
 
   // Get Deployed Web3PacksState
   const web3packs = await ethers.getContractAt('Web3PacksV2', '0xEEC393142db33eb94C18f3d5514888Ad5e7BECc2');
-  const web3packsState = await ethers.getContractAt('Web3PacksState', '');
+  const web3packsState = await ethers.getContractAt('Web3PacksState', '0xD0CDC6aF34B01dB1f84b4ECC1d029d6a11eaBa3a');
 
   if (web3packsState.address.length > 0) {
-    for (let i = 2824; i < 3000; i++) {
+    for (let i = 2898; i < 2899; i++) {
       const tokenId = i;
-      const tokenAmounts = await web3packs.callStatic.getPackBalances(contracts.protonC, tokenId);
+      const tokenAmounts = await _getPackBalance(tokenId);
       const nftCount = _.reduce(tokenAmounts, (sum, obj) => sum + (obj.nftTokenId > 0 ? 1 : 0), 0);
 
       let packType = '';
       let bundleIds = [];
       if (tokenAmounts.length === 0) {
         // Unbundled, no need to migrate
+        log(`  Skipping Unbundled Pack with TokenId: ${tokenId}...`);
         continue;
       }
       if (tokenAmounts.length === 3) {

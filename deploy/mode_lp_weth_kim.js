@@ -32,20 +32,24 @@ module.exports = async (hre) => {
       tickUpper: BigInt(findNearestValidTick(60, false)),
     }];
 
-    //
-    // Deploy Contracts
-    //
-    log(`\nDeploying ${bundlerContractName} Bundler...`);
 
-    await deploy(bundlerContractName, {
-      from: deployer,
-      args: constructorArgs,
-      log: true,
-    });
+    let bundler = await ethers.getContract(bundlerContractName);
+    if (!bundler.address) {
+      //
+      // Deploy Contracts
+      //
+      log(`\nDeploying ${bundlerContractName} Bundler...`);
 
-    const bundler = await ethers.getContract(bundlerContractName);
-    if (!isHardhat(network)) {
-      await verifyContract(bundlerContractName, bundler, constructorArgs);
+      await deploy(bundlerContractName, {
+        from: deployer,
+        args: constructorArgs,
+        log: true,
+      });
+
+      bundler = await ethers.getContract(bundlerContractName);
+      if (!isHardhat(network)) {
+        await verifyContract(bundlerContractName, bundler, constructorArgs);
+      }
     }
 
     log(`  Registering Bundler in Web3Packs: ${bundlerId} = ${bundler.address}`);
