@@ -13,8 +13,8 @@ module.exports = async (hre) => {
   const contracts = globals.contracts[chainId];
   const tokenAddress = globals.tokenAddress[chainId];
 
-  const useExistingWeb3PacksContract = isHardhat(network) ? '' : '';
-  const useExistingWeb3PacksStateContract = isHardhat(network) ? '' : '';
+  const useExistingWeb3PacksContract = isHardhat(network) ? '' : '0xB7DB5BF6B45782372B40e759cB60A79a522942f3';
+  const useExistingWeb3PacksStateContract = isHardhat(network) ? '' : '0xD0CDC6aF34B01dB1f84b4ECC1d029d6a11eaBa3a';
 
   log('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
   log('Charged Particles - Web3 Packs V2 - Contract Deployment');
