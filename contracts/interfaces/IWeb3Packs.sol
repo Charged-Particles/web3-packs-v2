@@ -49,6 +49,15 @@ interface IWeb3Packs is IWeb3PacksDefs {
   ) external
     payable;
 
+  function unbundleUnknown(
+    address payable receiver,
+    address tokenAddress,
+    uint256 tokenId,
+    bytes32[] memory packBundles,
+    bool sellAll
+  ) external
+    payable;
+
   // QUERY
   function getPackBalances(
     address tokenAddress,
@@ -63,7 +72,4 @@ interface IWeb3Packs is IWeb3PacksDefs {
   function getReferralRewardsOf(address account)
     external
     returns (uint256 balance);
-
-  function claimReferralRewards(address payable account)
-    external;
 }

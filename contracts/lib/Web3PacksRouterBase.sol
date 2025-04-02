@@ -32,6 +32,7 @@ import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "./BlackholePrevention.sol";
 import "../interfaces/IWeb3PacksRouter.sol";
 import "../interfaces/IWeb3PacksDefs.sol";
+import "../interfaces/IWeb3PacksOld.sol";
 
 abstract contract Web3PacksRouterBase is
   IWeb3PacksRouter,
@@ -127,6 +128,24 @@ abstract contract Web3PacksRouterBase is
     amount1 = getBalanceToken1();
     minAmount0 = (amount0 * (10000 - _slippage)) / 10000;
     minAmount1 = (amount1 * (10000 - _slippage)) / 10000;
+  }
+
+  /// @dev This can be overridden to specify custom amounts for swapping
+  function getLiquidityPosition(uint256 tokenId) public virtual view returns (IWeb3PacksDefs.LiquidityPosition memory lp) {
+    lp = _liquidityPositionsByTokenId[tokenId];
+    // if (lp.liquidity == 0) {
+    //   IWeb3PacksOld.LiquidityPosition[] memory oldLps = IWeb3PacksOld(_oldWeb3PacksManager).getLiquidityPositions(tokenId);
+    //   for (uint i = 0; i < oldLps.length; i++) {
+    //     if (oldLps[i].token0 == getToken0().tokenAddress && oldLps[i].token1 == getToken1().tokenAddress) {
+    //       lp = IWeb3PacksDefs.LiquidityPosition({
+    //         lpTokenId: oldLps[i].lpTokenId,
+    //         liquidity: oldLps[i].liquidity,
+    //         stable: oldLps[i].stable
+    //       });
+    //       break;
+    //     }
+    //   }
+    // }
   }
 
   /***********************************|

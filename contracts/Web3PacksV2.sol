@@ -40,6 +40,7 @@ import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "./lib/BlackholePrevention.sol";
 import "./interfaces/IWeb3Packs.sol";
+import "./interfaces/IWeb3PacksState.sol";
 import "./interfaces/IWeb3PacksDefs.sol";
 import "./interfaces/IWeb3PacksBundler.sol";
 import "./interfaces/IChargedState.sol";
@@ -57,27 +58,22 @@ contract Web3PacksV2 is
 
   event ChargedParticlesSet(address indexed chargedParticles);
   event ChargedStateSet(address indexed chargedState);
+  event Web3PacksStateSet(address indexed web3state);
   event ProtonSet(address indexed proton);
   event PackBundled(uint256 indexed tokenId, address indexed receiver, bytes32 packType, uint256 ethPackPrice);
   event PackUnbundled(uint256 indexed tokenId, address indexed receiver, uint256 ethAmount);
   event ProtocolFeeSet(uint256 fee);
   event Web3PacksTreasurySet(address indexed treasury);
-  event BundlerRegistered(address indexed bundlerAddress, bytes32 bundlerId);
-  event BalanceClaimed(address indexed account, uint256 balance);
 
   uint256 private constant BASIS_POINTS = 10000;
 
   address public _weth;
   address public _proton;
+  address public _web3state;
   address public _chargedParticles;
   address public _chargedState;
   address payable internal _treasury;
   uint256 public _protocolFee;
-
-  mapping (bytes32 => address) public _bundlersById;
-  mapping (uint256 => uint256) internal _packPriceByPackId;
-  mapping (uint256 => bytes32[]) internal _bundlesByPackId;
-  mapping (address => uint256) internal _referrerBalance;
 
   // Charged Particles Wallet Managers
   string public _cpWalletManager = "generic.B";
@@ -94,6 +90,8 @@ contract Web3PacksV2 is
     _chargedParticles = chargedParticles;
     _chargedState = chargedState;
   }
+
+  receive() external payable {}
 
 
   /***********************************|
@@ -148,27 +146,43 @@ contract Web3PacksV2 is
     emit PackUnbundled(tokenId, receiver, ethAmount);
   }
 
+  // Primarily for Unbundling Old Packs from V1
+  function unbundleUnknown(
+    address payable receiver,
+    address tokenAddress,
+    uint256 tokenId,
+    bytes32[] memory packBundles,
+    bool sellAll
+  )
+    external
+    override
+    payable
+    whenNotPaused
+    nonReentrant
+  {
+    _collectFees(0);
+    uint256 ethAmount = _unbundlePack(
+      receiver,
+      tokenAddress,
+      tokenId,
+      packBundles,
+      sellAll
+    );
+    emit PackUnbundled(tokenId, receiver, ethAmount);
+  }
+
   // NOTE: Call via "staticCall" for Balances
   function getPackBalances(address tokenAddress, uint256 tokenId) public override returns (TokenAmount[] memory) {
     return _getPackBalances(tokenAddress, tokenId);
   }
 
   function getPackPriceEth(uint256 tokenId) public view override returns (uint256 packPriceEth) {
-    packPriceEth = _packPriceByPackId[tokenId];
+    packPriceEth = IWeb3PacksState(_web3state).getPackPriceByPackId(tokenId);
   }
 
   function getReferralRewardsOf(address account) public view override returns (uint256 balance) {
-    balance = _referrerBalance[account];
+    balance = IWeb3PacksState(_web3state).getReferrerBalance(account);
   }
-
-  function claimReferralRewards(address payable account) public override nonReentrant {
-    uint256 balance = _referrerBalance[account];
-    if (address(this).balance >= balance) {
-      account.sendValue(balance);
-      emit BalanceClaimed(account, balance);
-    }
-  }
-
 
   /***********************************|
   |     Private Bundle Functions      |
@@ -205,10 +219,11 @@ contract Web3PacksV2 is
       packBundlerIds[i] = chunk.bundlerId; // track bundlerIds per pack
 
       // Ensure Bundler is Registered
-      if (_bundlersById[chunk.bundlerId] == address(0)) {
+      address bundlerAddress = IWeb3PacksState(_web3state).getBundlerById(chunk.bundlerId);
+      if (bundlerAddress == address(0)) {
         revert BundlerNotRegistered(chunk.bundlerId);
       }
-      bundler = IWeb3PacksBundler(_bundlersById[chunk.bundlerId]);
+      bundler = IWeb3PacksBundler(bundlerAddress);
 
       // Calculate Percent
       chunkWeth = (wethTotal * chunk.percentBasisPoints) / BASIS_POINTS;
@@ -232,8 +247,8 @@ contract Web3PacksV2 is
     }
 
     // Track Pack Data
-    _bundlesByPackId[tokenId] = packBundlerIds;
-    _packPriceByPackId[tokenId] = ethPackPrice;
+    IWeb3PacksState(_web3state).setBundlesByPackId(tokenId, packBundlerIds);
+    IWeb3PacksState(_web3state).setPackPriceByPackId(tokenId, ethPackPrice);
 
     // Set the Timelock State
     _lock(lockState, tokenId);
@@ -251,6 +266,37 @@ contract Web3PacksV2 is
     internal
     returns (uint ethAmount)
   {
+    // Ensure Pack has Bundles
+    bytes32[] memory bundles = IWeb3PacksState(_web3state).getBundlesByPackId(packTokenId);
+    if (bundles.length == 0) {
+      revert NoBundlesInPack();
+    }
+
+    // Unbundle Known Pack
+    ethAmount = _unbundlePack(
+      receiver,
+      tokenAddress,
+      packTokenId,
+      bundles,
+      sellAll
+    );
+
+    // Clear Bundles for Pack
+    bytes32[] memory empty;
+    IWeb3PacksState(_web3state).setBundlesByPackId(packTokenId, empty);
+    IWeb3PacksState(_web3state).setPackPriceByPackId(packTokenId, 0);
+  }
+
+  function _unbundlePack(
+    address payable receiver,
+    address tokenAddress,
+    uint256 packTokenId,
+    bytes32[] memory packBundles,
+    bool sellAll
+  )
+    internal
+    returns (uint ethAmount)
+  {
     IWeb3PacksBundler bundler;
 
     // Verify Ownership
@@ -259,57 +305,50 @@ contract Web3PacksV2 is
       revert NotOwnerOrApproved();
     }
 
-    // Ensure Pack has Bundles
-    if (_bundlesByPackId[packTokenId].length == 0) {
-      revert NoBundlesInPack();
-    }
-
     address assetTokenAddress;
     uint256 assetTokenId;
-    for (uint i; i < _bundlesByPackId[packTokenId].length; i++) {
-      bytes32 bundlerId = _bundlesByPackId[packTokenId][i];
-      if (_bundlersById[bundlerId] == address(0)) {
+    for (uint i; i < packBundles.length; i++) {
+      address bundlerAddress = IWeb3PacksState(_web3state).getBundlerById(packBundles[i]);
+      if (bundlerAddress == address(0)) {
         // skip unregistered bundlers to prevent breaking unbundle
         continue;
       }
-      bundler = IWeb3PacksBundler(_bundlersById[bundlerId]);
+      bundler = IWeb3PacksBundler(bundlerAddress);
 
       // Pull Assets from NFT and send to Bundler for Unbundling
       (assetTokenAddress, assetTokenId) = bundler.getLiquidityToken(packTokenId);
       if (assetTokenId == 0) {
-        _release(_bundlersById[bundlerId], packTokenId, assetTokenAddress);
+        _release(bundlerAddress, packTokenId, assetTokenAddress);
       } else {
-        _breakBond(_bundlersById[bundlerId], packTokenId, assetTokenAddress, assetTokenId);
+        _breakBond(bundlerAddress, packTokenId, assetTokenAddress, assetTokenId);
       }
 
       // Unbundle current asset
       ethAmount += bundler.unbundle(receiver, packTokenId, sellAll);
     }
-
-    // Clear Bundles for Pack
-    delete _bundlesByPackId[packTokenId];
-    delete _packPriceByPackId[packTokenId];
   }
 
   function _getPackBalances(address tokenAddress, uint256 tokenId) internal returns (TokenAmount[] memory) {
     IWeb3PacksBundler bundler;
 
     // Ensure Pack has Bundles
-    if (_bundlesByPackId[tokenId].length == 0) {
+    bytes32[] memory bundles = IWeb3PacksState(_web3state).getBundlesByPackId(tokenId);
+    uint256 bundleCount = bundles.length;
+    if (bundleCount == 0) {
       revert NoBundlesInPack();
     }
 
-    uint256 bundleCount = _bundlesByPackId[tokenId].length;
     TokenAmount[] memory tokenBalances = new TokenAmount[](bundleCount);
     for (uint i; i < bundleCount; i++) {
-      bytes32 bundlerId = _bundlesByPackId[tokenId][i];
-      if (_bundlersById[bundlerId] == address(0)) {
+      bytes32 bundlerId = bundles[i];
+      address bundlerAddress = IWeb3PacksState(_web3state).getBundlerById(bundlerId);
+      if (bundlerAddress == address(0)) {
         // skip unregistered bundlers
         continue;
       }
 
       // Get Liquidity Token from Bundler
-      bundler = IWeb3PacksBundler(_bundlersById[bundlerId]);
+      bundler = IWeb3PacksBundler(bundlerAddress);
       (address assetTokenAddress, uint256 assetTokenId) = bundler.getLiquidityToken(tokenId);
       bool isNft = (assetTokenId > 0);
 
@@ -463,6 +502,7 @@ contract Web3PacksV2 is
     address[] memory referrals
   ) internal returns (uint256 fee) {
     uint256 referralAmountTotal = ((ethPackPrice * 330) / BASIS_POINTS);  // 3.3%
+    IWeb3PacksState _state = IWeb3PacksState(_web3state);
 
     // Calculate Referral Amounts and Distribute
     if (referrals.length > 0 && referrals[0] != address(0)) {
@@ -471,16 +511,19 @@ contract Web3PacksV2 is
 
       if (referrals.length > 1 && referrals[1] != address(0)) {
         if (referrals.length > 2 && referrals[2] != address(0)) {
-          _referrerBalance[referrals[0]] += ((ethPackPrice * 30) / BASIS_POINTS);  // 0.3%
-          _referrerBalance[referrals[1]] += ((ethPackPrice * 30) / BASIS_POINTS);  // 0.3%
-          _referrerBalance[referrals[2]] += ((ethPackPrice * 270) / BASIS_POINTS); // 2.7%
+          _state.addToReferrerBalance(referrals[0], (ethPackPrice * 30) / BASIS_POINTS);    // 0.3%
+          _state.addToReferrerBalance(referrals[1], (ethPackPrice * 30) / BASIS_POINTS);    // 0.3%
+          _state.addToReferrerBalance(referrals[2], (ethPackPrice * 270) / BASIS_POINTS);   // 2.7%
         } else {
-          _referrerBalance[referrals[0]] += ((ethPackPrice * 30) / BASIS_POINTS);  // 0.3%
-          _referrerBalance[referrals[1]] += ((ethPackPrice * 300) / BASIS_POINTS);  // 3.0%
+          _state.addToReferrerBalance(referrals[0], (ethPackPrice * 30) / BASIS_POINTS);    // 0.3%
+          _state.addToReferrerBalance(referrals[1], (ethPackPrice * 300) / BASIS_POINTS);   // 3.0%
         }
       } else {
-        _referrerBalance[referrals[0]] += referralAmountTotal;  // 3.3%
+        _state.addToReferrerBalance(referrals[0], referralAmountTotal);   // 3.3%
       }
+
+      // Transfer Rewards to State Contract
+      payable(_web3state).sendValue(fee);
     }
   }
 
@@ -509,6 +552,12 @@ contract Web3PacksV2 is
     emit ProtonSet(proton);
   }
 
+  function setWeb3PacksState(address web3state) external onlyOwner {
+    require(web3state != address(0), "Invalid address for web3state");
+    _web3state = web3state;
+    emit Web3PacksStateSet(web3state);
+  }
+
   function setTreasury(address payable treasury) external onlyOwner {
     require(treasury != address(0), "Invalid address for treasury");
     _treasury = treasury;
@@ -518,11 +567,6 @@ contract Web3PacksV2 is
   function setProtocolFee(uint256 fee) external onlyOwner {
     _protocolFee = fee;
     emit ProtocolFeeSet(fee);
-  }
-
-  function registerBundlerId(bytes32 bundlerId, address bundlerAddress) external onlyOwner {
-    _bundlersById[bundlerId] = bundlerAddress;
-    emit BundlerRegistered(bundlerAddress, bundlerId);
   }
 
   function pause() public onlyOwner {

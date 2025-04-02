@@ -34,6 +34,7 @@ interface IWeb3PacksRouter is IWeb3PacksDefs {
   function getTokenPath(bool reverse) external returns (IWeb3PacksDefs.Route[] memory tokenPath);
   function getOrderedAssets(bool reverse) external returns (address[] memory assets, uint256[] memory amounts);
   function getLiquidityAmounts() external returns (uint256 amount0, uint256 amount1, uint256 minAmount0, uint256 minAmount1);
+  function getLiquidityPosition(uint256 tokenId) external returns (IWeb3PacksDefs.LiquidityPosition memory lp);
 
   function getBalanceToken0() external returns (uint256 balanceToken0);
   function getBalanceToken1() external returns (uint256 balanceToken1);
