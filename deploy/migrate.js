@@ -40,7 +40,7 @@ module.exports = async (hre) => {
   const web3packsState = await ethers.getContractAt('Web3PacksState', '0xD0CDC6aF34B01dB1f84b4ECC1d029d6a11eaBa3a');
 
   if (web3packsState.address.length > 0) {
-    for (let i = 2898; i < 2899; i++) {
+    for (let i = 2823; i < 2899; i++) {
       const tokenId = i;
       const tokenAmounts = await _getPackBalance(tokenId);
       const nftCount = _.reduce(tokenAmounts, (sum, obj) => sum + (obj.nftTokenId > 0 ? 1 : 0), 0);
@@ -51,6 +51,10 @@ module.exports = async (hre) => {
         // Unbundled, no need to migrate
         log(`  Skipping Unbundled Pack with TokenId: ${tokenId}...`);
         continue;
+      }
+      if (tokenAmounts.length === 2) {
+        packType = 'AI';
+        bundleIds = AI;
       }
       if (tokenAmounts.length === 3) {
         const balancerLpToken = _.find(tokenAmounts, { tokenAddress: '0x7c86a44778c52a0aad17860924b53bf3f35dc932' });
