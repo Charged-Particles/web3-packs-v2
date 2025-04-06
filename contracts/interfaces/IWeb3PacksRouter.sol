@@ -25,6 +25,9 @@ pragma solidity 0.8.17;
 import "./IWeb3PacksDefs.sol";
 
 interface IWeb3PacksRouter is IWeb3PacksDefs {
+  event EthTransferred(address indexed receiver, uint256 amount);
+  event SwappedTokens(address indexed token0, address indexed token1, uint256 amount0, uint256 amount1);
+
   function getToken0() external returns (IWeb3PacksDefs.Token calldata token0);
   function getToken1() external returns (IWeb3PacksDefs.Token calldata token1);
 

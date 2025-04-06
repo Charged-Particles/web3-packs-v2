@@ -57,7 +57,7 @@ abstract contract Web3PacksRouterBase is
   int24 public _tickUpper;
 
   // Store Liquidity Positions by Pack Token ID
-  mapping(uint256 => IWeb3PacksDefs.LiquidityPosition) internal _liquidityPositionsByTokenId;
+  mapping(uint256 => IWeb3PacksDefs.LiquidityPosition) public _liquidityPositionsByTokenId;
 
   constructor(IWeb3PacksDefs.RouterConfig memory config) {
     _weth = config.weth;
@@ -155,8 +155,12 @@ abstract contract Web3PacksRouterBase is
       IWETH(_weth).withdraw(wethBalance);
     }
     ethAmount = address(this).balance;
+    if (ethAmount != wethBalance) {
+      revert FailedToExitWeth();
+    }
     if (ethAmount > 0) {
       receiver.sendValue(ethAmount);
+      emit EthTransferred(receiver, ethAmount);
     }
   }
 

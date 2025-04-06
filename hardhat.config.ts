@@ -46,7 +46,7 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: !optimizerDisabled,
-            runs: 200,
+            runs: 1000,
           },
         },
       },
@@ -61,6 +61,7 @@ const config: HardhatUserConfig = {
       default: 1,
       // Treasury:
       'mode': '0x74D599ddC5c015C45D8033670404C7C23d932C77', // https://safe.optimism.io/address-book?safe=mode:0x74D599ddC5c015C45D8033670404C7C23d932C77
+      'bsc': '',
     },
     user1: {
       default: 2,
@@ -186,6 +187,17 @@ const config: HardhatUserConfig = {
       },
       chainId: 10,
     },
+    bscTestnet: {
+      url: 'https://data-seed-prebsc-1-s1.binance.org:8545/', // `https://bnb-testnet.g.alchemy.com/v2/${process.env.ALCHEMY_APIKEY}`,
+      gasPrice: 10000000000,
+      gas: 3000000,
+      accounts: {
+          mnemonic: mnemonic.testnet,
+          initialIndex: 0,
+          count: 10,
+      },
+      chainId: 97,
+    },
   },
   etherscan: {
     apiKey: {
@@ -194,6 +206,7 @@ const config: HardhatUserConfig = {
       mode: process.env.ETHERSCAN_APIKEY ?? '',
       modeSepolia: 'MODE-NETWORK-TESTNET',
       optimism: process.env.ALCHEMY_OP_APIKEY ?? '',
+      bscTestnet: process.env.BSCSCAN_APIKEY ?? '',
     },
     customChains: [
       {

@@ -32,7 +32,6 @@ import "../../../interfaces/mode/IVelodrome.sol";
 import {IUniversalRouter} from "../../../interfaces/mode/IVelodromeUniversalRouter.sol";
 import {Commands} from "./lib/VelodromeV2Commands.sol";
 import {Constants} from "./lib/VelodromeV2Constants.sol";
-import "hardhat/console.sol";
 
 // REF: https://github.com/velodrome-finance/universal-router/blob/main/test/foundry-tests/v2/UniswapV2MultiHop.t.sol#L68
 
@@ -54,14 +53,14 @@ abstract contract VelodromeV2Router is Web3PacksRouterBase {
     onlyManagerOrSelf
     returns (uint256 amountOut)
   {
-    IWeb3PacksDefs.Token memory token0 = getToken0();
-    IWeb3PacksDefs.Token memory token1 = getToken1();
+    IWeb3PacksDefs.Token memory token0 = reverse ? getToken1() : getToken0();
+    IWeb3PacksDefs.Token memory token1 = reverse ? getToken0() : getToken1();
     IWeb3PacksDefs.Route[] memory tokens = getTokenPath(reverse);
     VRoute[] memory routes = new VRoute[](tokens.length);
     for (uint i; i < tokens.length; i++) {
       routes[i] = VRoute({from: tokens[i].token0, to: tokens[i].token1, stable: tokens[i].stable});
     }
-    amountOut = _performSwap(percentOfAmount, token0.tokenAddress, token1.tokenAddress, routes);
+    amountOut = _performSwapV2(percentOfAmount, token0.tokenAddress, token1.tokenAddress, routes);
   }
 
   function swapCustom(uint256 percentOfAmount, address token0, address token1)
@@ -73,7 +72,7 @@ abstract contract VelodromeV2Router is Web3PacksRouterBase {
   {
     VRoute[] memory routes = new VRoute[](1);
     routes[0] = VRoute({from: token0, to: token1, stable: false});
-    amountOut = _performSwap(percentOfAmount, token0, token1, routes);
+    amountOut = _performSwapV2(percentOfAmount, token0, token1, routes);
   }
 
   function createLiquidityPosition(bool)
@@ -117,7 +116,7 @@ abstract contract VelodromeV2Router is Web3PacksRouterBase {
   }
 
 
-  function _performSwap(uint256 percentOfAmount, address token0, address token1, VRoute[] memory routes)
+  function _performSwapV2(uint256 percentOfAmount, address token0, address token1, VRoute[] memory routes)
     internal
     returns (uint256 amountOut)
   {
@@ -131,6 +130,27 @@ abstract contract VelodromeV2Router is Web3PacksRouterBase {
       inputs[0] = abi.encode(Constants.MSG_SENDER, swapAmount, 0, routes, true);
       IUniversalRouter(_swapRouter).execute(commands, inputs, block.timestamp);
       amountOut = IERC20(token1).balanceOf(address(this));
+      if (amountOut == 0) { revert SwapFailed(); }
+      emit SwappedTokens(token0, token1, swapAmount, amountOut);
+    }
+  }
+
+  function _performSwapV3(uint256 percentOfAmount, address token0, address token1, bytes memory path)
+    internal
+    returns (uint256 amountOut)
+  {
+    uint256 balance = IERC20(token0).balanceOf(address(this));
+    uint256 swapAmount = (balance * percentOfAmount) / 10000;
+
+    if (swapAmount > 0) {
+      TransferHelper.safeApprove(token0, _swapRouter, swapAmount);
+      bytes memory commands = abi.encodePacked(bytes1(uint8(Commands.V3_SWAP_EXACT_IN)));
+      bytes[] memory inputs = new bytes[](1);
+      inputs[0] = abi.encode(Constants.MSG_SENDER, swapAmount, 0, path, true);
+      IUniversalRouter(_swapRouter).execute(commands, inputs, block.timestamp);
+      amountOut = IERC20(token1).balanceOf(address(this));
+      if (amountOut == 0) { revert SwapFailed(); }
+      emit SwappedTokens(token0, token1, swapAmount, amountOut);
     }
   }
 }

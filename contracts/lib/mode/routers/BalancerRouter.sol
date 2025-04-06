@@ -166,6 +166,8 @@ abstract contract BalancerRouter is Web3PacksRouterBase {
       IBalancerV2Vault(_swapRouter).swap(swapData, fundData, 0, block.timestamp);
 
       amountOut = IERC20(token1).balanceOf(address(this));
+      if (amountOut == 0) { revert SwapFailed(); }
+      emit SwappedTokens(token0, token1, swapAmount, amountOut);
     }
   }
 
