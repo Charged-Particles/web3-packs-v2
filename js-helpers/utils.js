@@ -37,6 +37,8 @@ const chainIdByName = (chainName) => {
     case 'kovan': return 42;
     case 'polygon': return 137;
     case 'mumbai': return 80001;
+    case 'bsctestnet': return 97;
+    case 'bsc': return 56;
     case 'hardhat': return 34443;
     case 'coverage': return 31337;
     case 'mode': return 34443;
@@ -53,6 +55,8 @@ const chainNameById = (chainId) => {
     case 42: return 'Kovan';
     case 137: return 'Polygon';
     case 80001: return 'Mumbai';
+    case 56: return 'BSC';
+    case 97: return 'BSC Testnet';
     case 31337: return 'Hardhat';
     default: return 'Unknown';
   }
@@ -61,11 +65,13 @@ const chainNameById = (chainId) => {
 const chainTypeById = (chainId) => {
   switch (parseInt(chainId, 10)) {
     case 1:
+    case 56:
     case 137:
       return {isProd: true, isTestnet: false, isHardhat: false};
     case 3:
     case 4:
     case 42:
+    case 97:
     case 80001:
       return {isProd: false, isTestnet: true, isHardhat: false};
     case 31337:

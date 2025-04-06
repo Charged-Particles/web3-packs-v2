@@ -5,7 +5,7 @@ import { BigNumber, Contract, Signer } from 'ethers';
 import globals from '../js-helpers/globals';
 import { _findNearestValidTick } from './utils';
 import { Web3PacksV2, IWeb3PacksDefs } from '../typechain-types/contracts/Web3PacksV2';
-import Charged, { chargedParticlesAbi, chargedStateAbi, protonBAbi } from "@charged-particles/charged-js-sdk";
+import { chargedParticlesAbi, chargedStateAbi, protonBAbi } from "@charged-particles/charged-js-sdk";
 
 interface BundleChunk extends IWeb3PacksDefs.BundleChunkStruct {}
 
@@ -179,40 +179,36 @@ describe('Web3PacksV2', async ()=> {
     for (let i = 0; i < singleSidedBundlers.length; i++) {
       const bundler = singleSidedBundlers[i];
 
-      it(`Bundles using Bundler: ${bundler.bundlerId}`, (done) => {
-        (async () => {
-          const { deployer } = await getNamedAccounts();
+      it(`Bundles using Bundler: ${bundler.bundlerId}`, async () => {
+        const { deployer } = await getNamedAccounts();
 
-          // @ts-ignore
-          const bundlerContract = await ethers.getContract(bundler.contract);
-          const token1 = await bundlerContract.getToken1();
+        // @ts-ignore
+        const bundlerContract = await ethers.getContract(bundler.contract);
+        const token1 = await bundlerContract.getToken1();
 
-          // Get Balance before Transaction for Test Confirmation
-          const preBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
+        // Get Balance before Transaction for Test Confirmation
+        const preBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
 
-          const bundleChunks:IWeb3PacksDefs.BundleChunkStruct[] = [
-            {bundlerId: toBytes32(bundler.bundlerId), percentBasisPoints: 10000},
-          ];
+        const bundleChunks:IWeb3PacksDefs.BundleChunkStruct[] = [
+          {bundlerId: toBytes32(bundler.bundlerId), percentBasisPoints: 10000},
+        ];
 
-          // Bundle Pack
-          const { tokenId, gasCost, tx } = await _callBundle({
-            bundleChunks,
-            packType: 'ECOSYSTEM',
-            ethPackPrice,
-          });
-          expect(tx).not.to.be.revertedWith('SwapFailed');
-          expect(tx).to.emit(bundlerContract, 'SwappedTokens');
+        // Bundle Pack
+        const { tokenId, gasCost, tx } = await _callBundle({
+          bundleChunks,
+          packType: 'ECOSYSTEM',
+          ethPackPrice,
+        });
+        expect(tx).not.to.be.revertedWith('SwapFailed');
+        expect(tx).to.emit(bundlerContract, 'SwappedTokens');
 
-          const tokenAmount = await _getParticleMass(tokenId, token1.tokenAddress);
-          expect(tokenAmount).to.be.gt(100);
+        const tokenAmount = await _getParticleMass(tokenId, token1.tokenAddress);
+        expect(tokenAmount).to.be.gt(100);
 
-          // Confirm ETH Balance
-          const expectedBalance = preBalance - ethPackPrice.toBigInt() - globals.protocolFee.toBigInt() - gasCost.toBigInt();
-          const postBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
-          expect(postBalance).to.eq(expectedBalance);
-
-          done();
-        })();
+        // Confirm ETH Balance
+        const expectedBalance = preBalance - ethPackPrice.toBigInt() - globals.protocolFee.toBigInt() - gasCost.toBigInt();
+        const postBalance = (await ethers.provider.getBalance(deployer)).toBigInt();
+        expect(postBalance).to.eq(expectedBalance);
       });
 
       it(`Unbundles without Sell All: ${bundler.bundlerId}`, async () => {
