@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-// Web3PacksState.sol
+// ZkgmVault.sol
 // Copyright (c) 2025 Firma Lux, Inc. <https://charged.fi>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,58 +21,64 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-pragma solidity 0.8.17;
+pragma solidity 0.8.27;
 
 import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
-import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+
 import "./lib/BlackholePrevention.sol";
 import "./interfaces/IWeb3Packs.sol";
-import "./interfaces/IWeb3PacksState.sol";
+import "./interfaces/IWeb3PacksVault.sol";
+import "./interfaces/union/IZkgmable.sol";
 
-contract Web3PacksState is
-  IWeb3PacksState,
+contract ZkgmVault is
+  IWeb3PacksVault,
+  IZkgmable,
+  ERC165,
   Ownable,
-  ReentrancyGuard,
   BlackholePrevention
 {
   using Address for address payable;
+  using ERC165Checker for address payable;
+  using SafeERC20 for *;
 
   event Web3PacksSet(address indexed web3packs);
-  event BundlerRegistered(address indexed bundlerAddress, bytes32 bundlerId);
+  event ZkgmSet(address indexed zkgm);
+  event BalanceClaimed(address indexed account, uint256 balance);
   event RewardsMigrated(address indexed newWeb3state, uint256 balance);
+  event MessageReceived(uint256 path, uint32 sourceChannelId, uint32 destinationChannelId, address sender, bytes message);
 
+  address public _zkgm;
   address public _web3packs;
+  mapping (address => uint256) internal _referrerBalance;
 
-  mapping (bytes32 => address) internal _bundlersById;
-  mapping (uint256 => uint256) internal _packPriceByPackId;
-  mapping (uint256 => bytes32[]) internal _bundlesByPackId;
-
-  constructor(address web3packs) {
+  constructor(address web3packs, address zkgm) Ownable() {
+    _zkgm = zkgm;
     _web3packs = web3packs;
   }
 
   receive() external payable {}
 
   modifier onlyWeb3Packs() {
-    require(msg.sender == _web3packs, "Web3PacksState - Only Web3Packs");
+    require(msg.sender == _web3packs, "Web3PacksVault - Only Web3Packs");
     _;
   }
 
-  function getBundlerById(bytes32 bundlerId) external view returns (address bundler) {
-    bundler = _bundlersById[bundlerId];
+  modifier onlyWeb3PacksOrZkgm() {
+    require(msg.sender == _zkgm || msg.sender == _web3packs, "Web3PacksVault - Only Web3Packs or ZKGM");
+    _;
   }
 
-  function getPackPriceByPackId(uint256 tokenId) external view returns (uint256 packPrice) {
-    packPrice = _packPriceByPackId[tokenId];
+  function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+    return interfaceId == type(IWeb3PacksVault).interfaceId
+      || interfaceId == type(IZkgmable).interfaceId
+      || super.supportsInterface(interfaceId);
   }
 
-  function getBundlesByPackId(uint256 tokenId) external view returns (bytes32[] memory bundles) {
-    bundles = _bundlesByPackId[tokenId];
+  function getReferrerBalance(address account) external view returns (uint256 balance) {
+    balance = _referrerBalance[account];
   }
 
 
@@ -80,51 +86,87 @@ contract Web3PacksState is
   |         Only Web3 Packs           |
   |__________________________________*/
 
-  function setPackPriceByPackId(uint256 tokenId, uint256 packPrice) external onlyWeb3Packs {
-    if (packPrice > 0) {
-      _packPriceByPackId[tokenId] = packPrice;
-    } else {
-      delete _packPriceByPackId[tokenId];
+  function updateReferrerBalances(uint256, address[] memory referrers, uint256[] memory amounts) external onlyWeb3PacksOrZkgm {
+    require(referrers.length == amounts.length, "Input length mismatch");
+    for (uint256 i = 0; i < referrers.length; i++) {
+      _referrerBalance[referrers[i]] += amounts[i];
     }
   }
 
-  function setBundlesByPackId(uint256 tokenId, bytes32[] memory bundles) external onlyWeb3Packs {
-    if (bundles.length > 0) {
-      _bundlesByPackId[tokenId] = bundles;
-    } else {
-      delete _bundlesByPackId[tokenId];
+  function claimReferralRewards(address payable account) external onlyWeb3Packs {
+    uint256 balance = _referrerBalance[account];
+    if (address(this).balance >= balance) {
+      account.sendValue(balance);
+      delete _referrerBalance[account];
+      emit BalanceClaimed(account, balance);
     }
   }
 
+
+  /***********************************|
+  |         Only Union-ZKGM           |
+  |__________________________________*/
+
+  function onZkgm(
+    address,
+    uint256 path,
+    uint32 sourceChannelId,
+    uint32 destinationChannelId,
+    bytes calldata sender,
+    bytes calldata message,
+    address,
+    bytes calldata
+  ) external onlyWeb3PacksOrZkgm {
+    // Verify that the sourceChannelId and sender are authorized...
+    // todo..
+
+    // Process the cross-chain message
+    emit MessageReceived(
+      path,
+      sourceChannelId,
+      destinationChannelId,
+      address(bytes20(sender)),
+      message
+    );
+  }
+
+  function onIntentZkgm(
+    address,
+    uint256,
+    uint32,
+    uint32,
+    bytes calldata,
+    bytes calldata,
+    address,
+    bytes calldata
+  ) external onlyWeb3PacksOrZkgm {
+    // no-op
+  }
 
   /***********************************|
   |          Only Admin/DAO           |
   |__________________________________*/
 
   function setWeb3Packs(address web3packs) external onlyOwner {
-    require(web3packs != address(0), "Invalid address for treasury");
+    require(web3packs != address(0), "Invalid address for web3packs");
     _web3packs = web3packs;
     emit Web3PacksSet(web3packs);
   }
 
-  function registerBundlerId(bytes32 bundlerId, address bundlerAddress) external onlyOwner {
-    _bundlersById[bundlerId] = bundlerAddress;
-    emit BundlerRegistered(bundlerAddress, bundlerId);
-  }
-
-  function migratePackData(address oldWeb3Packs, uint256 tokenId, bytes32[] memory bundleIds) public onlyOwner {
-    uint256 packPriceEth = IWeb3Packs(oldWeb3Packs).getPackPriceEth(tokenId);
-    _packPriceByPackId[tokenId] = packPriceEth;
-    _bundlesByPackId[tokenId] = bundleIds;
+  function setZkgm(address zkgm) external onlyOwner {
+    _zkgm = zkgm;
+    emit ZkgmSet(zkgm);
   }
 
   function migrateRewards(address payable newVault) public onlyOwner {
+    require(newVault.supportsInterface(type(IWeb3PacksVault).interfaceId), "Invalid Vault");
     uint256 balance = address(this).balance;
     if (balance > 0) {
       newVault.sendValue(balance);
       emit RewardsMigrated(newVault, balance);
     }
   }
+
 
   /***********************************|
   |          Only Admin/DAO           |

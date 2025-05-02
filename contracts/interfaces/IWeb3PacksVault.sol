@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-// IWeb3PacksState.sol
+// IWeb3PacksVault.sol
 // Copyright (c) 2025 Firma Lux, Inc. <https://charged.fi>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,13 +22,9 @@
 // SOFTWARE.
 pragma solidity 0.8.17;
 
-interface IWeb3PacksState {
-  function getBundlerById(bytes32 bundlerId) external view returns (address bundler);
-  function setPackPriceByPackId(uint256 tokenId, uint256 packPrice) external;
-  function getPackPriceByPackId(uint256 tokenId) external view returns (uint256 packPrice);
-  function setBundlesByPackId(uint256 tokenId, bytes32[] memory bundles) external;
-  function getBundlesByPackId(uint256 tokenId) external view returns (bytes32[] memory bundles);
+import "./IWeb3PacksVaultBase.sol";
 
-  function setWeb3Packs(address web3packs) external;
-  function registerBundlerId(bytes32 bundlerId, address bundlerAddress) external;
+interface IWeb3PacksVault is IWeb3PacksVaultBase {
+  function getReferrerBalance(address referrer) external view returns (uint256 balance);
+  function claimReferralRewards(address payable account) external;
 }

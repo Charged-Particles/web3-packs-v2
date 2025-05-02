@@ -41,6 +41,7 @@ import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "./lib/BlackholePrevention.sol";
 import "./interfaces/IWeb3Packs.sol";
 import "./interfaces/IWeb3PacksState.sol";
+import "./interfaces/IWeb3PacksVault.sol";
 import "./interfaces/IWeb3PacksDefs.sol";
 import "./interfaces/IWeb3PacksBundler.sol";
 import "./interfaces/IChargedState.sol";
@@ -59,17 +60,22 @@ contract Web3PacksV2 is
   event ChargedParticlesSet(address indexed chargedParticles);
   event ChargedStateSet(address indexed chargedState);
   event Web3PacksStateSet(address indexed web3state);
+  event Web3PacksVaultSet(address indexed web3vault);
   event ProtonSet(address indexed proton);
   event PackBundled(uint256 indexed tokenId, address indexed receiver, bytes32 packType, uint256 ethPackPrice);
   event PackUnbundled(uint256 indexed tokenId, address indexed receiver, uint256 ethAmount);
   event ProtocolFeeSet(uint256 fee);
+  event RewardsPercentSet(uint256 max, uint256 step);
   event Web3PacksTreasurySet(address indexed treasury);
 
   uint256 private constant BASIS_POINTS = 10000;
+  uint256 public _rewardsMax = 330;  // 3.3%
+  uint256 public _rewardsStep = 30;  // 0.3%
 
   address public _weth;
   address public _proton;
   address public _web3state;
+  address public _web3vault;
   address public _chargedParticles;
   address public _chargedState;
   address payable internal _treasury;
@@ -114,7 +120,7 @@ contract Web3PacksV2 is
     returns(uint256 tokenId)
   {
     _collectFees(ethPackPrice);
-    uint256 rewards = _calculateReferralRewards(ethPackPrice, referrals);
+    uint256 rewards = _collectReferralRewards(ethPackPrice, referrals);
     tokenId = _bundle(
       bundleChunks,
       tokenMetaUri,
@@ -181,8 +187,13 @@ contract Web3PacksV2 is
   }
 
   function getReferralRewardsOf(address account) public view override returns (uint256 balance) {
-    balance = IWeb3PacksState(_web3state).getReferrerBalance(account);
+    balance = IWeb3PacksVault(_web3vault).getReferrerBalance(account);
   }
+
+  function claimReferralRewards(address payable account) public override nonReentrant {
+    IWeb3PacksVault(_web3vault).claimReferralRewards(account);
+  }
+
 
   /***********************************|
   |     Private Bundle Functions      |
@@ -497,33 +508,38 @@ contract Web3PacksV2 is
     _treasury.sendValue(fees);
   }
 
-  function _calculateReferralRewards(
+  function _collectReferralRewards(
     uint256 ethPackPrice,
     address[] memory referrals
   ) internal returns (uint256 fee) {
-    uint256 referralAmountTotal = ((ethPackPrice * 330) / BASIS_POINTS);  // 3.3%
-    IWeb3PacksState _state = IWeb3PacksState(_web3state);
+    uint256 referralAmountTotal = ((ethPackPrice * _rewardsMax) / BASIS_POINTS);
+    uint256[] memory referralAmounts;
+    IWeb3PacksVault _vault = IWeb3PacksVault(_web3vault);
 
     // Calculate Referral Amounts and Distribute
     if (referrals.length > 0 && referrals[0] != address(0)) {
+      referralAmounts = new uint256[](referrals.length);
+
       // Remove Referral Value from Funding Value
       fee = referralAmountTotal;
 
       if (referrals.length > 1 && referrals[1] != address(0)) {
+        referralAmounts[0] = (ethPackPrice * _rewardsStep) / BASIS_POINTS;
         if (referrals.length > 2 && referrals[2] != address(0)) {
-          _state.addToReferrerBalance(referrals[0], (ethPackPrice * 30) / BASIS_POINTS);    // 0.3%
-          _state.addToReferrerBalance(referrals[1], (ethPackPrice * 30) / BASIS_POINTS);    // 0.3%
-          _state.addToReferrerBalance(referrals[2], (ethPackPrice * 270) / BASIS_POINTS);   // 2.7%
+          referralAmounts[1] = (ethPackPrice * _rewardsStep) / BASIS_POINTS;
+          referralAmounts[2] = (ethPackPrice * (_rewardsMax - (_rewardsStep * 2))) / BASIS_POINTS;
         } else {
-          _state.addToReferrerBalance(referrals[0], (ethPackPrice * 30) / BASIS_POINTS);    // 0.3%
-          _state.addToReferrerBalance(referrals[1], (ethPackPrice * 300) / BASIS_POINTS);   // 3.0%
+          referralAmounts[1] = (ethPackPrice * (_rewardsMax - _rewardsStep)) / BASIS_POINTS;
         }
       } else {
-        _state.addToReferrerBalance(referrals[0], referralAmountTotal);   // 3.3%
+        referralAmounts[0] = referralAmountTotal;
       }
 
-      // Transfer Rewards to State Contract
-      payable(_web3state).sendValue(fee);
+      // Transfer Rewards to Vault Contract
+      payable(_web3vault).sendValue(fee);
+
+      // Update Referrer Balances
+      _vault.updateReferrerBalances(referralAmountTotal, referrals, referralAmounts);
     }
   }
 
@@ -558,6 +574,12 @@ contract Web3PacksV2 is
     emit Web3PacksStateSet(web3state);
   }
 
+  function setWeb3PacksVault(address web3vault) external onlyOwner {
+    require(web3vault != address(0), "Invalid address for web3vault");
+    _web3vault = web3vault;
+    emit Web3PacksVaultSet(web3vault);
+  }
+
   function setTreasury(address payable treasury) external onlyOwner {
     require(treasury != address(0), "Invalid address for treasury");
     _treasury = treasury;
@@ -567,6 +589,12 @@ contract Web3PacksV2 is
   function setProtocolFee(uint256 fee) external onlyOwner {
     _protocolFee = fee;
     emit ProtocolFeeSet(fee);
+  }
+
+  function setRewardsPercent(uint256 max, uint256 step) external onlyOwner {
+    _rewardsMax = max;
+    _rewardsStep = step;
+    emit RewardsPercentSet(max, step);
   }
 
   function pause() public onlyOwner {

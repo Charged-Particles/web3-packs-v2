@@ -35,7 +35,8 @@
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
     "@uniswap/v3-core": "^1.0.1",
     "@uniswap/v3-periphery": "^1.4.3",
-    "@uniswap/v3-sdk": "^3.9.0"
+    "@uniswap/v3-sdk": "^3.9.0",
+    "solady": "^0.1.17"
   },
   "devDependencies": {
     "@charged-particles/charged-js-sdk": "https://github.com/Charged-Particles/charged-js-sdk.git",
@@ -65,7 +66,7 @@
     "hardhat-watcher": "^2.1.1",
     "lodash": "^4.17.21",
     "mocha-junit-reporter": "^2.2.1",
-    "solc": "0.8.17",
+    "solc": "0.8.27",
     "solhint": "^3.0.0",
     "solidity-coverage": "^0.8.14",
     "solidity-docgen": "^0.5.3",

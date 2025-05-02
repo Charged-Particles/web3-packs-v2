@@ -72,4 +72,7 @@ interface IWeb3Packs is IWeb3PacksDefs {
   function getReferralRewardsOf(address account)
     external
     returns (uint256 balance);
+
+  function claimReferralRewards(address payable account)
+    external;
 }
