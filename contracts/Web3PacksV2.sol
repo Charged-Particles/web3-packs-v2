@@ -28,7 +28,7 @@
 //   \/  \/ \___|_.__/____/\/    \__,_|\___|_|\_\___/      \_/ |_____|
 //
 
-pragma solidity 0.8.17;
+pragma solidity 0.8.27;
 
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";

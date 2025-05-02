@@ -20,7 +20,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-pragma solidity 0.8.17;
+pragma solidity 0.8.27;
 
 interface IWeb3PacksVaultBase {
   function updateReferrerBalances(uint256 referralAmountTotal, address[] memory referrers, uint256[] memory amounts) external;
