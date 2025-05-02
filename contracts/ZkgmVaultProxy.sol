@@ -55,6 +55,7 @@ contract ZkgmVaultProxy is
   address public _rewardsToken;
   address public _web3packs;
   address public _web3packsVault;
+  uint32 public _destinationPath;
   uint32 public _destinationChannelId;
 
   constructor(
@@ -131,11 +132,14 @@ contract ZkgmVaultProxy is
 
   function _getTransferInstruction(uint256 referralAmountTotal) internal returns (Instruction memory orderInstrunction) {
     bytes memory vault = abi.encodePacked(_web3packsVault);
-    bytes memory quoteToken = abi.encodePacked(address(0)); // TODO
+
+    // Predict wrapped token address
+    (address wrappedToken, ) = _zkgm.predictWrappedToken(_destinationPath, _destinationChannelId, abi.encodePacked(_rewardsToken));
+    bytes memory quoteToken = abi.encodePacked(wrappedToken);
 
     // Create fungible asset order instruction
     orderInstrunction = _zkgm.makeFungibleAssetOrder(
-      0,
+      _destinationPath,
       _destinationChannelId,
       msg.sender,
       vault,                // receiver,
@@ -196,6 +200,10 @@ contract ZkgmVaultProxy is
 
   function setChannelId(uint32 channelId) external onlyOwner {
     _destinationChannelId = channelId;
+  }
+
+  function setDestinationPath(uint32 path) external onlyOwner {
+    _destinationPath = path;
   }
 
 
