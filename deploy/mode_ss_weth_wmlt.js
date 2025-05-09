@@ -1,4 +1,4 @@
-const { chainIdByName, toBytes, isHardhat, findNearestValidTick, log } = require('../js-helpers/utils');
+const { chainIdByName, toBytes, isHardhat, findNearestValidTick, tryGetContract, log } = require('../js-helpers/utils');
 const { verifyContract } = require('../js-helpers/verifyContract');
 const globals = require('../js-helpers/globals');
 
@@ -35,7 +35,7 @@ module.exports = async (hre) => {
     tokenAddress.usdc,
   ];
 
-  let bundler = await ethers.getContract(bundlerContractName);
+  let bundler = await tryGetContract(bundlerContractName);
   if (!bundler.address) {
     //
     // Deploy Contracts

@@ -1,7 +1,30 @@
 const { utils } = require('ethers');
 
+// Chains:
+// 1 - Ethereum Mainnet
+// 11155111 - Ethereum Sepolia Testnet
+
+// 919 - MODE Mainnet
+// 34443 - MODE Testnet
+
+// 56 - BSC Mainnet
+// 97 - BSC Testnet
+
+// 137 - Polygon Mainnet
+// 80001 - Polygon Mumbai Testnet
+
+// 8453 - Base Mainnet
+// 84532 - Base Testnet
+
+// 80094 - Berachain Mainnet
+// 80069 - Berachain Bepolia Testnet
+
+// 57073 - INK Mainnet
+// 763373 - INK Testnet
+
 const globals = {
   contracts: {
+    // MODE
     919: {
       chargedParticles: '0xdD5B990d752d53A93CcaE0aA3aDBbe0940d93d46',
       chargedState: '0x7a6561daD7EfB841D08B6891AFbFE7e98D8052D6',
@@ -12,6 +35,18 @@ const globals = {
       chargedState: '0x2691B4f4251408bA4b8bf9530B6961b9D0C1231F',
       protonC: '0x76a5df1c6F53A4B80c8c8177edf52FBbC368E825',
     },
+    // INK
+    763373: {
+      chargedParticles: '0x2Ff4613a12570a77D88376A3e5d0FF68953b3fd8',
+      chargedState: '0x10a4b06BA9aC1Bf6e44F17EAf5c0D05c98F82704',
+      protonC: '0xd7240874cf781531520ce59373624B30d788d27f',
+    },
+    57073: {
+      chargedParticles: '0x54b32b288d7904D5d98Be1910975a80e45DA5e8d',
+      chargedState: '0xB29256073C63960daAa398f1227D0adBC574341C',
+      protonC: '0xe2a9b15E283456894246499Fb912CCe717f83319',
+    },
+    // BSC
     97: {
       chargedParticles: '0x4a7b80e418454a21A49885b009d51f0d0A6Ed77A',
       chargedState: '0xc42De19eB6eB8fa3eCCcA9Ad0F2E4795c468310f',
@@ -20,6 +55,7 @@ const globals = {
   },
 
   tokenAddress: {
+    // MODE
     919: {
       weth: '0xeb72756ee12309Eae82a0deb9787e69f5b62949c',
       mode: '0x4FFa6cDEB4deF980b75e3F4764797A2CAd1fAEF3',
@@ -49,6 +85,18 @@ const globals = {
       cartel: '0x98E0AD23382184338dDcEC0E13685358EF845f30',
       gambl: '0x6bb4a37643e7613e812a8d1af5e675cc735ea1e2',
     },
+    // INK
+    57073: {
+      weth: '0x4200000000000000000000000000000000000006',
+      ieth: '0x11476323D8DFCBAFac942588E2f38823d2Dd308e',
+      usdt0: '0x0200C29006150606B650577BBE7B6248F58470c1',
+      kbtc: '0x73E0C0d45E048D25Fc26Fa3159b0aA04BfA4Db98',
+      usdce: '0xF1815bd50389c46847f0Bda824eC8da914045D14',
+    },
+    763373: {
+      weth: '0x4200000000000000000000000000000000000006',
+    },
+    // BSC
     97: {
       weth: '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd', // WBNB on BSC
       busd: '0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee',
@@ -59,6 +107,7 @@ const globals = {
   },
 
   router: {
+    // MODE
     919: {
       velodrome: '',
       velodromeV2: '',
@@ -75,6 +124,16 @@ const globals = {
       balancer: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
       swapMode: '0xc1e624C810D297FD70eF53B0E08F44FABE468591',
     },
+    // INK
+    763373: {
+      velodrome: '',
+      velodromeV2: '',
+    },
+    57073: {
+      velodrome: '0x3a63171DD9BebF4D07BC782FECC7eb0b890C2A45',
+      velodromeV2: '0x652e53C6a4FE39B6B30426d9c96376a105C89A95',
+    },
+    // BSC
     97: {
       pancakeSwapUni: '0x9A082015c919AD0E47861e5Db9A1c7070E81A2C7',
       pancakeSwapV3: '0x1b81D678ffb9C0263b24A97847620C99d213eB14',
@@ -92,6 +151,47 @@ const globals = {
       balancerMode: '0x7c86a44778c52a0aad17860924b53bf3f35dc932000200000000000000000007',
       balancerEzEth: '0x16453789fed619c7fa18c068dec1cb2766ba2e3e000000000000000000000006',
     },
+  },
+
+  union: {
+    // MODE
+    919: {
+      zkgm: '0x0000000000000000000000000000000000000000',
+      rewardsToken: '0x0000000000000000000000000000000000000000',
+      rewardsQuoteToken: '0x0000000000000000000000000000000000000000',
+      destinationPath: 0,
+      destinationChannelId: 0,
+    },
+    34443: {
+      zkgm: '0x0000000000000000000000000000000000000000',
+      rewardsToken: '0x0000000000000000000000000000000000000000',
+      rewardsQuoteToken: '0x0000000000000000000000000000000000000000',
+      destinationPath: 0,
+      destinationChannelId: 0,
+    },
+    // INK
+    763373: {
+      zkgm: '0x0000000000000000000000000000000000000000',
+      rewardsToken: '0x0000000000000000000000000000000000000000',
+      rewardsQuoteToken: '0x0000000000000000000000000000000000000000',
+      destinationPath: 0,
+      destinationChannelId: 0,
+    },
+    57073: {
+      zkgm: '0x0000000000000000000000000000000000000000',
+      rewardsToken: '0x0000000000000000000000000000000000000000',
+      rewardsQuoteToken: '0x0000000000000000000000000000000000000000',
+      destinationPath: 0,
+      destinationChannelId: 0,
+    },
+    // BSC
+    97: {
+      zkgm: '0x0000000000000000000000000000000000000000',
+      rewardsToken: '0x0000000000000000000000000000000000000000',
+      rewardsQuoteToken: '0x0000000000000000000000000000000000000000',
+      destinationPath: 0,
+      destinationChannelId: 0,
+    }
   },
 
   // Standard Parameters

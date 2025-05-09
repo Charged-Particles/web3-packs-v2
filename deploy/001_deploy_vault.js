@@ -1,0 +1,138 @@
+const { chainNameById, chainIdByName, isHardhat, log } = require('../js-helpers/utils');
+const { verifyContract } = require('../js-helpers/verifyContract');
+const globals = require('../js-helpers/globals');
+const _ = require('lodash');
+
+const _PRIMARY_VAULT_CHAIN_ID = 1;
+
+module.exports = async (hre) => {
+  const { ethers, getNamedAccounts, deployments } = hre;
+  const { deploy } = deployments;
+  const { deployer } = await getNamedAccounts();
+  const network = await hre.network;
+  const chainId = chainIdByName(network.name);
+  const asPrimaryVault = true; // isHardhat(network) || _PRIMARY_VAULT_CHAIN_ID === chainId;
+
+  const contracts = globals.contracts[chainId];
+  const union = globals.union[chainId];
+  const useExistingVaultContract = isHardhat(network) ? '' : '';
+  const useExistingVaultProxyContract = isHardhat(network) ? '' : '';
+
+  async function _deployPrimaryVault(web3packsAddress) {
+    // Deploy & Verify Vault
+    if (useExistingVaultContract.length === 0) {
+      log('  Deploying ZkgmVault...');
+      const constructorArgs = [
+        web3packsAddress,
+        union.zkgm,
+      ];
+      await deploy('ZkgmVault', {
+        from: deployer,
+        args: constructorArgs,
+        log: true,
+      });
+
+      if (!isHardhat(network)) {
+        await verifyContract('ZkgmVault', await ethers.getContract('ZkgmVault'), constructorArgs);
+      }
+    }
+
+    // Get Deployed ZkgmVault
+    let web3packsVault;
+    if (useExistingVaultContract.length === 0) {
+      web3packsVault = await ethers.getContract('ZkgmVault');
+    } else {
+      web3packsVault = await ethers.getContractAt('ZkgmVault', useExistingVaultContract);
+    }
+    return web3packsVault;
+  }
+
+  async function _deployProxyVault(web3packsAddress) {
+    // Deploy & Verify Vault
+    if (useExistingVaultProxyContract.length === 0) {
+      log('  Deploying ZkgmVaultProxy...');
+      const constructorArgs = [
+        web3packsAddress,
+        union.zkgm,
+      ];
+      await deploy('ZkgmVaultProxy', {
+        from: deployer,
+        args: constructorArgs,
+        log: true,
+      });
+
+      if (!isHardhat(network)) {
+        await verifyContract('ZkgmVaultProxy', await ethers.getContract('ZkgmVaultProxy'), constructorArgs);
+      }
+    }
+
+    // Get Deployed ZkgmVaultProxy
+    let web3packsVaultProxy;
+    if (useExistingVaultProxyContract.length === 0) {
+      web3packsVaultProxy = await ethers.getContract('ZkgmVaultProxy');
+    } else {
+      web3packsVaultProxy = await ethers.getContractAt('ZkgmVaultProxy', useExistingVaultProxyContract);
+    }
+    return web3packsVaultProxy;
+  }
+
+
+  log('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+  log('Charged Particles - Web3 Packs V2 - Vault Deployment');
+  log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n');
+
+  log(`  Using Network: ${chainNameById(chainId)} (${network.name}:${chainId})`);
+  log('  Using Accounts:');
+  log('  - Deployer: ', deployer);
+  log('  - ZKGM:     ', contracts.zkgm);
+  log(' ');
+
+  if (!asPrimaryVault) {
+    log('  Deploying Vault as Proxy..\n');
+    if (useExistingVaultContract.length === 0) {
+      log('  Missing Primary Vault Contract Address!\n');
+      return;
+    }
+  }
+
+  // Get Deployed Web3PacksV2
+  const web3packs = await ethers.getContract('Web3PacksV2');
+
+  // Deploy & Verify Vault
+  let vault;
+  if (asPrimaryVault) {
+    vault = await _deployPrimaryVault(web3packs.address);
+
+    // Configure Newly Deployed ZkgmVault
+    log(`  Setting Vault in Web3Packs: ${vault.address}`);
+    await web3packs.setWeb3PacksVault(vault.address).then(tx => tx.wait());
+  } else {
+    vault = await _deployProxyVault(web3packs.address);
+
+    const rewardsToken = '';
+    const rewardsQuoteToken = '';
+    const channelId = 1;
+    const destinationPath = 1;
+
+    // Configure Newly Deployed ZkgmVaultProxy
+    log(`  Setting Vault in Web3Packs: ${vault.address}`);
+    await web3packs.setWeb3PacksVault(vault.address).then(tx => tx.wait());
+
+    log(`  Setting Primary Vault in VaultProxy: ${useExistingVaultContract}`);
+    await vault.setWeb3PacksVault(useExistingVaultContract).then(tx => tx.wait());
+
+    log(`  Setting Rewards Token in VaultProxy: ${rewardsToken}`);
+    await vault.setRewardsToken(rewardsToken).then(tx => tx.wait());
+
+    log(`  Setting Rewards Quote Token in VaultProxy: ${rewardsQuoteToken}`);
+    await vault.setRewardsQuoteToken(rewardsQuoteToken).then(tx => tx.wait());
+
+    log(`  Setting Channel ID in VaultProxy: ${channelId}`);
+    await vault.setChannelId(channelId).then(tx => tx.wait());
+
+    log(`  Setting Destination Path in VaultProxy: ${destinationPath}`);
+    await vault.setDestinationPath(destinationPath).then(tx => tx.wait());
+  }
+};
+
+module.exports.tags = ['zkgmVault']

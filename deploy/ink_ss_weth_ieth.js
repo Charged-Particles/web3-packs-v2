@@ -2,8 +2,8 @@ const { chainIdByName, toBytes, isHardhat, findNearestValidTick, tryGetContract,
 const { verifyContract } = require('../js-helpers/verifyContract');
 const globals = require('../js-helpers/globals');
 
-const bundlerContractName = 'SSWethIonx';
-const bundlerId = 'SS-WETH-IONX';
+const bundlerContractName = 'SSInkWethIeth';
+const bundlerId = 'SS-INK-WETH-IETH';
 const priceSlippage = 300n; // 3%
 
 module.exports = async (hre) => {
@@ -13,6 +13,9 @@ module.exports = async (hre) => {
   const network = await hre.network;
   const chainId = chainIdByName(network.name);
 
+  // Only run on INK Chains
+  if (chainId !== 57073 && chainId !== 763373) { return; }
+
   const routers = globals.router[chainId];
   const tokenAddress = globals.tokenAddress[chainId];
   const web3packs = await ethers.getContract('Web3PacksV2');
@@ -21,10 +24,10 @@ module.exports = async (hre) => {
   const constructorArgs = [{
     weth: tokenAddress.weth,
     token0: tokenAddress.weth,
-    token1: tokenAddress.ionx,
+    token1: tokenAddress.ieth,
     manager: web3packs.address,
-    swapRouter: routers.kim,
-    liquidityRouter: routers.kimNft,
+    swapRouter: routers.velodromeV2,
+    liquidityRouter: routers.velodromeV2,
     poolId: toBytes(''),
     bundlerId: toBytes(bundlerId),
     slippage: priceSlippage,
