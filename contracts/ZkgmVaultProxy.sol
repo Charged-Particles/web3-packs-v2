@@ -34,7 +34,6 @@ import "./interfaces/IWeb3PacksVaultBase.sol";
 import "./interfaces/union/IZkgm.sol";
 import "./interfaces/union/Lib.sol";
 
-
 contract ZkgmVaultProxy is
   IWeb3PacksVaultBase,
   ERC165,
@@ -48,29 +47,25 @@ contract ZkgmVaultProxy is
 
   event Web3PacksSet(address indexed web3packs);
   event Web3PacksVaultSet(address indexed web3packsVault);
-  event RewardsTokenSet(address indexed rewardsToken);
   event ZkgmSet(address indexed zkgm);
+  event RewardsTokenSet(address indexed rewardsToken);
+  event RewardsQuoteTokenSet(address indexed rewardsToken);
+  event ChannelIdSet(uint32 channelId);
+  event DestinationPathSet(uint32 destinationPath);
 
-  IZkgm public _zkgm;
-  address public _rewardsToken;
-  address public _web3packs;
-  address public _web3packsVault;
-  uint32 public _destinationPath;
-  uint32 public _destinationChannelId;
+  IZkgm internal _zkgm;
+  address internal _web3packs;
+  address internal _rewardsToken;
+  uint32 internal _destinationPath;
+  uint32 internal _destinationChannelId;
+  bytes internal _web3packsVault;
+  bytes internal _rewardsQuoteToken;
 
-  constructor(
-    address web3packs,
-    address web3packsVault,
-    address rewardsToken,
-    address zkgm
-  ) Ownable() {
+
+  constructor(address web3packs, address zkgm) Ownable() {
     require(web3packs != address(0), "Invalid address for web3packs");
-    require(web3packsVault != address(0), "Invalid address for vault");
-    require(rewardsToken != address(0), "Invalid address for rewardsToken");
     require(zkgm != address(0), "Invalid address for zkgm");
     _web3packs = web3packs;
-    _web3packsVault = web3packsVault;
-    _rewardsToken = rewardsToken;
     _zkgm = IZkgm(zkgm);
   }
 
@@ -91,7 +86,7 @@ contract ZkgmVaultProxy is
   |__________________________________*/
 
   function updateReferrerBalances(uint256 referralAmountTotal, address[] calldata referrers, uint256[] calldata amounts) external onlyWeb3Packs {
-    uint64 timeoutTimestamp = uint64(block.timestamp + 60);
+    require(referrers.length == amounts.length, "Input length mismatch");
 
     // Approve Token Transfer to Zkgm
     IERC20(_rewardsToken).approve(address(_zkgm), referralAmountTotal);
@@ -106,7 +101,7 @@ contract ZkgmVaultProxy is
     // Send Cross-chain Transaction
     _zkgm.send(
       _destinationChannelId,
-      timeoutTimestamp,
+      uint64(block.timestamp + 60),
       0,          // block timeout [Optional]
       bytes32(0), // salt,
       instructions
@@ -117,7 +112,7 @@ contract ZkgmVaultProxy is
     uint256 referralAmountTotal,
     address[] calldata referrers,
     uint256[] calldata amounts
-  ) internal returns (Instruction memory batchInstrunction) {
+  ) internal view returns (Instruction memory batchInstrunction) {
     Instruction[] memory instructions = new Instruction[](2);
 
     // Create fungible asset order instruction
@@ -130,22 +125,16 @@ contract ZkgmVaultProxy is
     batchInstrunction = ZkgmLib.makeBatch(instructions);
   }
 
-  function _getTransferInstruction(uint256 referralAmountTotal) internal returns (Instruction memory orderInstrunction) {
-    bytes memory vault = abi.encodePacked(_web3packsVault);
-
-    // Predict wrapped token address
-    (address wrappedToken, ) = _zkgm.predictWrappedToken(_destinationPath, _destinationChannelId, abi.encodePacked(_rewardsToken));
-    bytes memory quoteToken = abi.encodePacked(wrappedToken);
-
+  function _getTransferInstruction(uint256 referralAmountTotal) internal view returns (Instruction memory orderInstrunction) {
     // Create fungible asset order instruction
-    orderInstrunction = _zkgm.makeFungibleAssetOrder(
+    orderInstrunction = IZkgm(_zkgm).makeFungibleAssetOrder(
       _destinationPath,
       _destinationChannelId,
       msg.sender,
-      vault,                // receiver,
+      _web3packsVault,      // receiver,
       _rewardsToken,        // baseToken,
       referralAmountTotal,  // baseAmount,
-      quoteToken,           // quoteToken,
+      _rewardsQuoteToken,   // quoteToken,
       referralAmountTotal   // quoteAmount
     );
   }
@@ -154,14 +143,12 @@ contract ZkgmVaultProxy is
     uint256 referralAmountTotal,
     address[] calldata referrers,
     uint256[] calldata amounts
-  ) internal returns (Instruction memory updateInstrunction) {
-    bytes memory vault = abi.encodePacked(_web3packsVault);
-
+  ) internal view returns (Instruction memory updateInstrunction) {
     // Create Contract Call Instruction
     updateInstrunction = ZkgmLib.makeMultiplexCall(
       msg.sender,
       false, // isEureka (IBC-style callbacks)
-      vault,
+      _web3packsVault,
       abi.encodeCall(
         IWeb3PacksVaultBase.updateReferrerBalances,
         (referralAmountTotal, referrers, amounts)
@@ -181,15 +168,9 @@ contract ZkgmVaultProxy is
   }
 
   function setWeb3PacksVault(address web3packsVault) external onlyOwner {
-    require(web3packsVault != address(0), "Invalid address for vault");
-    _web3packsVault = web3packsVault;
+    require(web3packsVault != address(0), "Invalid address for web3packsVault");
+    _web3packsVault = abi.encodePacked(web3packsVault);
     emit Web3PacksVaultSet(web3packsVault);
-  }
-
-  function setRewardsToken(address rewardsToken) external onlyOwner {
-    require(rewardsToken != address(0), "Invalid address for rewardsToken");
-    _rewardsToken = rewardsToken;
-    emit RewardsTokenSet(rewardsToken);
   }
 
   function setZkgm(address zkgm) external onlyOwner {
@@ -198,12 +179,28 @@ contract ZkgmVaultProxy is
     emit ZkgmSet(zkgm);
   }
 
+  function setRewardsToken(address rewardsToken) external onlyOwner {
+    require(rewardsToken != address(0), "Invalid address for rewardsToken");
+    _rewardsToken = rewardsToken;
+    emit RewardsTokenSet(rewardsToken);
+  }
+
+  function setRewardsQuoteToken(address quoteToken) external onlyOwner {
+    require(quoteToken != address(0), "Invalid address for quoteToken");
+    _rewardsQuoteToken = abi.encodePacked(quoteToken);
+    emit RewardsQuoteTokenSet(quoteToken);
+  }
+
   function setChannelId(uint32 channelId) external onlyOwner {
+    require(channelId != 0, "Invalid channelId");
     _destinationChannelId = channelId;
+    emit ChannelIdSet(channelId);
   }
 
   function setDestinationPath(uint32 path) external onlyOwner {
+    require(path != 0, "Invalid destinationPath");
     _destinationPath = path;
+    emit DestinationPathSet(path);
   }
 
 

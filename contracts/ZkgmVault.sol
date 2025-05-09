@@ -42,21 +42,21 @@ contract ZkgmVault is
 {
   using Address for address payable;
   using ERC165Checker for address payable;
-  using SafeERC20 for *;
+  using SafeERC20 for address;
 
   event Web3PacksSet(address indexed web3packs);
   event ZkgmSet(address indexed zkgm);
   event BalanceClaimed(address indexed account, uint256 balance);
-  event RewardsMigrated(address indexed newWeb3state, uint256 balance);
   event MessageReceived(uint256 path, uint32 sourceChannelId, uint32 destinationChannelId, address sender, bytes message);
 
-  address public _zkgm;
-  address public _web3packs;
+  address internal _zkgm;
+  address internal _web3packs;
   mapping (address => uint256) internal _referrerBalance;
 
   constructor(address web3packs, address zkgm) Ownable() {
-    _zkgm = zkgm;
+    require(web3packs != address(0), "Invalid address for web3packs");
     _web3packs = web3packs;
+    _zkgm = zkgm; // optional
   }
 
   receive() external payable {}
@@ -86,7 +86,7 @@ contract ZkgmVault is
   |         Only Web3 Packs           |
   |__________________________________*/
 
-  function updateReferrerBalances(uint256, address[] memory referrers, uint256[] memory amounts) external onlyWeb3PacksOrZkgm {
+  function updateReferrerBalances(uint256, address[] calldata referrers, uint256[] calldata amounts) external onlyWeb3PacksOrZkgm {
     require(referrers.length == amounts.length, "Input length mismatch");
     for (uint256 i = 0; i < referrers.length; i++) {
       _referrerBalance[referrers[i]] += amounts[i];
@@ -156,15 +156,6 @@ contract ZkgmVault is
   function setZkgm(address zkgm) external onlyOwner {
     _zkgm = zkgm;
     emit ZkgmSet(zkgm);
-  }
-
-  function migrateRewards(address payable newVault) public onlyOwner {
-    require(newVault.supportsInterface(type(IWeb3PacksVault).interfaceId), "Invalid Vault");
-    uint256 balance = address(this).balance;
-    if (balance > 0) {
-      newVault.sendValue(balance);
-      emit RewardsMigrated(newVault, balance);
-    }
   }
 
 
