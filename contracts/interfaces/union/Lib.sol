@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.27;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -209,7 +210,7 @@ library ZkgmLib {
 
     function isDeployed(
         address addr
-    ) internal returns (bool) {
+    ) internal view returns (bool) {
         uint32 size = 0;
         assembly {
             size := extcodesize(addr)
@@ -329,12 +330,12 @@ library ZkgmLib {
         uint256 baseAmount,
         bytes memory quoteToken,
         uint256 quoteAmount
-    ) internal returns (Instruction memory) {
+    ) internal view returns (Instruction memory) {
         (address wrappedToken,) = zkgm.predictWrappedToken(
             ZkgmLib.reverseChannelPath(path), channelId, quoteToken
         );
         uint256 origin = zkgm.tokenOrigin(baseToken);
-        (uint256 baseOrigin, uint32 finalChannelId) =
+        (, uint32 finalChannelId) =
             ZkgmLib.popChannelFromPath(origin);
         uint256 baseTokenPath = finalChannelId == channelId
             && abi.encodePacked(baseToken).eq(abi.encodePacked(wrappedToken))
@@ -368,7 +369,7 @@ library ZkgmLib {
         bool eureka,
         bytes memory contractAddress,
         bytes memory contractCalldata
-    ) internal returns (Instruction memory) {
+    ) internal pure returns (Instruction memory) {
         return Instruction({
             version: INSTR_VERSION_0,
             opcode: OP_FUNGIBLE_ASSET_ORDER,
@@ -385,7 +386,7 @@ library ZkgmLib {
 
     function makeBatch(
         Instruction[] memory instructions
-    ) internal returns (Instruction memory) {
+    ) internal pure returns (Instruction memory) {
         return Instruction({
             version: INSTR_VERSION_0,
             opcode: OP_BATCH,

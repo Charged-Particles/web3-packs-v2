@@ -192,13 +192,11 @@ contract ZkgmVaultProxy is
   }
 
   function setChannelId(uint32 channelId) external onlyOwner {
-    require(channelId != 0, "Invalid channelId");
     _destinationChannelId = channelId;
     emit ChannelIdSet(channelId);
   }
 
   function setDestinationPath(uint32 path) external onlyOwner {
-    require(path != 0, "Invalid destinationPath");
     _destinationPath = path;
     emit DestinationPathSet(path);
   }

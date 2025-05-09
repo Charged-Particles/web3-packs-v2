@@ -178,6 +178,43 @@ const config: HardhatUserConfig = {
       },
       chainId: 84532,
     },
+    inkSepolia: {
+      url: 'https://rpc-gel-sepolia.inkonchain.com',
+      gasPrice: 1e8, // 0.1 GWEI
+      accounts: {
+          mnemonic: mnemonic.testnet,
+          initialIndex: 0,
+          count: 10,
+      },
+    },
+    ink: {
+      url: 'https://rpc-qnd.inkonchain.com',
+      gasPrice: 'auto',
+      accounts: {
+          mnemonic: mnemonic.mainnet,
+          initialIndex: 0,
+          count: 10,
+      },
+      chainId: 57073,
+    },
+    berachainBepolia: {
+      url: 'https://bepolia.rpc.berachain.com',
+      gasPrice: 1e8, // 0.1 GWEI
+      accounts: {
+          mnemonic: mnemonic.testnet,
+          initialIndex: 0,
+          count: 10,
+      },
+    },
+    berachain: {
+      url: 'https://rpc.berachain.com',
+      gasPrice: 'auto',
+      accounts: {
+          mnemonic: mnemonic.mainnet,
+          initialIndex: 0,
+          count: 10,
+      },
+    },
     optimism: {
       url: `https://opt-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_OP_APIKEY}`,
       gasPrice: 'auto',
@@ -208,6 +245,10 @@ const config: HardhatUserConfig = {
       modeSepolia: 'MODE-NETWORK-TESTNET',
       optimism: process.env.ALCHEMY_OP_APIKEY ?? '',
       bscTestnet: process.env.BSCSCAN_APIKEY ?? '',
+      inkSepolia: process.env.BLOCKSCOUT_APIKEY ?? '',
+      ink: process.env.BLOCKSCOUT_APIKEY ?? '',
+      berachain: process.env.BERASCAN_APIKEY ?? '',
+      berachainBepolia: process.env.BERASCAN_APIKEY ?? '',
     },
     customChains: [
       {
@@ -234,6 +275,38 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: 'https://sepolia.mode.network/api',
           browserURL: 'https://sepolia.explorer.mode.network',
+        },
+      },
+      {
+        network: 'inkSepolia',
+        chainId: 763373,
+        urls: {
+          apiURL: 'https://explorer-sepolia.inkonchain.com/api',
+          browserURL: 'https://explorer-sepolia.inkonchain.com/',
+        },
+      },
+      {
+        network: 'ink',
+        chainId: 57073,
+        urls: {
+          apiURL: 'https://explorer.inkonchain.com/api',
+          browserURL: 'https://explorer.inkonchain.com/',
+        },
+      },
+      {
+        network: 'berachain',
+        chainId: 80094,
+        urls: {
+          apiURL: 'https://api.berascan.com/api',
+          browserURL: 'https://berascan.com/',
+        },
+      },
+      {
+        network: 'berachainBepolia',
+        chainId: 80069,
+        urls: {
+          apiURL: 'https://api-testnet.berascan.com/api',
+          browserURL: 'https://testnet.berascan.com/',
         },
       },
     ],

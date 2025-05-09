@@ -29,8 +29,8 @@ import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "../../Web3PacksRouterBase.sol";
 import "../../../interfaces/IWeb3PacksDefs.sol";
 import {IUniversalRouter} from "../../../interfaces/bsc/IPancakeUniversalRouter.sol";
-import {Commands} from "./lib/PancakeUniversalCommands.sol";
-import {Constants} from "./lib/PancakeUniversalConstants.sol";
+import {Commands} from "../../agnostic/PancakeUniversalCommands.sol";
+import {Constants} from "../../agnostic/PancakeUniversalConstants.sol";
 
 // REF: https://developer.pancakeswap.finance/contracts/universal-router/addresses
 
