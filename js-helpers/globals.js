@@ -1,4 +1,4 @@
-const { utils } = require('ethers');
+const { utils, constants } = require('ethers');
 
 // Chains:
 // 1 - Ethereum Mainnet
@@ -151,47 +151,6 @@ const globals = {
       balancerMode: '0x7c86a44778c52a0aad17860924b53bf3f35dc932000200000000000000000007',
       balancerEzEth: '0x16453789fed619c7fa18c068dec1cb2766ba2e3e000000000000000000000006',
     },
-  },
-
-  union: {
-    // MODE
-    919: {
-      zkgm: '0x0000000000000000000000000000000000000000',
-      rewardsToken: '0x0000000000000000000000000000000000000000',
-      rewardsQuoteToken: '0x0000000000000000000000000000000000000000',
-      destinationPath: 0,
-      destinationChannelId: 0,
-    },
-    34443: {
-      zkgm: '0x0000000000000000000000000000000000000000',
-      rewardsToken: '0x0000000000000000000000000000000000000000',
-      rewardsQuoteToken: '0x0000000000000000000000000000000000000000',
-      destinationPath: 0,
-      destinationChannelId: 0,
-    },
-    // INK
-    763373: {
-      zkgm: '0x0000000000000000000000000000000000000000',
-      rewardsToken: '0x0000000000000000000000000000000000000000',
-      rewardsQuoteToken: '0x0000000000000000000000000000000000000000',
-      destinationPath: 0,
-      destinationChannelId: 0,
-    },
-    57073: {
-      zkgm: '0x0000000000000000000000000000000000000000',
-      rewardsToken: '0x0000000000000000000000000000000000000000',
-      rewardsQuoteToken: '0x0000000000000000000000000000000000000000',
-      destinationPath: 0,
-      destinationChannelId: 0,
-    },
-    // BSC
-    97: {
-      zkgm: '0x0000000000000000000000000000000000000000',
-      rewardsToken: '0x0000000000000000000000000000000000000000',
-      rewardsQuoteToken: '0x0000000000000000000000000000000000000000',
-      destinationPath: 0,
-      destinationChannelId: 0,
-    }
   },
 
   // Standard Parameters

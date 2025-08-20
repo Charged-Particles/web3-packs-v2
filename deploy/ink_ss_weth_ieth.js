@@ -13,7 +13,7 @@ module.exports = async (hre) => {
   const network = await hre.network;
   const chainId = chainIdByName(network.name);
 
-  // Only run on INK Chains
+  // Only run on INK Chain
   if (chainId !== 57073 && chainId !== 763373) { return; }
 
   const routers = globals.router[chainId];
@@ -27,7 +27,7 @@ module.exports = async (hre) => {
     token1: tokenAddress.ieth,
     manager: web3packs.address,
     swapRouter: routers.velodromeV2,
-    liquidityRouter: routers.velodromeV2,
+    liquidityRouter: routers.velodrome,
     poolId: toBytes(''),
     bundlerId: toBytes(bundlerId),
     slippage: priceSlippage,

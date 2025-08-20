@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-// ZkgmVaultProxy.sol
+// Web3PacksVaultProxy.sol
 // Copyright (c) 2025 Firma Lux, Inc. <https://charged.fi>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -34,7 +34,7 @@ import "./interfaces/IWeb3PacksVaultBase.sol";
 import "./interfaces/union/IZkgm.sol";
 import "./interfaces/union/Lib.sol";
 
-contract ZkgmVaultProxy is
+contract Web3PacksVaultProxy is
   IWeb3PacksVaultBase,
   ERC165,
   Ownable,

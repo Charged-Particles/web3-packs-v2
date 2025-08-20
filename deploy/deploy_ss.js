@@ -19,6 +19,9 @@ const _BSC_BUNDLES = [
 
 const _INK_BUNDLES = [
   'SS-INK-WETH-IETH',
+  'SS-INK-WETH-USDT0',
+  'SS-INK-WETH-KBTC',
+  'SS-INK-WETH-USDCE',
 ];
 
 const _BERA_BUNDLES = [

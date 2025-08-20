@@ -13,6 +13,9 @@ module.exports = async (hre) => {
   const network = await hre.network;
   const chainId = chainIdByName(network.name);
 
+  // Only run on Mode Chain
+  if (chainId !== 919 && chainId !== 34443) { return; }
+
   const routers = globals.router[chainId];
   const tokenAddress = globals.tokenAddress[chainId];
   const web3packs = await ethers.getContract('Web3PacksV2');

@@ -15,6 +15,7 @@ const _BSC_BUNDLES = [
 ];
 
 const _INK_BUNDLES = [
+  'LP-INK-WETH-IETH',
 ];
 
 const _BERA_BUNDLES = [

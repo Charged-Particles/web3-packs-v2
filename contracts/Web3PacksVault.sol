@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-// ZkgmVault.sol
+// Web3PacksVault.sol
 // Copyright (c) 2025 Firma Lux, Inc. <https://charged.fi>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31,11 +31,9 @@ import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "./lib/BlackholePrevention.sol";
 import "./interfaces/IWeb3Packs.sol";
 import "./interfaces/IWeb3PacksVault.sol";
-import "./interfaces/union/IZkgmable.sol";
 
-contract ZkgmVault is
+contract Web3PacksVault is
   IWeb3PacksVault,
-  IZkgmable,
   ERC165,
   Ownable,
   BlackholePrevention
@@ -45,48 +43,56 @@ contract ZkgmVault is
   using SafeERC20 for address;
 
   event Web3PacksSet(address indexed web3packs);
-  event ZkgmSet(address indexed zkgm);
+  event ProxySet(address indexed proxy);
+  event UpgradedVaultSet(address indexed upgradedVault);
   event BalanceClaimed(address indexed account, uint256 balance);
   event MessageReceived(uint256 path, uint32 sourceChannelId, uint32 destinationChannelId, address sender, bytes message);
 
-  address internal _zkgm;
+  address internal _proxy;
   address internal _web3packs;
+  address internal _upgradedVault; // Only set when a newer Vault is deployed and reaches into this Vault to claim old balances
   mapping (address => uint256) internal _referrerBalance;
 
-  constructor(address web3packs, address zkgm) Ownable() {
+  constructor(address web3packs, address proxy) Ownable() {
     require(web3packs != address(0), "Invalid address for web3packs");
     _web3packs = web3packs;
-    _zkgm = zkgm; // optional
+    _proxy = proxy; // optional
   }
 
   receive() external payable {}
 
   modifier onlyWeb3Packs() {
-    require(msg.sender == _web3packs, "Web3PacksVault - Only Web3Packs");
+    require(
+      msg.sender == _web3packs ||
+      (_upgradedVault != address(0) && msg.sender == _upgradedVault),
+      "Web3PacksVault - Only Web3Packs or Vault"
+    );
     _;
   }
 
-  modifier onlyWeb3PacksOrZkgm() {
-    require(msg.sender == _zkgm || msg.sender == _web3packs, "Web3PacksVault - Only Web3Packs or ZKGM");
+  modifier onlyWeb3PacksOrProxy() {
+    require(
+      msg.sender == _proxy ||
+      msg.sender == _web3packs ||
+      (_upgradedVault != address(0) && msg.sender == _upgradedVault),
+      "Web3PacksVault - Only Web3Packs or Proxy"
+    );
     _;
   }
 
   function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-    return interfaceId == type(IWeb3PacksVault).interfaceId
-      || interfaceId == type(IZkgmable).interfaceId
-      || super.supportsInterface(interfaceId);
+    return interfaceId == type(IWeb3PacksVault).interfaceId || super.supportsInterface(interfaceId);
   }
 
   function getReferrerBalance(address account) external view returns (uint256 balance) {
     balance = _referrerBalance[account];
   }
 
-
   /***********************************|
   |         Only Web3 Packs           |
   |__________________________________*/
 
-  function updateReferrerBalances(uint256, address[] calldata referrers, uint256[] calldata amounts) external onlyWeb3PacksOrZkgm {
+  function updateReferrerBalances(uint256, address[] calldata referrers, uint256[] calldata amounts) external onlyWeb3PacksOrProxy {
     require(referrers.length == amounts.length, "Input length mismatch");
     for (uint256 i = 0; i < referrers.length; i++) {
       _referrerBalance[referrers[i]] += amounts[i];
@@ -104,46 +110,6 @@ contract ZkgmVault is
 
 
   /***********************************|
-  |         Only Union-ZKGM           |
-  |__________________________________*/
-
-  function onZkgm(
-    address,
-    uint256 path,
-    uint32 sourceChannelId,
-    uint32 destinationChannelId,
-    bytes calldata sender,
-    bytes calldata message,
-    address,
-    bytes calldata
-  ) external onlyWeb3PacksOrZkgm {
-    // Verify that the sourceChannelId and sender are authorized...
-    // todo..
-
-    // Process the cross-chain message
-    emit MessageReceived(
-      path,
-      sourceChannelId,
-      destinationChannelId,
-      address(bytes20(sender)),
-      message
-    );
-  }
-
-  function onIntentZkgm(
-    address,
-    uint256,
-    uint32,
-    uint32,
-    bytes calldata,
-    bytes calldata,
-    address,
-    bytes calldata
-  ) external onlyWeb3PacksOrZkgm {
-    // no-op
-  }
-
-  /***********************************|
   |          Only Admin/DAO           |
   |__________________________________*/
 
@@ -153,11 +119,16 @@ contract ZkgmVault is
     emit Web3PacksSet(web3packs);
   }
 
-  function setZkgm(address zkgm) external onlyOwner {
-    _zkgm = zkgm;
-    emit ZkgmSet(zkgm);
+  function setProxy(address proxy) external onlyOwner {
+    _proxy = proxy;
+    emit ProxySet(proxy);
   }
 
+  function setUpgradedVault(address upgradedVault) external onlyOwner {
+    require(upgradedVault != address(0), "Invalid address for upgraded vault");
+    _upgradedVault = upgradedVault;
+    emit UpgradedVaultSet(upgradedVault);
+  }
 
   /***********************************|
   |          Only Admin/DAO           |

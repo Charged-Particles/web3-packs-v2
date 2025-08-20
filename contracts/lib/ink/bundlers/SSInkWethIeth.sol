@@ -28,7 +28,7 @@ import "../routers/VelodromeV2Router.sol";
 import "../../../interfaces/IWeb3PacksBundler.sol";
 
 /*
-  Performs a Single-Sided Swap on Velodrome Exchange using the Velodrome Router
+  Performs a Single-Sided Swap on INK Chain using the Velodrome Router
   Token 0 = WETH
   Token 1 = iETH
  */

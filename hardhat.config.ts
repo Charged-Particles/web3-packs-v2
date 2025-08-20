@@ -62,7 +62,7 @@ const config: HardhatUserConfig = {
       default: 1,
       // Treasury:
       'mode': '0x74D599ddC5c015C45D8033670404C7C23d932C77', // https://safe.optimism.io/address-book?safe=mode:0x74D599ddC5c015C45D8033670404C7C23d932C77
-      'bsc': '',
+      // 'bsc': '',
     },
     user1: {
       default: 2,
@@ -252,14 +252,6 @@ const config: HardhatUserConfig = {
     },
     customChains: [
       {
-        network: 'optimism',
-        chainId: 10,
-        urls: {
-          apiURL: 'https://api-optimistic.etherscan.io/api',
-          browserURL: 'https://optimistic.etherscan.io',
-        },
-      },
-      {
         network: 'mode',
         chainId: 34443,
         urls: {
@@ -275,22 +267,6 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: 'https://sepolia.mode.network/api',
           browserURL: 'https://sepolia.explorer.mode.network',
-        },
-      },
-      {
-        network: 'inkSepolia',
-        chainId: 763373,
-        urls: {
-          apiURL: 'https://explorer-sepolia.inkonchain.com/api',
-          browserURL: 'https://explorer-sepolia.inkonchain.com/',
-        },
-      },
-      {
-        network: 'ink',
-        chainId: 57073,
-        urls: {
-          apiURL: 'https://explorer.inkonchain.com/api',
-          browserURL: 'https://explorer.inkonchain.com/',
         },
       },
       {
