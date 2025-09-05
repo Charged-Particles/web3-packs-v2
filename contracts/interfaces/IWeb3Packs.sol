@@ -35,10 +35,9 @@ interface IWeb3Packs is IWeb3PacksDefs {
     string calldata tokenMetaUri,
     IWeb3PacksDefs.LockState calldata lockState,
     bytes32 packType,
-    uint256 ethPackPrice
-  ) external
-    payable
-    returns(uint256 tokenId);
+    address purchaser,
+    uint256 paymentAmount
+  ) external payable returns(uint256 tokenId);
 
   // UNBUNDLE
   function unbundle(

@@ -37,6 +37,7 @@ const chainIdByName = (chainName) => {
     case 'kovan': return 42;
     case 'polygon': return 137;
     case 'mumbai': return 80001;
+    case 'amoy': return 80002;
     case 'ink': return 57073;
     case 'inksepolia': return 763373;
     case 'bsctestnet': return 97;
@@ -59,6 +60,7 @@ const chainNameById = (chainId) => {
     case 42: return 'Kovan';
     case 137: return 'Polygon';
     case 80001: return 'Mumbai';
+    case 80002: return 'Amoy';
     case 57073: return 'INK';
     case 763373: return 'INK Sepolia';
     case 56: return 'BSC';
@@ -92,6 +94,7 @@ const chainTypeById = (chainId) => {
     case 763373:
     case 11155111:
     case 80001:
+    case 80002:
       return {isProd: false, isTestnet: true, isHardhat: false};
     case 31337:
     default:

@@ -12,6 +12,7 @@ const { utils, constants } = require('ethers');
 
 // 137 - Polygon Mainnet
 // 80001 - Polygon Mumbai Testnet
+// 80002 - Polygon Amoy Testnet
 
 // 8453 - Base Mainnet
 // 84532 - Base Testnet
@@ -51,6 +52,12 @@ const globals = {
       chargedParticles: '0x4a7b80e418454a21A49885b009d51f0d0A6Ed77A',
       chargedState: '0xc42De19eB6eB8fa3eCCcA9Ad0F2E4795c468310f',
       protonC: '0xE0dbEc1fE9c4148c85815abE93D496F5f909EB65',
+    },
+    // Polygon
+    137: {
+      chargedParticles: '0x0288280Df6221E7e9f23c1BB398c820ae0Aa6c10',
+      chargedState: '0x9c00b8CF03f58c0420CDb6DE72E27Bf11964025b',
+      protonC: '0x59dde2EBe605cD75365F387FFFE82E5203b8E4cd',
     },
   },
 
@@ -104,6 +111,14 @@ const globals = {
       tusd: '0x337610d27c682E347C9cD60BD4b3b107C9d34dDd',
       cake: '0xFa60D973F7642B748046464e165A65B7323b0DEE',
     },
+    // Polygon
+    137: {
+      weth: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
+      pack: '0x4fb9b94bd8bbbd684a7d5a5544bc7a07188e5617',
+      h2dao: '0x6fc91fbe42f72941486c98d11724b14fb8d18b36',
+      tdm: '0x878b6bf76f7ba67d0c4da616eac1933f9b133c1c',
+      lock: '0x69ce536f95a84e1ef51ed0132c514c7ce012e49b',
+    },
   },
 
   router: {
@@ -139,6 +154,11 @@ const globals = {
       pancakeSwapV3: '0x1b81D678ffb9C0263b24A97847620C99d213eB14',
       pancakeSwapV3Nft: '0x46A15B0b27311cedF172AB29E4f4766fbE7F4364',
       pancakeSwapV2: '0xD99D1c33F9fC3444f8101754aBC46c52416550D1',
+    },
+    // Polygon
+    137: {
+      quickswapAlgebra: '0xf5b509bB0909a69B1c207E495f687a596C168E12', // Swap router
+      quickswapAlgebraLP: '0x8eF88E4c7CfbbaC1C163f7eddd4B578792201de6', // Non fungible position manager
     },
   },
 

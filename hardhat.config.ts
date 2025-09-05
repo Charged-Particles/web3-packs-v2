@@ -128,6 +128,16 @@ const config: HardhatUserConfig = {
       },
       chainId: 137,
     },
+    amoy: {
+      url: `https://polygon-amoy.g.alchemy.com/v2/${process.env.ALCHEMY_POLYGON_AMOY_APIKEY}`,
+      gasPrice: 'auto',
+      accounts: {
+        mnemonic: mnemonic.testnet,
+        // initialIndex: 0,
+        count: 8,
+      },
+      chainId: 80002,
+    },
     mumbai: {
       url: `https://polygon-mumbai.g.alchemy.io/v2/${process.env.ALCHEMY_POLYGON_APIKEY}`,
       gasPrice: 10e9,
@@ -249,6 +259,7 @@ const config: HardhatUserConfig = {
       ink: process.env.BLOCKSCOUT_APIKEY ?? '',
       berachain: process.env.BERASCAN_APIKEY ?? '',
       berachainBepolia: process.env.BERASCAN_APIKEY ?? '',
+      polygon: process.env.POLYGONSCAN_APIKEY ?? '',
     },
     customChains: [
       {
