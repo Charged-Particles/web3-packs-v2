@@ -16,25 +16,6 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "account",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "balance",
-        "type": "uint256"
-      }
-    ],
-    "name": "BalanceClaimed",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
         "name": "bundlerAddress",
         "type": "address"
       },
@@ -215,37 +196,6 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "referrer",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "addToReferrerBalance",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address payable",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "claimReferralRewards",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "bytes32",
         "name": "bundlerId",
         "type": "bytes32"
@@ -304,25 +254,6 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "referrer",
-        "type": "address"
-      }
-    ],
-    "name": "getReferrerBalance",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "balance",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
         "name": "oldWeb3Packs",
         "type": "address"
       },
@@ -346,7 +277,7 @@
     "inputs": [
       {
         "internalType": "address payable",
-        "name": "newWeb3state",
+        "name": "newVault",
         "type": "address"
       }
     ],

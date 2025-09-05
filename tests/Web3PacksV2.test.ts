@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { ethers, network, getNamedAccounts } from 'hardhat';
+import { ethers, getNamedAccounts } from 'hardhat';
 import { BigNumber, Contract, Signer } from 'ethers';
 
 import globals from '../js-helpers/globals';
@@ -68,8 +68,6 @@ describe('Web3PacksV2', async ()=> {
   // Define contracts
   let web3packs: Web3PacksV2;
   let Proton: Contract;
-
-  // Charged Particles
   let charged: Contract;
 
   // Define signers
@@ -80,7 +78,6 @@ describe('Web3PacksV2', async ()=> {
   let deployerSigner: Signer;
 
   let chainId;
-  let routers;
   let contracts;
   let tokenAddresses;
 
@@ -90,7 +87,6 @@ describe('Web3PacksV2', async ()=> {
     deployer = deployerAccount;
 
     chainId = 34443;
-    routers = globals.router[chainId];
     contracts = globals.contracts[chainId];
     tokenAddresses = globals.tokenAddress[chainId];
 
@@ -637,34 +633,27 @@ describe('Web3PacksV2', async ()=> {
           packType: 'ECOSYSTEM',
           ethPackPrice,
         });
-        const particle = charged.NFT(Proton.address, tokenId);
 
-        let tokenMass = await particle.getMass(tokenAddresses.ionx, 'generic.B');
-        let tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
+        // Check Pack for Tokens
+        let tokenAmount = await _getParticleMass(tokenId, tokenAddresses.ionx);
         expect(tokenAmount).to.be.gt(100);
 
-        tokenMass = await particle.getMass(tokenAddresses.kim, 'generic.B');
-        tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
+        tokenAmount = await _getParticleMass(tokenId, tokenAddresses.kim);
         expect(tokenAmount).to.be.gt(100);
 
-        tokenMass = await particle.getMass(tokenAddresses.mode, 'generic.B');
-        tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
+        tokenAmount = await _getParticleMass(tokenId, tokenAddresses.mode);
         expect(tokenAmount).to.be.gt(100);
 
-        tokenMass = await particle.getMass(tokenAddresses.bmx, 'generic.B');
-        tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
+        tokenAmount = await _getParticleMass(tokenId, tokenAddresses.bmx);
         expect(tokenAmount).to.be.gt(100);
 
-        tokenMass = await particle.getMass(tokenAddresses.icl, 'generic.B');
-        tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
+        tokenAmount = await _getParticleMass(tokenId, tokenAddresses.icl);
         expect(tokenAmount).to.be.gt(100);
 
-        tokenMass = await particle.getMass(tokenAddresses.smd, 'generic.B');
-        tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
+        tokenAmount = await _getParticleMass(tokenId, tokenAddresses.smd);
         expect(tokenAmount).to.be.gt(100);
 
-        tokenMass = await particle.getMass(tokenAddresses.wmlt, 'generic.B');
-        tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
+        tokenAmount = await _getParticleMass(tokenId, tokenAddresses.wmlt);
         expect(tokenAmount).to.be.gt(100);
 
         // Confirm ETH Balance
@@ -706,11 +695,9 @@ describe('Web3PacksV2', async ()=> {
           packType: 'DEFI',
           ethPackPrice,
         });
-        const particle = charged.NFT(Proton.address, tokenId);
 
         // Check Pack for Liquidity NFTs
-        const tokenBonds = await particle.getBonds('generic.B');
-        const bondCount = tokenBonds[network.config.chainId ?? '']?.value;
+        const bondCount = await _getParticleBonds(tokenId);
         expect(bondCount).to.eq(7);
 
         // Confirm ETH Balance
@@ -748,24 +735,20 @@ describe('Web3PacksV2', async ()=> {
           packType: 'GOVERNANCE',
           ethPackPrice,
         });
-        const particle = charged.NFT(Proton.address, tokenId);
 
         // @ts-ignore
         const bundlerContract = await ethers.getContract('LpWethMode8020');
         const { tokenAdddress: lpTokenAddress } = await bundlerContract.getLiquidityToken();
 
         // Check Pack for Liquidity NFTs
-        const tokenBonds = await particle.getBonds('generic.B');
-        const bondCount = tokenBonds[network.config.chainId ?? '']?.value;
+        const bondCount = await _getParticleBonds(tokenId);
         expect(bondCount).to.eq(1);
 
         // Check Pack for Liquidity Tokens
-        let tokenMass = await particle.getMass(tokenAddresses.ionx, 'generic.B');
-        let tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
+        let tokenAmount = await _getParticleMass(tokenId, tokenAddresses.ionx);
         expect(tokenAmount).to.be.gt(100);
 
-        tokenMass = await particle.getMass(lpTokenAddress, 'generic.B');
-        tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
+        tokenAmount = await _getParticleMass(tokenId, lpTokenAddress);
         expect(tokenAmount).to.be.gt(100);
 
         // Confirm ETH Balance
@@ -803,19 +786,15 @@ describe('Web3PacksV2', async ()=> {
           packType: 'AI',
           ethPackPrice,
         });
-        const particle = charged.NFT(Proton.address, tokenId);
 
         // Check Pack for Tokens
-        let tokenMass = await particle.getMass(tokenAddresses.packy, 'generic.B');
-        let tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
+        let tokenAmount = await _getParticleMass(tokenId, tokenAddresses.packy);
         expect(tokenAmount).to.be.gt(100);
 
-        tokenMass = await particle.getMass(tokenAddresses.cartel, 'generic.B');
-        tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
+        tokenAmount = await _getParticleMass(tokenId, tokenAddresses.cartel);
         expect(tokenAmount).to.be.gt(100);
 
-        tokenMass = await particle.getMass(tokenAddresses.gambl, 'generic.B');
-        tokenAmount = tokenMass[network.config.chainId ?? '']?.value;
+        tokenAmount = await _getParticleMass(tokenId, tokenAddresses.gambl);
         expect(tokenAmount).to.be.gt(100);
 
         // Confirm ETH Balance

@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-pragma solidity 0.8.17;
+pragma solidity 0.8.27;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -30,8 +30,8 @@ import "../../Web3PacksRouterBase.sol";
 import "../../../interfaces/IWeb3PacksDefs.sol";
 import "../../../interfaces/mode/IVelodrome.sol";
 import {IUniversalRouter} from "../../../interfaces/mode/IVelodromeUniversalRouter.sol";
-import {Commands} from "./lib/VelodromeV2Commands.sol";
-import {Constants} from "./lib/VelodromeV2Constants.sol";
+import {Commands} from "../../agnostic/VelodromeV2Commands.sol";
+import {Constants} from "../../agnostic/VelodromeV2Constants.sol";
 
 // REF: https://github.com/velodrome-finance/universal-router/blob/main/test/foundry-tests/v2/UniswapV2MultiHop.t.sol#L68
 

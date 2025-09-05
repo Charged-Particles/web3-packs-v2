@@ -1,4 +1,4 @@
-const { chainIdByName, toBytes, isHardhat, findNearestValidTick, log } = require('../js-helpers/utils');
+const { chainIdByName, toBytes, isHardhat, findNearestValidTick, tryGetContract, log } = require('../js-helpers/utils');
 const { verifyContract } = require('../js-helpers/verifyContract');
 const globals = require('../js-helpers/globals');
 
@@ -12,6 +12,9 @@ module.exports = async (hre) => {
   const { deployer } = await getNamedAccounts();
   const network = await hre.network;
   const chainId = chainIdByName(network.name);
+
+  // Only run on Mode Chain
+  if (chainId !== 919 && chainId !== 34443) { return; }
 
   const routers = globals.router[chainId];
   const tokenAddress = globals.tokenAddress[chainId];
@@ -29,13 +32,13 @@ module.exports = async (hre) => {
       poolId: toBytes(''),
       bundlerId: toBytes(bundlerId),
       slippage: priceSlippage,
-      tickLower: 100n, // Cartel/Mode is 100 Tick Spacing
+      tickLower: 100n, // Cartel/Mode is 100 Tick Spacing (Concentrated Volatile 100)
       tickUpper: 200n, // Weth/Mode is 200 Tick Spacing (Standard)
     },
     tokenAddress.mode,
   ];
 
-  let bundler = await ethers.getContract(bundlerContractName);
+  let bundler = await tryGetContract(bundlerContractName);
   if (!bundler.address) {
     //
     // Deploy Contracts

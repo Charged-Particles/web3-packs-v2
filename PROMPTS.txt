@@ -1,0 +1,55 @@
+I need to integrate Axelar/Squid into our Contracts, such that we can accept payment from any supported blockchain.
+
+The steps would be:
+
+1. Pay in USDC on Chain A
+2. Use Squid Router to Bridge to Chain B
+3. Use Squid Router to convert USDC to WETH for payment
+4. Use Axelar to call Web3PacksV2.bundle() on Chain B
+5. Wait for Confirmation on Chain A.
+
+This could also happen in reverse; Pay on Chain B, Bundle on Chain A...
+
+Also, we should be able to support more currencies than just USDC, and convert to WETH when bridging.
+The file in Context (GEMINI.md) contains some docs/notes on the Axelar Chain and the Squid Router.
+
+Please give me a breakdown of how I should put this together in my code with some actionable steps.  We can then go through each step 1 at a time together.
+
+---
+
+Phase 1: Smart Contract Development (On Destination Chain - Mode, Ink, or Polygon)
+Create Web3PackReceiver.sol:
+
+This new contract will be responsible for receiving cross-chain messages via Axelar.
+It will inherit from AxelarExecutable (from Axelar's GMP SDK).
+Its constructor will take the Axelar Gateway address and the address of your deployed Web3PacksV2 contract.
+It will implement the _execute(string calldata sourceChain, string calldata sourceAddress, bytes calldata payload) function, which is the entry point for Axelar messages.
+It will include a mechanism (e.g., a mapping(address => bool) public trustedSenders;) to whitelist addresses that are allowed to call _execute. This will primarily be the Squid Router's contract address on the destination chain.
+Implement _execute Logic in Web3PackReceiver.sol:
+
+Inside _execute, we will first validate the sourceAddress against our trustedSenders whitelist.
+We will then define a clear abi.decode structure for the payload that will contain all the necessary parameters to call your Web3PacksV2.bundle() function (e.g., bundleChunks, referrals, tokenMetaUri, lockState, packType, ethPackPrice, and the receiver address).
+The ethPackPrice will be the amount of WETH received on the destination chain.
+The Web3PackReceiver contract will need to receive the WETH from Squid and then pass it along to Web3PacksV2.bundle(). This might involve IWETH(wethAddress).deposit{value: amount}() if the payment is in native ETH, or IERC20(wethAddress).transfer() if it's already WETH.
+Finally, it will call Web3PacksV2(web3PacksV2Address).bundle(...) with the decoded parameters.
+Phase 2: Frontend/Off-chain Integration (Using Squid SDK)
+Initialize Squid SDK:
+
+Set up your environment with the necessary RPC endpoints, private keys (for the sender), and your Squid integratorId.
+Construct the getRoute Call:
+
+Use squid.getRoute() to define the cross-chain swap and call.
+fromChain, toChain, fromToken (e.g., USDC on Chain A), toToken (WETH on Chain B), fromAmount, fromAddress, toAddress (this will be the Web3PackReceiver contract address on Chain B).
+Crucially, we will use the postHook parameter to specify the call to your Web3PackReceiver contract.
+The postHook will include:
+target: The address of your deployed Web3PackReceiver.sol contract on Chain B.
+callData: The ABI-encoded call to the _execute function of your Web3PackReceiver contract. This callData will contain the sourceChain, sourceAddress, and the payload (which itself contains the bundle() parameters).
+value: The amount of WETH that Squid will send to your Web3PackReceiver contract. This will be the ethPackPrice for your bundle() call.
+Execute the Route:
+
+Once the route is obtained, use squid.executeRoute() to send the transaction.
+Monitor Transaction Status:
+
+Use squid.getStatus() to track the progress of the cross-chain transaction and provide feedback to the user.
+Next Steps:
+We'll start by creating the Web3PackReceiver.sol contract. I'll provide the initial code for this contract, and we can then refine it together.

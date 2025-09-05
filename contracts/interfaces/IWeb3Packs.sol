@@ -20,7 +20,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-pragma solidity 0.8.17;
+pragma solidity 0.8.27;
 
 import "./IWeb3PacksDefs.sol";
 
@@ -35,10 +35,9 @@ interface IWeb3Packs is IWeb3PacksDefs {
     string calldata tokenMetaUri,
     IWeb3PacksDefs.LockState calldata lockState,
     bytes32 packType,
-    uint256 ethPackPrice
-  ) external
-    payable
-    returns(uint256 tokenId);
+    address purchaser,
+    uint256 paymentAmount
+  ) external payable returns(uint256 tokenId);
 
   // UNBUNDLE
   function unbundle(
@@ -72,4 +71,7 @@ interface IWeb3Packs is IWeb3PacksDefs {
   function getReferralRewardsOf(address account)
     external
     returns (uint256 balance);
+
+  function claimReferralRewards(address payable account)
+    external;
 }

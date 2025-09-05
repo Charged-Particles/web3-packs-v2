@@ -14,9 +14,16 @@ const _MODE_BUNDLES = [
 const _BSC_BUNDLES = [
 ];
 
+const _INK_BUNDLES = [
+  'LP-INK-WETH-IETH',
+];
+
+const _BERA_BUNDLES = [
+];
+
 module.exports = async (hre) => {
     log('\n---\nLiquidity-Position Bundlers Deployed!');
 };
 
-module.exports.dependencies = _MODE_BUNDLES;
+module.exports.dependencies = _INK_BUNDLES;
 module.exports.tags = ['deployLP']

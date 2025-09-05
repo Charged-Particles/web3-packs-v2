@@ -24,14 +24,15 @@
 //  __    __     _    _____   ___           _                   ____
 // / / /\ \ \___| |__|___ /  / _ \__ _  ___| | _____     /\   /\___ \
 // \ \/  \/ / _ \ '_ \ |_ \ / /_)/ _` |/ __| |/ / __|____\ \ / / __) |
-//  \  /\  /  __/ |_) |__) / ___/ (_| | (__|   <\__ \_____\ V / / __/
-//   \/  \/ \___|_.__/____/\/    \__,_|\___|_|\_\___/      \_/ |_____|
+//  \  /\  /  __/ |_) |__) / ___/ (_| | (__|   <\__ \____\ V / / __/
+//   \/  \/ \___|_.__/____/\    \__,_|\___|_|\_\___/      \_/ |_____|
 //
 
-pragma solidity 0.8.17;
+pragma solidity 0.8.27;
 
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
@@ -41,6 +42,7 @@ import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "./lib/BlackholePrevention.sol";
 import "./interfaces/IWeb3Packs.sol";
 import "./interfaces/IWeb3PacksState.sol";
+import "./interfaces/IWeb3PacksVault.sol";
 import "./interfaces/IWeb3PacksDefs.sol";
 import "./interfaces/IWeb3PacksBundler.sol";
 import "./interfaces/IChargedState.sol";
@@ -55,21 +57,27 @@ contract Web3PacksV2 is
   ReentrancyGuard
 {
   using Address for address payable;
+  using SafeERC20 for IERC20;
 
   event ChargedParticlesSet(address indexed chargedParticles);
   event ChargedStateSet(address indexed chargedState);
   event Web3PacksStateSet(address indexed web3state);
+  event Web3PacksVaultSet(address indexed web3vault);
   event ProtonSet(address indexed proton);
-  event PackBundled(uint256 indexed tokenId, address indexed receiver, bytes32 packType, uint256 ethPackPrice);
+  event PackBundled(uint256 indexed tokenId, address indexed receiver, bytes32 packType, uint256 paymentAmount);
   event PackUnbundled(uint256 indexed tokenId, address indexed receiver, uint256 ethAmount);
   event ProtocolFeeSet(uint256 fee);
+  event RewardsPercentSet(uint256 max, uint256 step);
   event Web3PacksTreasurySet(address indexed treasury);
 
   uint256 private constant BASIS_POINTS = 10000;
+  uint256 public _rewardsMax = 330;  // 3.3%
+  uint256 public _rewardsStep = 30;  // 0.3%
 
   address public _weth;
   address public _proton;
   address public _web3state;
+  address public _web3vault;
   address public _chargedParticles;
   address public _chargedState;
   address payable internal _treasury;
@@ -104,24 +112,44 @@ contract Web3PacksV2 is
     string calldata tokenMetaUri,
     IWeb3PacksDefs.LockState calldata lockState,
     bytes32 packType,
-    uint256 ethPackPrice
+    address purchaser,
+    uint256 paymentAmount
   )
     external
-    override
     payable
+    override
     whenNotPaused
     nonReentrant
     returns(uint256 tokenId)
   {
-    _collectFees(ethPackPrice);
-    uint256 rewards = _calculateReferralRewards(ethPackPrice, referrals);
+    if (msg.value > 0) { // Payment in NATIVE
+      enterWeth(msg.value);
+    }
+    if (paymentAmount > 0) { // Payment in WETH
+      IERC20(_weth).safeTransferFrom(_msgSender(), address(this), paymentAmount);
+    }
+
+    // Total Payment Amount
+    uint256 totalPayment = IERC20(_weth).balanceOf(address(this));
+
+    // Protocol Fees
+    uint256 fee = _getProtocolFee(totalPayment);
+    if (fee > 0) {
+      IERC20(_weth).safeTransfer(_treasury, fee);
+    }
+
+    uint256 remainingAmount = totalPayment - fee;
+    uint256 rewards = _collectReferralRewards(remainingAmount, referrals);
+    uint256 bundleAmount = remainingAmount - rewards;
+
     tokenId = _bundle(
       bundleChunks,
       tokenMetaUri,
       lockState,
-      ethPackPrice - rewards
+      bundleAmount,
+      purchaser
     );
-    emit PackBundled(tokenId, _msgSender(), packType, ethPackPrice);
+    emit PackBundled(tokenId, purchaser, packType, totalPayment);
   }
 
   function unbundle(
@@ -181,8 +209,13 @@ contract Web3PacksV2 is
   }
 
   function getReferralRewardsOf(address account) public view override returns (uint256 balance) {
-    balance = IWeb3PacksState(_web3state).getReferrerBalance(account);
+    balance = IWeb3PacksVault(_web3vault).getReferrerBalance(account);
   }
+
+  function claimReferralRewards(address payable account) public override nonReentrant {
+    IWeb3PacksVault(_web3vault).claimReferralRewards(account);
+  }
+
 
   /***********************************|
   |     Private Bundle Functions      |
@@ -192,7 +225,8 @@ contract Web3PacksV2 is
     IWeb3PacksDefs.BundleChunk[] calldata bundleChunks,
     string calldata tokenMetaUri,
     IWeb3PacksDefs.LockState calldata lockState,
-    uint256 ethPackPrice
+    uint256 bundleAmountWeth,
+    address purchaser
   )
     internal
     returns(uint256 tokenId)
@@ -202,9 +236,7 @@ contract Web3PacksV2 is
     // Mint Web3Pack NFT
     tokenId = _createBasicProton(tokenMetaUri);
 
-    // Wrap ETH for WETH
-    IWETH(_weth).deposit{value: ethPackPrice}();
-    uint256 wethTotal = IERC20(_weth).balanceOf(address(this));
+    uint256 wethTotal = bundleAmountWeth;
     uint256 chunkWeth;
 
     // Returned from Each Bundle:
@@ -234,7 +266,7 @@ contract Web3PacksV2 is
       // Receive Assets from Bundler
       //  If Liquidity is ERC20: nftTokenId == 0
       //  If Liquidity is ERC721: nftTokenId > 0
-      (tokenAddress, amountOut, nftTokenId) = bundler.bundle(tokenId, _msgSender());
+      (tokenAddress, amountOut, nftTokenId) = bundler.bundle(tokenId, purchaser);
 
       // Deposit the Assets into the Web3Packs NFT
       if (nftTokenId == 0) {
@@ -248,13 +280,13 @@ contract Web3PacksV2 is
 
     // Track Pack Data
     IWeb3PacksState(_web3state).setBundlesByPackId(tokenId, packBundlerIds);
-    IWeb3PacksState(_web3state).setPackPriceByPackId(tokenId, ethPackPrice);
+    IWeb3PacksState(_web3state).setPackPriceByPackId(tokenId, wethTotal);
 
     // Set the Timelock State
     _lock(lockState, tokenId);
 
     // Transfer the Web3Packs NFT to the Buyer
-    IBaseProton(_proton).safeTransferFrom(address(this), _msgSender(), tokenId);
+    IBaseProton(_proton).safeTransferFrom(address(this), purchaser, tokenId);
   }
 
   function _unbundle(
@@ -363,6 +395,10 @@ contract Web3PacksV2 is
       });
     }
     return tokenBalances;
+  }
+
+  function enterWeth(uint256 amount) internal virtual {
+    IWETH(_weth).deposit{value: amount}();
   }
 
   /***********************************|
@@ -488,6 +524,14 @@ contract Web3PacksV2 is
       .baseParticleMass(tokenAddress, tokenId, _cpWalletManager, assetTokenAddress);
   }
 
+  function _getProtocolFee(uint256 totalPayment) internal view returns (uint256) {
+    if (_protocolFee > 0 && totalPayment < _protocolFee) {
+      revert InsufficientForFee(totalPayment, 0, _protocolFee);
+    }
+    return _protocolFee;
+  }
+
+  // Legacy function for payable unbundles
   function _collectFees(uint256 excludedAmount) internal {
     // Track Collected Fees
     if (_protocolFee > 0 && msg.value < (_protocolFee + excludedAmount)) {
@@ -497,33 +541,38 @@ contract Web3PacksV2 is
     _treasury.sendValue(fees);
   }
 
-  function _calculateReferralRewards(
-    uint256 ethPackPrice,
+  function _collectReferralRewards(
+    uint256 paymentAmount,
     address[] memory referrals
   ) internal returns (uint256 fee) {
-    uint256 referralAmountTotal = ((ethPackPrice * 330) / BASIS_POINTS);  // 3.3%
-    IWeb3PacksState _state = IWeb3PacksState(_web3state);
+    uint256 referralAmountTotal = ((paymentAmount * _rewardsMax) / BASIS_POINTS);
+    uint256[] memory referralAmounts;
+    IWeb3PacksVault _vault = IWeb3PacksVault(_web3vault);
 
     // Calculate Referral Amounts and Distribute
     if (referrals.length > 0 && referrals[0] != address(0)) {
+      referralAmounts = new uint256[](referrals.length);
+
       // Remove Referral Value from Funding Value
       fee = referralAmountTotal;
 
       if (referrals.length > 1 && referrals[1] != address(0)) {
+        referralAmounts[0] = (paymentAmount * _rewardsStep) / BASIS_POINTS;
         if (referrals.length > 2 && referrals[2] != address(0)) {
-          _state.addToReferrerBalance(referrals[0], (ethPackPrice * 30) / BASIS_POINTS);    // 0.3%
-          _state.addToReferrerBalance(referrals[1], (ethPackPrice * 30) / BASIS_POINTS);    // 0.3%
-          _state.addToReferrerBalance(referrals[2], (ethPackPrice * 270) / BASIS_POINTS);   // 2.7%
+          referralAmounts[1] = (paymentAmount * _rewardsStep) / BASIS_POINTS;
+          referralAmounts[2] = (paymentAmount * (_rewardsMax - (_rewardsStep * 2))) / BASIS_POINTS;
         } else {
-          _state.addToReferrerBalance(referrals[0], (ethPackPrice * 30) / BASIS_POINTS);    // 0.3%
-          _state.addToReferrerBalance(referrals[1], (ethPackPrice * 300) / BASIS_POINTS);   // 3.0%
+          referralAmounts[1] = (paymentAmount * (_rewardsMax - _rewardsStep)) / BASIS_POINTS;
         }
       } else {
-        _state.addToReferrerBalance(referrals[0], referralAmountTotal);   // 3.3%
+        referralAmounts[0] = referralAmountTotal;
       }
 
-      // Transfer Rewards to State Contract
-      payable(_web3state).sendValue(fee);
+      // Transfer Rewards to Vault Contract
+      IERC20(_weth).safeTransfer(address(_vault), fee);
+
+      // Update Referrer Balances
+      _vault.updateReferrerBalances(referralAmountTotal, referrals, referralAmounts);
     }
   }
 
@@ -558,6 +607,12 @@ contract Web3PacksV2 is
     emit Web3PacksStateSet(web3state);
   }
 
+  function setWeb3PacksVault(address web3vault) external onlyOwner {
+    require(web3vault != address(0), "Invalid address for web3vault");
+    _web3vault = web3vault;
+    emit Web3PacksVaultSet(web3vault);
+  }
+
   function setTreasury(address payable treasury) external onlyOwner {
     require(treasury != address(0), "Invalid address for treasury");
     _treasury = treasury;
@@ -567,6 +622,12 @@ contract Web3PacksV2 is
   function setProtocolFee(uint256 fee) external onlyOwner {
     _protocolFee = fee;
     emit ProtocolFeeSet(fee);
+  }
+
+  function setRewardsPercent(uint256 max, uint256 step) external onlyOwner {
+    _rewardsMax = max;
+    _rewardsStep = step;
+    emit RewardsPercentSet(max, step);
   }
 
   function pause() public onlyOwner {

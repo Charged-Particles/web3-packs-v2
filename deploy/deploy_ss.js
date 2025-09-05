@@ -17,9 +17,20 @@ const _BSC_BUNDLES = [
   'SS-BSC-WETH-BUSD',
 ];
 
+const _INK_BUNDLES = [
+  'SS-INK-WETH-IETH',
+  'SS-INK-WETH-USDT0',
+  'SS-INK-WETH-KBTC',
+  'SS-INK-WETH-USDCE',
+];
+
+const _BERA_BUNDLES = [
+  'SS-BERA-WETH-USDC',
+];
+
 module.exports = async (hre) => {
     log('\n---\nSingle-Sided Bundlers Deployed!');
 };
 
-module.exports.dependencies = _MODE_BUNDLES;
+module.exports.dependencies = _INK_BUNDLES;
 module.exports.tags = ['deploySS']
