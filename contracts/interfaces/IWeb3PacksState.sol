@@ -20,7 +20,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-pragma solidity 0.8.17;
+pragma solidity 0.8.27;
 
 interface IWeb3PacksState {
   function getBundlerById(bytes32 bundlerId) external view returns (address bundler);
@@ -28,9 +28,6 @@ interface IWeb3PacksState {
   function getPackPriceByPackId(uint256 tokenId) external view returns (uint256 packPrice);
   function setBundlesByPackId(uint256 tokenId, bytes32[] memory bundles) external;
   function getBundlesByPackId(uint256 tokenId) external view returns (bytes32[] memory bundles);
-  function addToReferrerBalance(address referrer, uint256 amount) external;
-  function getReferrerBalance(address referrer) external view returns (uint256 balance);
-  function claimReferralRewards(address payable account) external;
 
   function setWeb3Packs(address web3packs) external;
   function registerBundlerId(bytes32 bundlerId, address bundlerAddress) external;

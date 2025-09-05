@@ -241,7 +241,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "ethPackPrice",
+        "name": "paymentAmount",
         "type": "uint256"
       }
     ],
@@ -317,6 +317,25 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "uint256",
+        "name": "max",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "step",
+        "type": "uint256"
+      }
+    ],
+    "name": "RewardsPercentSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
         "internalType": "address",
         "name": "account",
         "type": "address"
@@ -349,6 +368,19 @@
       }
     ],
     "name": "Web3PacksTreasurySet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "web3vault",
+        "type": "address"
+      }
+    ],
+    "name": "Web3PacksVaultSet",
     "type": "event"
   },
   {
@@ -531,7 +563,46 @@
   },
   {
     "inputs": [],
+    "name": "_rewardsMax",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "_rewardsStep",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "_web3state",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "_web3vault",
     "outputs": [
       {
         "internalType": "address",
@@ -607,8 +678,13 @@
         "type": "bytes32"
       },
       {
+        "internalType": "address",
+        "name": "purchaser",
+        "type": "address"
+      },
+      {
         "internalType": "uint256",
-        "name": "ethPackPrice",
+        "name": "paymentAmount",
         "type": "uint256"
       }
     ],
@@ -621,6 +697,19 @@
       }
     ],
     "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address payable",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "claimReferralRewards",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -831,6 +920,24 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "max",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "step",
+        "type": "uint256"
+      }
+    ],
+    "name": "setRewardsPercent",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address payable",
         "name": "treasury",
         "type": "address"
@@ -850,6 +957,19 @@
       }
     ],
     "name": "setWeb3PacksState",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "web3vault",
+        "type": "address"
+      }
+    ],
+    "name": "setWeb3PacksVault",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

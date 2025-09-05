@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-pragma solidity 0.8.17;
+pragma solidity 0.8.27;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -29,8 +29,8 @@ import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "../../Web3PacksRouterBase.sol";
 import "../../../interfaces/IWeb3PacksDefs.sol";
 import {IUniversalRouter} from "../../../interfaces/bsc/IPancakeUniversalRouter.sol";
-import {Commands} from "./lib/PancakeUniversalCommands.sol";
-import {Constants} from "./lib/PancakeUniversalConstants.sol";
+import {Commands} from "../../agnostic/PancakeUniversalCommands.sol";
+import {Constants} from "../../agnostic/PancakeUniversalConstants.sol";
 
 // REF: https://developer.pancakeswap.finance/contracts/universal-router/addresses
 

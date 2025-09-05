@@ -42,12 +42,13 @@ const config: HardhatUserConfig = {
         version: '0.7.6',
       },
       {
-        version: '0.8.17',
+        version: '0.8.27',
         settings: {
           optimizer: {
             enabled: !optimizerDisabled,
             runs: 1000,
           },
+          viaIR: true,
         },
       },
     ],
@@ -61,7 +62,7 @@ const config: HardhatUserConfig = {
       default: 1,
       // Treasury:
       'mode': '0x74D599ddC5c015C45D8033670404C7C23d932C77', // https://safe.optimism.io/address-book?safe=mode:0x74D599ddC5c015C45D8033670404C7C23d932C77
-      'bsc': '',
+      // 'bsc': '',
     },
     user1: {
       default: 2,
@@ -127,6 +128,16 @@ const config: HardhatUserConfig = {
       },
       chainId: 137,
     },
+    amoy: {
+      url: `https://polygon-amoy.g.alchemy.com/v2/${process.env.ALCHEMY_POLYGON_AMOY_APIKEY}`,
+      gasPrice: 'auto',
+      accounts: {
+        mnemonic: mnemonic.testnet,
+        // initialIndex: 0,
+        count: 8,
+      },
+      chainId: 80002,
+    },
     mumbai: {
       url: `https://polygon-mumbai.g.alchemy.io/v2/${process.env.ALCHEMY_POLYGON_APIKEY}`,
       gasPrice: 10e9,
@@ -177,6 +188,43 @@ const config: HardhatUserConfig = {
       },
       chainId: 84532,
     },
+    inkSepolia: {
+      url: 'https://rpc-gel-sepolia.inkonchain.com',
+      gasPrice: 1e8, // 0.1 GWEI
+      accounts: {
+          mnemonic: mnemonic.testnet,
+          initialIndex: 0,
+          count: 10,
+      },
+    },
+    ink: {
+      url: 'https://rpc-qnd.inkonchain.com',
+      gasPrice: 'auto',
+      accounts: {
+          mnemonic: mnemonic.mainnet,
+          initialIndex: 0,
+          count: 10,
+      },
+      chainId: 57073,
+    },
+    berachainBepolia: {
+      url: 'https://bepolia.rpc.berachain.com',
+      gasPrice: 1e8, // 0.1 GWEI
+      accounts: {
+          mnemonic: mnemonic.testnet,
+          initialIndex: 0,
+          count: 10,
+      },
+    },
+    berachain: {
+      url: 'https://rpc.berachain.com',
+      gasPrice: 'auto',
+      accounts: {
+          mnemonic: mnemonic.mainnet,
+          initialIndex: 0,
+          count: 10,
+      },
+    },
     optimism: {
       url: `https://opt-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_OP_APIKEY}`,
       gasPrice: 'auto',
@@ -207,16 +255,13 @@ const config: HardhatUserConfig = {
       modeSepolia: 'MODE-NETWORK-TESTNET',
       optimism: process.env.ALCHEMY_OP_APIKEY ?? '',
       bscTestnet: process.env.BSCSCAN_APIKEY ?? '',
+      inkSepolia: process.env.BLOCKSCOUT_APIKEY ?? '',
+      ink: process.env.BLOCKSCOUT_APIKEY ?? '',
+      berachain: process.env.BERASCAN_APIKEY ?? '',
+      berachainBepolia: process.env.BERASCAN_APIKEY ?? '',
+      polygon: process.env.POLYGONSCAN_APIKEY ?? '',
     },
     customChains: [
-      {
-        network: 'optimism',
-        chainId: 10,
-        urls: {
-          apiURL: 'https://api-optimistic.etherscan.io/api',
-          browserURL: 'https://optimistic.etherscan.io',
-        },
-      },
       {
         network: 'mode',
         chainId: 34443,
@@ -233,6 +278,22 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: 'https://sepolia.mode.network/api',
           browserURL: 'https://sepolia.explorer.mode.network',
+        },
+      },
+      {
+        network: 'berachain',
+        chainId: 80094,
+        urls: {
+          apiURL: 'https://api.berascan.com/api',
+          browserURL: 'https://berascan.com/',
+        },
+      },
+      {
+        network: 'berachainBepolia',
+        chainId: 80069,
+        urls: {
+          apiURL: 'https://api-testnet.berascan.com/api',
+          browserURL: 'https://testnet.berascan.com/',
         },
       },
     ],

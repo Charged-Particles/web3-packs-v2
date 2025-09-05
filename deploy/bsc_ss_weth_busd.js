@@ -1,4 +1,4 @@
-const { chainIdByName, toBytes, isHardhat, findNearestValidTick, log } = require('../js-helpers/utils');
+const { chainIdByName, toBytes, isHardhat, findNearestValidTick, tryGetContract, log } = require('../js-helpers/utils');
 const { verifyContract } = require('../js-helpers/verifyContract');
 const globals = require('../js-helpers/globals');
 
@@ -13,7 +13,7 @@ module.exports = async (hre) => {
     const network = await hre.network;
     const chainId = chainIdByName(network.name);
 
-    // Only run on BSC Chains
+    // Only run on BSC Chain
     if (chainId !== 97 && chainId !== 56) { return; }
 
     const routers = globals.router[chainId];

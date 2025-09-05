@@ -13,8 +13,8 @@ module.exports = async (hre) => {
   const contracts = globals.contracts[chainId];
   const tokenAddress = globals.tokenAddress[chainId];
 
-  const useExistingWeb3PacksContract = isHardhat(network) ? '' : '0xB7DB5BF6B45782372B40e759cB60A79a522942f3';
-  const useExistingWeb3PacksStateContract = isHardhat(network) ? '' : '0xD0CDC6aF34B01dB1f84b4ECC1d029d6a11eaBa3a';
+  const useExistingWeb3PacksContract = isHardhat(network) ? '' : '0xdBE000aDe32AcC1d81C38B01765902de6d698e5c';
+  const useExistingWeb3PacksStateContract = isHardhat(network) ? '' : '0x42229C922b6Ddc1609222601CC7e7C53B0cA85E2';
 
   log('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
   log('Charged Particles - Web3 Packs V2 - Contract Deployment');
@@ -26,6 +26,17 @@ module.exports = async (hre) => {
   log('  - Treaury:  ', treasury);
   log('  - User1:    ', user1);
   log(' ');
+
+  // FORCED VERIFICATION OF EXISTING CONTRACTS
+  // const constructorArgs = [
+  //   tokenAddress.weth,
+  //   contracts.protonC,
+  //   contracts.chargedParticles,
+  //   contracts.chargedState,
+  // ];
+  // await verifyContract('Web3PacksV2', await ethers.getContractAt('Web3PacksV2', useExistingWeb3PacksContract), constructorArgs);
+  // await verifyContract('Web3PacksState', await ethers.getContractAt('Web3PacksState', useExistingWeb3PacksStateContract), [ useExistingWeb3PacksContract ]);
+  // return;
 
   // Deploy & Verify Web3PacksV2
   if (useExistingWeb3PacksContract.length === 0) {
@@ -74,19 +85,18 @@ module.exports = async (hre) => {
 
   // Get Deployed Web3PacksState
   let web3packsState;
-  if (useExistingWeb3PacksContract.length === 0) {
+  if (useExistingWeb3PacksStateContract.length === 0) {
     web3packsState = await ethers.getContract('Web3PacksState');
   } else {
     web3packsState = await ethers.getContractAt('Web3PacksState', useExistingWeb3PacksStateContract);
   }
 
-
   // Configure Newly Deployed Web3PacksV2
-  if (useExistingWeb3PacksContract.length === 0) {
+  if (useExistingWeb3PacksContract.length === 0 && useExistingWeb3PacksStateContract.length > 0) {
     log(`  Setting Protocol Fee in Web3Packs: ${globals.protocolFee}`);
     await web3packs.setProtocolFee(globals.protocolFee).then(tx => tx.wait());
 
-    log(`  Setting Web3PacksState in Web3Packs: ${globals.protocolFee}`);
+    log(`  Setting Web3PacksState in Web3Packs: ${web3packsState.address}`);
     await web3packs.setWeb3PacksState(web3packsState.address).then(tx => tx.wait());
 
     log(`  Setting Protocol Treasury in Web3Packs: ${treasury}`);

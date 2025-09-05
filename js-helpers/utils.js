@@ -37,8 +37,13 @@ const chainIdByName = (chainName) => {
     case 'kovan': return 42;
     case 'polygon': return 137;
     case 'mumbai': return 80001;
+    case 'amoy': return 80002;
+    case 'ink': return 57073;
+    case 'inksepolia': return 763373;
     case 'bsctestnet': return 97;
     case 'bsc': return 56;
+    case 'berachain': return 80094;
+    case 'berachainbepolia': return 80069;
     case 'hardhat': return 34443;
     case 'coverage': return 31337;
     case 'mode': return 34443;
@@ -55,8 +60,13 @@ const chainNameById = (chainId) => {
     case 42: return 'Kovan';
     case 137: return 'Polygon';
     case 80001: return 'Mumbai';
+    case 80002: return 'Amoy';
+    case 57073: return 'INK';
+    case 763373: return 'INK Sepolia';
     case 56: return 'BSC';
     case 97: return 'BSC Testnet';
+    case 80094: return 'Berachain';
+    case 80069: return 'Berachain Bepolia';
     case 31337: return 'Hardhat';
     default: return 'Unknown';
   }
@@ -67,12 +77,24 @@ const chainTypeById = (chainId) => {
     case 1:
     case 56:
     case 137:
+    case 5000:
+    case 57073:
+    case 80094:
+    case 34443:
       return {isProd: true, isTestnet: false, isHardhat: false};
     case 3:
     case 4:
+    case 5:
     case 42:
     case 97:
+    case 919:
+    case 1442:
+    case 5001:
+    case 80069:
+    case 763373:
+    case 11155111:
     case 80001:
+    case 80002:
       return {isProd: false, isTestnet: true, isHardhat: false};
     case 31337:
     default:
@@ -90,6 +112,14 @@ const findNearestValidTick = (tickSpacing, nearestToMin) => {
   } else {
     // Adjust to the nearest valid tick below MAX_TICK
     return Math.floor(MAX_TICK / tickSpacing) * tickSpacing;
+  }
+};
+
+const tryGetContract = async (contractName) => {
+  try {
+    return await ethers.getContract(contractName);
+  } catch (err) {
+    return { address: null };
   }
 };
 
@@ -114,5 +144,6 @@ module.exports = {
   chainNameById,
   chainIdByName,
   findNearestValidTick,
+  tryGetContract,
   ensureDirectoryExistence,
 }

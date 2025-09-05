@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-pragma solidity 0.8.17;
+pragma solidity 0.8.27;
 
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -44,7 +44,6 @@ contract Web3PacksState is
 
   event Web3PacksSet(address indexed web3packs);
   event BundlerRegistered(address indexed bundlerAddress, bytes32 bundlerId);
-  event BalanceClaimed(address indexed account, uint256 balance);
   event RewardsMigrated(address indexed newWeb3state, uint256 balance);
 
   address public _web3packs;
@@ -52,7 +51,6 @@ contract Web3PacksState is
   mapping (bytes32 => address) internal _bundlersById;
   mapping (uint256 => uint256) internal _packPriceByPackId;
   mapping (uint256 => bytes32[]) internal _bundlesByPackId;
-  mapping (address => uint256) internal _referrerBalance;
 
   constructor(address web3packs) {
     _web3packs = web3packs;
@@ -77,19 +75,6 @@ contract Web3PacksState is
     bundles = _bundlesByPackId[tokenId];
   }
 
-  function getReferrerBalance(address referrer) external view returns (uint256 balance) {
-    balance = _referrerBalance[referrer];
-  }
-
-  function claimReferralRewards(address payable account) external nonReentrant {
-    uint256 balance = _referrerBalance[account];
-    if (address(this).balance >= balance) {
-      account.sendValue(balance);
-      delete _referrerBalance[account];
-      emit BalanceClaimed(account, balance);
-    }
-  }
-
 
   /***********************************|
   |         Only Web3 Packs           |
@@ -109,10 +94,6 @@ contract Web3PacksState is
     } else {
       delete _bundlesByPackId[tokenId];
     }
-  }
-
-  function addToReferrerBalance(address referrer, uint256 amount) external onlyWeb3Packs {
-    _referrerBalance[referrer] += amount;
   }
 
 
@@ -137,11 +118,11 @@ contract Web3PacksState is
     _bundlesByPackId[tokenId] = bundleIds;
   }
 
-  function migrateRewards(address payable newWeb3state) public onlyOwner {
+  function migrateRewards(address payable newVault) public onlyOwner {
     uint256 balance = address(this).balance;
     if (balance > 0) {
-      newWeb3state.sendValue(balance);
-      emit RewardsMigrated(newWeb3state, balance);
+      newVault.sendValue(balance);
+      emit RewardsMigrated(newVault, balance);
     }
   }
 
