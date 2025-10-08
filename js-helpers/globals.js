@@ -99,6 +99,11 @@ const globals = {
       usdt0: '0x0200C29006150606B650577BBE7B6248F58470c1',
       kbtc: '0x73E0C0d45E048D25Fc26Fa3159b0aA04BfA4Db98',
       usdce: '0xF1815bd50389c46847f0Bda824eC8da914045D14',
+      shroomy: '0x0c5E2D1C98cd265C751e02F8F3293bC5764F9111',
+      anita: '0x0606FC632ee812bA970af72F8489baAa443C4B98',
+      purple: '0xD642B49d10cc6e1BC1c6945725667c35e0875f22',
+      ak47: '0x2a1bce657F919ac3f9aB50b2584CFC77563A02Ec',
+      cat: '0x20C69C12abf2B6F8D8ca33604DD25C700c7e70A5',
     },
     763373: {
       weth: '0x4200000000000000000000000000000000000006',
@@ -118,6 +123,7 @@ const globals = {
       h2dao: '0x6fc91fbe42f72941486c98d11724b14fb8d18b36',
       tdm: '0x878b6bf76f7ba67d0c4da616eac1933f9b133c1c',
       lock: '0x69ce536f95a84e1ef51ed0132c514c7ce012e49b',
+      pack: '0x8a8c62e6b1c8ee5b104b7c7401d0b4cdfa4cecbf',
     },
   },
 
@@ -147,6 +153,7 @@ const globals = {
     57073: {
       velodrome: '0x3a63171DD9BebF4D07BC782FECC7eb0b890C2A45',
       velodromeV2: '0x652e53C6a4FE39B6B30426d9c96376a105C89A95',
+      inky: '0xA8C1C38FF57428e5C3a34E0899Be5Cb385476507',
     },
     // BSC
     97: {
