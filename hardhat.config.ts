@@ -246,6 +246,17 @@ const config: HardhatUserConfig = {
       },
       chainId: 97,
     },
+    'somnia-testnet': {
+      url: 'https://dream-rpc.somnia.network',
+      gasPrice: 'auto',
+      accounts: {
+          mnemonic: mnemonic.testnet,
+          initialIndex: 0,
+          count: 10,
+      },
+      timeout: 400000,
+      chainId: 50312,
+    }
   },
   etherscan: {
     apiKey: {
@@ -260,6 +271,7 @@ const config: HardhatUserConfig = {
       berachain: process.env.BERASCAN_APIKEY ?? '',
       berachainBepolia: process.env.BERASCAN_APIKEY ?? '',
       polygon: process.env.POLYGONSCAN_APIKEY ?? '',
+      'somnia-testnet': 'placeholder',
     },
     customChains: [
       {
@@ -296,6 +308,14 @@ const config: HardhatUserConfig = {
           browserURL: 'https://testnet.berascan.com/',
         },
       },
+      {
+        network: 'somnia-testnet',
+        chainId: 50312,
+        urls: {
+          apiURL: 'https://shannon-explorer.somnia.network/api',
+          browserURL: 'https://shannon-explorer.somnia.network',
+        },
+      }
     ],
   },
   gasReporter: {
