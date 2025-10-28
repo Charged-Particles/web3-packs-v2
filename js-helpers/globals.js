@@ -59,6 +59,12 @@ const globals = {
       chargedState: '0x9c00b8CF03f58c0420CDb6DE72E27Bf11964025b',
       protonC: '0x59dde2EBe605cD75365F387FFFE82E5203b8E4cd',
     },
+    // somnia-testnet
+    50312: {
+      chargedParticles: '0xd8bFF003AcfF6067B5F6AB1EC966eD650C6f0740',
+      chargedState: '0x54F9A3f294dBd6f5a100084647bd0E6EcD4b653e',
+      protonC: '0x9E61185CDDA5De038Cebd4C04E82b90952a186bE',
+    }
   },
 
   tokenAddress: {
@@ -119,6 +125,10 @@ const globals = {
       tdm: '0x878b6bf76f7ba67d0c4da616eac1933f9b133c1c',
       lock: '0x69ce536f95a84e1ef51ed0132c514c7ce012e49b',
     },
+    // somnia-testnet
+    50312: {
+      weth: '0xdd8f41bf80d0E47132423339ca06bC6413da96b5',
+    }
   },
 
   router: {
@@ -160,6 +170,10 @@ const globals = {
       quickswapAlgebra: '0xf5b509bB0909a69B1c207E495f687a596C168E12', // Swap router
       quickswapAlgebraLP: '0x8eF88E4c7CfbbaC1C163f7eddd4B578792201de6', // Non fungible position manager
     },
+    // somnia-testnet
+    50312: {
+        
+    }
   },
 
   poolId: {

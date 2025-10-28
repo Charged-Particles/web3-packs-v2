@@ -45,8 +45,8 @@ const config: HardhatUserConfig = {
         version: '0.8.27',
         settings: {
           optimizer: {
-            enabled: !optimizerDisabled,
-            runs: 1000,
+            enabled: true,
+            runs: 200,
           },
           viaIR: true,
         },
@@ -249,6 +249,7 @@ const config: HardhatUserConfig = {
     'somnia-testnet': {
       url: 'https://dream-rpc.somnia.network',
       gasPrice: 'auto',
+      gas: 3000000,
       accounts: {
           mnemonic: mnemonic.testnet,
           initialIndex: 0,
