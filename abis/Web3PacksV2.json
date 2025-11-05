@@ -178,32 +178,6 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "chargedParticles",
-        "type": "address"
-      }
-    ],
-    "name": "ChargedParticlesSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "chargedState",
-        "type": "address"
-      }
-    ],
-    "name": "ChargedStateSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
         "name": "previousOwner",
         "type": "address"
       },
@@ -297,38 +271,6 @@
       }
     ],
     "name": "ProtocolFeeSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "proton",
-        "type": "address"
-      }
-    ],
-    "name": "ProtonSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "max",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "step",
-        "type": "uint256"
-      }
-    ],
-    "name": "RewardsPercentSet",
     "type": "event"
   },
   {
@@ -484,149 +426,6 @@
     "type": "event"
   },
   {
-    "inputs": [],
-    "name": "_chargedParticles",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "_chargedState",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "_cpBasketManager",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "_cpWalletManager",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "_protocolFee",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "_proton",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "_rewardsMax",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "_rewardsStep",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "_web3state",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "_web3vault",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "_weth",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "components": [
@@ -647,7 +446,7 @@
       },
       {
         "internalType": "address[]",
-        "name": "referrals",
+        "name": "",
         "type": "address[]"
       },
       {
@@ -702,60 +501,6 @@
   {
     "inputs": [
       {
-        "internalType": "address payable",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "claimReferralRewards",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "tokenAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      }
-    ],
-    "name": "getPackBalances",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "tokenAddress",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "balance",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "nftTokenId",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct IWeb3PacksDefs.TokenAmount[]",
-        "name": "",
-        "type": "tuple[]"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "uint256",
         "name": "tokenId",
         "type": "uint256"
@@ -766,25 +511,6 @@
       {
         "internalType": "uint256",
         "name": "packPriceEth",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "getReferralRewardsOf",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "balance",
         "type": "uint256"
       }
     ],
@@ -868,69 +594,12 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "chargedParticles",
-        "type": "address"
-      }
-    ],
-    "name": "setChargedParticles",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "chargedState",
-        "type": "address"
-      }
-    ],
-    "name": "setChargedState",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "uint256",
         "name": "fee",
         "type": "uint256"
       }
     ],
     "name": "setProtocolFee",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "proton",
-        "type": "address"
-      }
-    ],
-    "name": "setProton",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "max",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "step",
-        "type": "uint256"
-      }
-    ],
-    "name": "setRewardsPercent",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1011,39 +680,6 @@
       }
     ],
     "name": "unbundle",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address payable",
-        "name": "receiver",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "tokenAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes32[]",
-        "name": "packBundles",
-        "type": "bytes32[]"
-      },
-      {
-        "internalType": "bool",
-        "name": "sellAll",
-        "type": "bool"
-      }
-    ],
-    "name": "unbundleUnknown",
     "outputs": [],
     "stateMutability": "payable",
     "type": "function"

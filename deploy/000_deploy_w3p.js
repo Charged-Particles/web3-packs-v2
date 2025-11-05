@@ -42,7 +42,7 @@ module.exports = async (hre) => {
   if (useExistingWeb3PacksContract.length === 0) {
     log('  Deploying Web3PacksV2...');
     const constructorArgs = [
-      tokenAddress.weth,
+      tokenAddress.wsomi,
       contracts.protonC,
       contracts.chargedParticles,
       contracts.chargedState,
@@ -52,6 +52,7 @@ module.exports = async (hre) => {
       from: deployer,
       args: constructorArgs,
       log: true,
+      gasLimit: 30000000,
     });
 
     if (!isHardhat(network)) {
@@ -77,6 +78,7 @@ module.exports = async (hre) => {
       from: deployer,
       args: constructorArgs,
       log: true,
+      gasLimit: 30000000,
     });
 
     if (!isHardhat(network)) {

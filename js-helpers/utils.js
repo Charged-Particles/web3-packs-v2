@@ -47,7 +47,7 @@ const chainIdByName = (chainName) => {
     case 'hardhat': return 34443;
     case 'coverage': return 31337;
     case 'mode': return 34443;
-    case 'somniaTestnet': return 50312;
+    case 'somniatestnet': return 50312;
     case 'somnia': return 5031;
     default: return 0;
   }
