@@ -125,7 +125,12 @@ const globals = {
       tdm: '0x878b6bf76f7ba67d0c4da616eac1933f9b133c1c',
       lock: '0x69ce536f95a84e1ef51ed0132c514c7ce012e49b',
     },
-    // somniaTestnet
+    // Somnia
+    5031: {
+      wsomi: '0x046EDe9564A72571df6F5e44d0405360c0f4dCab',
+      weth: '0x936ab8c674bcb567cd5deb85d8a216494704e9d8',
+    },
+    // Somnia Testnet
     50312: {
       wsomi: '0x046EDe9564A72571df6F5e44d0405360c0f4dCab',
       weth: '0xdd8f41bf80d0E47132423339ca06bC6413da96b5',
@@ -171,10 +176,15 @@ const globals = {
       quickswapAlgebra: '0xf5b509bB0909a69B1c207E495f687a596C168E12', // Swap router
       quickswapAlgebraLP: '0x8eF88E4c7CfbbaC1C163f7eddd4B578792201de6', // Non fungible position manager
     },
-    // somniaTestnet
+    // Somnia
+    5031: {
+      quickswapAlgebra: '0x1582f6f3D26658F7208A799Be46e34b1f366CE44', // Swap router
+      quickswapAlgebraLP: '0xfE02219e0578B1E4831CDE7C3CB36f71AEb4A833', // Non fungible position manager
+    },
+    // Somnia Testnet
     50312: {
-      quickswapAlgebra: '', // Swap router
-      quickswapAlgebraLP: '', // Non fungible position manager
+      quickswapAlgebra: '0xE94de02e52Eaf9F0f6Bf7f16E4927FcBc2c09bC7', // Swap router
+      quickswapAlgebraLP: '0x37A4950b4ea0C46596404895c5027B088B0e70e7', // Non fungible position manager
     }
   },
 
