@@ -24,12 +24,10 @@
 pragma solidity 0.8.27;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "../../Web3PacksRouterBase.sol";
 import "../../../interfaces/IWeb3PacksDefs.sol";
 import "../../../interfaces/mode/IAlgebraRouter.sol";
-import "../../../interfaces/mode/IAlgebraQuoter.sol";
 import "../../../interfaces/mode/INonfungiblePositionManager.sol";
 
 

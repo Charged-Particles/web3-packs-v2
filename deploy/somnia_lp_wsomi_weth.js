@@ -34,6 +34,7 @@ module.exports = async (hre) => {
     tickLower: BigInt(findNearestValidTick(60, true)),
     tickUpper: BigInt(findNearestValidTick(60, false)),
   }];
+  console.log(constructorArgs);
 
   let bundler = await tryGetContract(bundlerContractName);
   if (!bundler.address) {
@@ -46,6 +47,7 @@ module.exports = async (hre) => {
       from: deployer,
       args: constructorArgs,
       log: true,
+      gasLimit: 30000000,
     });
 
     bundler = await ethers.getContract(bundlerContractName);
