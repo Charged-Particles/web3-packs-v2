@@ -64,6 +64,7 @@ contract Web3PacksV2 is
   event Web3PacksStateSet(address indexed web3state);
   event Web3PacksVaultSet(address indexed web3vault);
   event ProtonSet(address indexed proton);
+  event WrappedNativeTokenSet(address indexed wnative);
   event PackBundled(uint256 indexed tokenId, address indexed receiver, bytes32 packType, uint256 paymentAmount);
   event PackUnbundled(uint256 indexed tokenId, address indexed receiver, uint256 ethAmount);
   event ProtocolFeeSet(uint256 fee);
@@ -599,6 +600,12 @@ contract Web3PacksV2 is
     require(proton != address(0), "Invalid address for proton");
     _proton = proton;
     emit ProtonSet(proton);
+  }
+
+  function setWrappedNativeToken(address wnative) external onlyOwner {
+    require(wnative != address(0), "Invalid address for wnative");
+    _weth = wnative;
+    emit WrappedNativeTokenSet(wnative);
   }
 
   function setWeb3PacksState(address web3state) external onlyOwner {

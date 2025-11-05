@@ -22,12 +22,12 @@ module.exports = async (hre) => {
   const web3packsState = await ethers.getContract('Web3PacksState');
 
   const constructorArgs = [{
-    weth: tokenAddress.weth,    // THIS NEEDS TO BE WSOMI (Wrapped SOMI)
-    token0: tokenAddress.weth,  // THIS NEEDS TO BE WSOMI (Wrapped SOMI)
-    token1: tokenAddress.weth,  // THIS NEEDS TO BE WETH on Somnia Chain
+    weth: tokenAddress.wsomi,
+    token0: tokenAddress.wsomi,
+    token1: tokenAddress.weth,
     manager: web3packs.address,
-    swapRouter: routers.quickSwap,      // NEED TO FIND THESE ADDRESSES
-    liquidityRouter: routers.quickSwap,
+    swapRouter: routers.quickswapAlgebra,
+    liquidityRouter: routers.quickswapAlgebraLP,
     poolId: toBytes(''),
     bundlerId: toBytes(bundlerId),
     slippage: priceSlippage,

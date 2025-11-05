@@ -42,6 +42,15 @@ contract LPWSomiWeth is IWeb3PacksBundler, AlgebraRouter {
   |__________________________________*/
 
   // Token 0 = WSOMI
+  function getToken0() public view override returns (IWeb3PacksDefs.Token memory token1) {
+    IWeb3PacksDefs.Token memory token = IWeb3PacksDefs.Token({
+      tokenAddress: _token0,
+      tokenDecimals: 18,
+      tokenSymbol: "WSOMI"
+    });
+    return token;
+  }
+
   // Token 1 = WETH on Somnia (QuickSwap Exchange)
   function getToken1() public view override returns (IWeb3PacksDefs.Token memory token1) {
     IWeb3PacksDefs.Token memory token = IWeb3PacksDefs.Token({

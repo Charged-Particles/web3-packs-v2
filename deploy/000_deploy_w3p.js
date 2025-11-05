@@ -23,7 +23,7 @@ module.exports = async (hre) => {
   log(`  Using Network: ${chainNameById(chainId)} (${network.name}:${chainId})`);
   log('  Using Accounts:');
   log('  - Deployer: ', deployer);
-  log('  - Treaury:  ', treasury);
+  log('  - Treasury: ', treasury);
   log('  - User1:    ', user1);
   log(' ');
 
@@ -93,7 +93,7 @@ module.exports = async (hre) => {
   }
 
   // Configure Newly Deployed Web3PacksV2
-  if (useExistingWeb3PacksContract.length === 0 && useExistingWeb3PacksStateContract.length > 0) {
+  if (useExistingWeb3PacksContract.length === 0) {
     log(`  Setting Protocol Fee in Web3Packs: ${globals.protocolFee}`);
     await web3packs.setProtocolFee(globals.protocolFee).then(tx => tx.wait());
 
