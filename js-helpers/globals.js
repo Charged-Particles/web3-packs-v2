@@ -127,7 +127,7 @@ const globals = {
     },
     // somniaTestnet
     50312: {
-      wsomi: '',
+      wsomi: '0x046EDe9564A72571df6F5e44d0405360c0f4dCab',
       weth: '0xdd8f41bf80d0E47132423339ca06bC6413da96b5',
     }
   },
