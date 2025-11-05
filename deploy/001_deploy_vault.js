@@ -14,7 +14,7 @@ module.exports = async (hre) => {
   const asPrimaryVault = true; // isHardhat(network) || _PRIMARY_VAULT_CHAIN_ID === chainId;
 
   const contracts = globals.contracts[chainId];
-  const useExistingVaultContract = isHardhat(network) ? '' : '';
+  const useExistingVaultContract = isHardhat(network) ? '' : '0x502B98842a9d71cd24C32bd51810A64a1C9790ba';
   const useExistingVaultProxyContract = isHardhat(network) ? '' : '';
 
   async function _deployPrimaryVault(web3packsAddress) {
@@ -96,13 +96,18 @@ module.exports = async (hre) => {
   const web3packs = await ethers.getContract('Web3PacksV2');
 
   // Deploy & Verify Vault
-  let vault;
+  let vault = { address: '' };
   if (asPrimaryVault) {
-    vault = await _deployPrimaryVault(web3packs.address);
+    // vault = await _deployPrimaryVault(web3packs.address);
+    vault.address = useExistingVaultContract;
 
     // Configure Newly Deployed Web3PacksVault
     log(`  Setting Vault in Web3Packs: ${vault.address}`);
     await web3packs.setWeb3PacksVault(vault.address).then(tx => tx.wait());
+
+    log(`  Setting Web3Packs in Vault: ${web3packs.address}`);
+    const vaultContract = await ethers.getContractAt('Web3PacksVault', vault.address);
+    await vaultContract.setWeb3Packs(web3packs.address).then(tx => tx.wait());
   } else {
     vault = await _deployProxyVault(web3packs.address);
 

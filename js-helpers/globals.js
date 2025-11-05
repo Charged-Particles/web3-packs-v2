@@ -113,11 +113,23 @@ const globals = {
     },
     // Polygon
     137: {
-      weth: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
+      weth: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', // WPOL on Polygon
+      wpol: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+      pol: '0x0000000000000000000000000000000000001010',
       pack: '0x4fb9b94bd8bbbd684a7d5a5544bc7a07188e5617',
       h2dao: '0x6fc91fbe42f72941486c98d11724b14fb8d18b36',
       tdm: '0x878b6bf76f7ba67d0c4da616eac1933f9b133c1c',
       lock: '0x69ce536f95a84e1ef51ed0132c514c7ce012e49b',
+      link: '0x53e0bca35ec356bd5dddfebbd1fc0fd03fabad39',
+      uni: '0xb33eaad8d922b1083446dc23f610c2567fb5180f',
+      aave: '0xd6df932a45c0f255f85145f286ea0b292b21c90b',
+      crv: '0x172370d5cd63279efa6d502dab29171933a610af',
+      grt: '0x5fe2b58c013d7601147dcdd68c143a77499f5531',
+      axl: '0x6e4E624106Cb12E168E6533F8ec7c82263358940',
+      x23: '0x9c5B5FbEac8F3acc97422e4daF43696e415e25bA',
+      ctzn: '0x0D9B0790E97e3426C161580dF4Ee853E4A7C4607',
+      prsm: '0x0b7a46E1af45E1EaadEeD34B55b6FC00A85c7c68',
+      achad: '0xA1a78aC9884aDc9d04d59b2b743f1eC709618e55',
     },
   },
 

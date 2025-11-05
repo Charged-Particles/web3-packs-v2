@@ -2,8 +2,8 @@ const { chainIdByName, toBytes, isHardhat, findNearestValidTick, tryGetContract,
 const { verifyContract } = require('../js-helpers/verifyContract');
 const globals = require('../js-helpers/globals');
 
-const bundlerContractName = 'SSPolyWethPack';
-const bundlerId = 'SS-POLY-WETH-PACK';
+const bundlerContractName = 'SSPolyWpolAave';
+const bundlerId = 'SS-POLY-WPOL-AAVE';
 const priceSlippage = 300n; // 3%
 
 module.exports = async (hre) => {
@@ -16,15 +16,36 @@ module.exports = async (hre) => {
   // Only run on Polygon Chain
   if (chainId !== 137 && chainId !== 80002) { return; }
 
+  const useExistingWeb3PacksContract = isHardhat(network) ? '' : '0xbFf28A2a8C5f45D16f7E3629967563F33b3bdC78';
+  const useExistingWeb3PacksStateContract = isHardhat(network) ? '' : '0x42229C922b6Ddc1609222601CC7e7C53B0cA85E2';
+
   const routers = globals.router[chainId];
   const tokenAddress = globals.tokenAddress[chainId];
-  const web3packs = await ethers.getContract('Web3PacksV2');
-  const web3packsState = await ethers.getContract('Web3PacksState');
+
+  // Get Deployed Web3PacksV2
+  let web3packs;
+  if (useExistingWeb3PacksContract.length === 0) {
+    web3packs = await ethers.getContract('Web3PacksV2');
+  } else {
+    web3packs = await ethers.getContractAt('Web3PacksV2', useExistingWeb3PacksContract);
+  }
+
+  // Get Deployed Web3PacksState
+  let web3packsState;
+  if (useExistingWeb3PacksStateContract.length === 0) {
+    web3packsState = await ethers.getContract('Web3PacksState');
+  } else {
+    web3packsState = await ethers.getContractAt('Web3PacksState', useExistingWeb3PacksStateContract);
+  }
+
+  log(`  Web3PacksV2: ${web3packs.address}`);
+  log(`  Web3PacksState: ${web3packsState.address}`);
+  log(`  Bundler: ${bundlerContractName}`);
 
   const constructorArgs = [{
-    weth: tokenAddress.weth,
-    token0: tokenAddress.weth,
-    token1: tokenAddress.pack,
+    weth: tokenAddress.wpol,
+    token0: tokenAddress.wpol,
+    token1: tokenAddress.aave,
     manager: web3packs.address,
     swapRouter: routers.quickswapAlgebra,
     liquidityRouter: routers.quickswapAlgebraLP,
@@ -36,6 +57,7 @@ module.exports = async (hre) => {
   }];
 
   let bundler = await tryGetContract(bundlerContractName);
+  log(`  Bundler Address: ${bundler.address}`);
   if (!bundler.address) {
     //
     // Deploy Contracts

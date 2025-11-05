@@ -13,8 +13,8 @@ module.exports = async (hre) => {
   const contracts = globals.contracts[chainId];
   const tokenAddress = globals.tokenAddress[chainId];
 
-  const useExistingWeb3PacksContract = isHardhat(network) ? '' : '0xdBE000aDe32AcC1d81C38B01765902de6d698e5c';
-  const useExistingWeb3PacksStateContract = isHardhat(network) ? '' : '0x42229C922b6Ddc1609222601CC7e7C53B0cA85E2';
+  const useExistingWeb3PacksContract = isHardhat(network) ? '' : '';
+  const useExistingWeb3PacksStateContract = isHardhat(network) ? '' : '';
 
   log('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
   log('Charged Particles - Web3 Packs V2 - Contract Deployment');
@@ -23,7 +23,7 @@ module.exports = async (hre) => {
   log(`  Using Network: ${chainNameById(chainId)} (${network.name}:${chainId})`);
   log('  Using Accounts:');
   log('  - Deployer: ', deployer);
-  log('  - Treaury:  ', treasury);
+  log('  - Treasury: ', treasury);
   log('  - User1:    ', user1);
   log(' ');
 
@@ -92,15 +92,21 @@ module.exports = async (hre) => {
   }
 
   // Configure Newly Deployed Web3PacksV2
-  if (useExistingWeb3PacksContract.length === 0 && useExistingWeb3PacksStateContract.length > 0) {
+  if (useExistingWeb3PacksContract.length === 0) {
     log(`  Setting Protocol Fee in Web3Packs: ${globals.protocolFee}`);
-    await web3packs.setProtocolFee(globals.protocolFee).then(tx => tx.wait());
+    await web3packs.setProtocolFee(globals.protocolFee).then((tx) => {
+      console.log('    - tx:', tx.hash);
+      return tx.wait();
+    });
 
     log(`  Setting Web3PacksState in Web3Packs: ${web3packsState.address}`);
     await web3packs.setWeb3PacksState(web3packsState.address).then(tx => tx.wait());
 
     log(`  Setting Protocol Treasury in Web3Packs: ${treasury}`);
     await web3packs.setTreasury(treasury).then(tx => tx.wait());
+
+    // log(`  Setting Web3Packs in Web3PacksState: ${web3packs.address}`);
+    // await web3packsState.setWeb3Packs(web3packs.address).then(tx => tx.wait());
   }
 };
 

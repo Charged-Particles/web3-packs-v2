@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-// SSPolyWethPack.sol
+// SSPolyWpolAave.sol
 // Copyright (c) 2025 Firma Lux, Inc. <https://charged.fi>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,10 +29,10 @@ import "../../../interfaces/IWeb3PacksBundler.sol";
 
 /*
   Performs a Single-Sided Swap on QuickSwap Exchange using the Algebra Universal Router
-  Token 0 = WETH
-  Token 1 = PACK
+  Token 0 = WPOL
+  Token 1 = AAVE
  */
-contract SSPolyWethPack is IWeb3PacksBundler, AlgebraRouter {
+contract SSPolyWpolAave is IWeb3PacksBundler, AlgebraRouter {
   // Inherit from the Algebra Router
   constructor(IWeb3PacksDefs.RouterConfig memory config) AlgebraRouter(config) {}
 
@@ -40,12 +40,22 @@ contract SSPolyWethPack is IWeb3PacksBundler, AlgebraRouter {
   |          Configuration            |
   |__________________________________*/
 
-  // Token 1 = PACK on Polygon (QuickSwap Exchange)
+  // Token 0 = WPOL on Polygon (QuickSwap Exchange)
+  function getToken0() public view override returns (IWeb3PacksDefs.Token memory token0) {
+    IWeb3PacksDefs.Token memory token = IWeb3PacksDefs.Token({
+      tokenAddress: _token0,
+      tokenDecimals: 18,
+      tokenSymbol: "WPOL"
+    });
+    return token;
+  }
+
+  // Token 1 = AAVE on Polygon (QuickSwap Exchange)
   function getToken1() public view override returns (IWeb3PacksDefs.Token memory token1) {
     IWeb3PacksDefs.Token memory token = IWeb3PacksDefs.Token({
       tokenAddress: _token1,
       tokenDecimals: 18,
-      tokenSymbol: "PACK"
+      tokenSymbol: "AAVE"
     });
     return token;
   }

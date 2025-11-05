@@ -47,6 +47,7 @@ const chainIdByName = (chainName) => {
     case 'hardhat': return 34443;
     case 'coverage': return 31337;
     case 'mode': return 34443;
+    case 'somniatestnet': return 50312;
     default: return 0;
   }
 };
@@ -67,6 +68,7 @@ const chainNameById = (chainId) => {
     case 97: return 'BSC Testnet';
     case 80094: return 'Berachain';
     case 80069: return 'Berachain Bepolia';
+    case 50312: return 'Somnia Testnet';
     case 31337: return 'Hardhat';
     default: return 'Unknown';
   }
@@ -95,6 +97,7 @@ const chainTypeById = (chainId) => {
     case 11155111:
     case 80001:
     case 80002:
+    case 50312:
       return {isProd: false, isTestnet: true, isHardhat: false};
     case 31337:
     default:

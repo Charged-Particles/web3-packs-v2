@@ -16,7 +16,7 @@ module.exports = async (hre) => {
   log(`  Using Network: ${chainNameById(chainId)} (${network.name}:${chainId})`);
   log('  Using Accounts:');
   log('  - Deployer: ', deployer);
-  log('  - Treaury:  ', treasury);
+  log('  - Treasury: ', treasury);
   log('  - User1:    ', user1);
   log(' ');
 

@@ -24,7 +24,8 @@
     "migrate": "hardhat deploy --tags migrate --network",
     "erc721": "hardhat deploy --tags ERC721Mintable --network",
     "erc20": "hardhat deploy --tags ERC20Mintable --network",
-    "vault": "hardhat deploy --tags Vaults --network"
+    "vault": "hardhat deploy --tags Vaults --network",
+    "bundler": "hardhat deploy --tags SS-POLY-WPOL --network"
   },
   "dependencies": {
     "@axelar-network/axelar-gmp-sdk-solidity": "^6.0.6",
