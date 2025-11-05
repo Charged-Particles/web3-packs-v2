@@ -35,7 +35,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
+// import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
@@ -52,7 +52,6 @@ import "./interfaces/IBaseProton.sol";
 contract Web3PacksV2 is
   IWeb3Packs,
   Ownable,
-  Pausable,
   BlackholePrevention,
   ReentrancyGuard
 {
@@ -107,7 +106,7 @@ contract Web3PacksV2 is
     external
     payable
     override
-    whenNotPaused
+    // whenNotPaused
     nonReentrant
     returns(uint256 tokenId)
   {
@@ -150,7 +149,7 @@ contract Web3PacksV2 is
     external
     override
     payable
-    whenNotPaused
+    // whenNotPaused
     nonReentrant
   {
     _collectFees(0);
@@ -507,11 +506,11 @@ contract Web3PacksV2 is
     }
   }
 
-  function _getMass(address tokenAddress, uint256 tokenId, address assetTokenAddress) internal returns (uint256 assetMass) {
-    /// @dev "baseParticleMass" is not a "view" function; call via "callStatic"
-    assetMass = IChargedParticles(_chargedParticles)
-      .baseParticleMass(tokenAddress, tokenId, "generic.B", assetTokenAddress);
-  }
+  // function _getMass(address tokenAddress, uint256 tokenId, address assetTokenAddress) internal returns (uint256 assetMass) {
+  //   /// @dev "baseParticleMass" is not a "view" function; call via "callStatic"
+  //   assetMass = IChargedParticles(_chargedParticles)
+  //     .baseParticleMass(tokenAddress, tokenId, "generic.B", assetTokenAddress);
+  // }
 
   function _getProtocolFee(uint256 totalPayment) internal view returns (uint256) {
     if (_protocolFee > 0 && totalPayment < _protocolFee) {
@@ -625,13 +624,13 @@ contract Web3PacksV2 is
   //   emit RewardsPercentSet(max, step);
   // }
 
-  function pause() public onlyOwner {
-    _pause();
-  }
+  // function pause() public onlyOwner {
+  //   _pause();
+  // }
 
-  function unpause() public onlyOwner {
-    _unpause();
-  }
+  // function unpause() public onlyOwner {
+  //   _unpause();
+  // }
 
 
   /***********************************|
