@@ -68,7 +68,7 @@ const globals = {
     5031: {
       chargedParticles: '0x2Ff4613a12570a77D88376A3e5d0FF68953b3fd8',
       chargedState: '0x10a4b06BA9aC1Bf6e44F17EAf5c0D05c98F82704',
-      protonC: '0xE302487A213CC714Fb303a4c2A300eFa71453da6',
+      protonC: '0x6487cb6570D43e3239A680fd607e6859307a0149',
     }
   },
 
@@ -134,6 +134,7 @@ const globals = {
     5031: {
       wsomi: '0x046EDe9564A72571df6F5e44d0405360c0f4dCab',
       weth: '0x936ab8c674bcb567cd5deb85d8a216494704e9d8',
+      usdc: '0x28BEc7E30E6faee657a03e19Bf1128AaD7632A00',
     },
     // Somnia Testnet
     50312: {

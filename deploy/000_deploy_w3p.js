@@ -28,16 +28,6 @@ module.exports = async (hre) => {
   log(' ');
 
   // FORCED VERIFICATION OF EXISTING CONTRACTS
-  // const constructorArgs = [
-  //   tokenAddress.weth,
-  //   contracts.protonC,
-  //   contracts.chargedParticles,
-  //   contracts.chargedState,
-  // ];
-  // await verifyContract('Web3PacksV2', await ethers.getContractAt('Web3PacksV2', useExistingWeb3PacksContract), constructorArgs);
-  // await verifyContract('Web3PacksState', await ethers.getContractAt('Web3PacksState', useExistingWeb3PacksStateContract), [ useExistingWeb3PacksContract ]);
-  // return;
-
   // Deploy & Verify Web3PacksV2
   if (useExistingWeb3PacksContract.length === 0) {
     log('  Deploying Web3PacksV2...');
@@ -47,6 +37,8 @@ module.exports = async (hre) => {
       contracts.chargedParticles,
       contracts.chargedState,
     ];
+    
+    console.log(chainId, constructorArgs);
 
     await deploy('Web3PacksV2', {
       from: deployer,
