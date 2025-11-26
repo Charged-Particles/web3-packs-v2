@@ -64,6 +64,11 @@ const globals = {
       chargedParticles: '0xd8bFF003AcfF6067B5F6AB1EC966eD650C6f0740',
       chargedState: '0x54F9A3f294dBd6f5a100084647bd0E6EcD4b653e',
       protonC: '0x9E61185CDDA5De038Cebd4C04E82b90952a186bE',
+    },
+    5031: {
+      chargedParticles: '0x2Ff4613a12570a77D88376A3e5d0FF68953b3fd8',
+      chargedState: '0x10a4b06BA9aC1Bf6e44F17EAf5c0D05c98F82704',
+      protonC: '0xE302487A213CC714Fb303a4c2A300eFa71453da6',
     }
   },
 
@@ -212,7 +217,7 @@ const globals = {
   wethAbi : [
     'function deposit() public',
     'function withdraw(uint wad) public',
-  ],
+  ]
 };
 
 module.exports = globals;

@@ -253,6 +253,14 @@ const config: HardhatUserConfig = {
           initialIndex: 0,
           count: 10,
       },
+    },
+    somnia: {
+      url: 'https://api.infra.mainnet.somnia.network/',
+      accounts: {
+          mnemonic: mnemonic.testnet,
+          initialIndex: 0,
+          count: 10,
+      },
     }
   },
   etherscan: {
@@ -269,6 +277,7 @@ const config: HardhatUserConfig = {
       berachainBepolia: process.env.BERASCAN_APIKEY ?? '',
       polygon: process.env.POLYGONSCAN_APIKEY ?? '',
       somniaTestnet: 'empty',
+      somnia: 'empty',
     },
     customChains: [
       {
@@ -312,7 +321,15 @@ const config: HardhatUserConfig = {
           apiURL: 'https://shannon-explorer.somnia.network/api',
           browserURL: 'https://shannon-explorer.somnia.network',
         },
-      }
+      },
+      {
+        network: 'somnia',
+        chainId: 5031,
+        urls: {
+          apiURL: 'https://mainnet.somnia.w3us.site/api',
+          browserURL: 'https://explorer.somnia.network',
+        },
+       },
     ],
   },
   gasReporter: {
