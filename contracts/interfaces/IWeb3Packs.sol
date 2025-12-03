@@ -28,6 +28,19 @@ interface IWeb3Packs is IWeb3PacksDefs {
   event BundledERC20(address indexed tokenAddress, uint256 amountOut);
   event BundledERC721(address indexed tokenAddress, uint256 nftTokenId);
 
+  // event ChargedParticlesSet(address indexed chargedParticles);
+  // event ChargedStateSet(address indexed chargedState);
+  event Web3PacksStateSet(address indexed web3state);
+  event Web3PacksVaultSet(address indexed web3vault);
+  // event ProtonSet(address indexed proton);
+  // event WrappedNativeTokenSet(address indexed wnative);
+  event PackBundled(uint256 indexed tokenId, address indexed receiver, bytes32 packType, uint256 paymentAmount);
+  event PackUnbundled(uint256 indexed tokenId, address indexed receiver, uint256 ethAmount);
+  event ProtocolFeeSet(uint256 fee);
+  // event RewardsPercentSet(uint256 max, uint256 step);
+  event Web3PacksTreasurySet(address indexed treasury);
+
+
   // BUNDLE
   function bundle(
     IWeb3PacksDefs.BundleChunk[] calldata bundleChunks,
@@ -48,30 +61,30 @@ interface IWeb3Packs is IWeb3PacksDefs {
   ) external
     payable;
 
-  function unbundleUnknown(
-    address payable receiver,
-    address tokenAddress,
-    uint256 tokenId,
-    bytes32[] memory packBundles,
-    bool sellAll
-  ) external
-    payable;
+  // function unbundleUnknown(
+  //   address payable receiver,
+  //   address tokenAddress,
+  //   uint256 tokenId,
+  //   bytes32[] memory packBundles,
+  //   bool sellAll
+  // ) external
+  //   payable;
 
   // QUERY
-  function getPackBalances(
-    address tokenAddress,
-    uint256 tokenId
-  ) external
-    returns (TokenAmount[] memory);
+  // function getPackBalances(
+  //   address tokenAddress,
+  //   uint256 tokenId
+  // ) external
+  //   returns (TokenAmount[] memory);
 
   function getPackPriceEth(uint256 tokenId)
     external
     returns (uint256 packPriceEth);
 
-  function getReferralRewardsOf(address account)
-    external
-    returns (uint256 balance);
+  // function getReferralRewardsOf(address account)
+  //   external
+  //   returns (uint256 balance);
 
-  function claimReferralRewards(address payable account)
-    external;
+  // function claimReferralRewards(address payable account)
+  //   external;
 }

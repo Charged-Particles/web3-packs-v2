@@ -29,35 +29,34 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
-import "./BlackholePrevention.sol";
+// import "./BlackholePrevention.sol";
 import "../interfaces/IWeb3PacksRouter.sol";
 import "../interfaces/IWeb3PacksDefs.sol";
 
 abstract contract Web3PacksRouterBase is
   IWeb3PacksRouter,
-  Ownable,
-  BlackholePrevention
+  Ownable
 {
   using Address for address payable;
 
-  address public _weth;
-  address public _manager;
-  address public _token0;
-  address public _token1;
+  uint256 internal _slippage;
+  int24 internal _tickLower;
+  int24 internal _tickUpper;
 
-  address public _swapRouter;
-  address public _liquidityRouter;
-  bytes32 public _poolId;
+  address internal _weth;
+  address internal _manager;
+  address internal _token0;
+  address internal _token1;
+
+  address internal _swapRouter;
+  address internal _liquidityRouter;
+  bytes32 internal _poolId;
 
   // The ID Associated with this Bundler (must be Registered with Web3Packs)
-  bytes32 public _bundlerId;
-
-  uint256 public _slippage;
-  int24 public _tickLower;
-  int24 public _tickUpper;
+  bytes32 internal _bundlerId;
 
   // Store Liquidity Positions by Pack Token ID
-  mapping(uint256 => IWeb3PacksDefs.LiquidityPosition) public _liquidityPositionsByTokenId;
+  mapping(uint256 => IWeb3PacksDefs.LiquidityPosition) internal _liquidityPositionsByTokenId;
 
   constructor(IWeb3PacksDefs.RouterConfig memory config) {
     _weth = config.weth;
@@ -190,49 +189,49 @@ abstract contract Web3PacksRouterBase is
   |      (blackhole prevention)       |
   |__________________________________*/
 
-  function setWeth(address weth) external virtual onlyOwner {
-    _weth = weth;
-  }
+  // function setWeth(address weth) external virtual onlyOwner {
+  //   _weth = weth;
+  // }
 
-  function setSwapRouter(address router) external virtual onlyOwner {
-    _swapRouter = router;
-  }
+  // function setSwapRouter(address router) external virtual onlyOwner {
+  //   _swapRouter = router;
+  // }
 
-  function setLiquidityRouter(address router) external virtual onlyOwner {
-    _liquidityRouter = router;
-  }
+  // function setLiquidityRouter(address router) external virtual onlyOwner {
+  //   _liquidityRouter = router;
+  // }
 
   function setManager(address manager) external virtual onlyOwner {
     _manager = manager;
   }
 
-  function setSlippage(uint256 slippage) external virtual onlyOwner {
-    _slippage = slippage;
-  }
+  // function setSlippage(uint256 slippage) external virtual onlyOwner {
+  //   _slippage = slippage;
+  // }
 
-  function setTickLower(int24 tickLower) external virtual onlyOwner {
-    _tickLower = tickLower;
-  }
+  // function setTickLower(int24 tickLower) external virtual onlyOwner {
+  //   _tickLower = tickLower;
+  // }
 
-  function setTickUpper(int24 tickUpper) external virtual onlyOwner {
-    _tickUpper = tickUpper;
-  }
+  // function setTickUpper(int24 tickUpper) external virtual onlyOwner {
+  //   _tickUpper = tickUpper;
+  // }
 
-  function withdrawEther(address payable receiver, uint256 amount) external virtual onlyOwner {
-    _withdrawEther(receiver, amount);
-  }
+  // function withdrawEther(address payable receiver, uint256 amount) external virtual onlyOwner {
+  //   _withdrawEther(receiver, amount);
+  // }
 
-  function withdrawErc20(address payable receiver, address tokenAddress, uint256 amount) external virtual onlyOwner {
-    _withdrawERC20(receiver, tokenAddress, amount);
-  }
+  // function withdrawErc20(address payable receiver, address tokenAddress, uint256 amount) external virtual onlyOwner {
+  //   _withdrawERC20(receiver, tokenAddress, amount);
+  // }
 
-  function withdrawERC721(address payable receiver, address tokenAddress, uint256 tokenId) external virtual onlyOwner {
-    _withdrawERC721(receiver, tokenAddress, tokenId);
-  }
+  // function withdrawERC721(address payable receiver, address tokenAddress, uint256 tokenId) external virtual onlyOwner {
+  //   _withdrawERC721(receiver, tokenAddress, tokenId);
+  // }
 
-  function withdrawERC1155(address payable receiver, address tokenAddress, uint256 tokenId, uint256 amount) external virtual onlyOwner {
-    _withdrawERC1155(receiver, tokenAddress, tokenId, amount);
-  }
+  // function withdrawERC1155(address payable receiver, address tokenAddress, uint256 tokenId, uint256 amount) external virtual onlyOwner {
+  //   _withdrawERC1155(receiver, tokenAddress, tokenId, amount);
+  // }
 
 
   modifier onlyManagerOrSelf() {

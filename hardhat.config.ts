@@ -45,8 +45,8 @@ const config: HardhatUserConfig = {
         version: '0.8.27',
         settings: {
           optimizer: {
-            enabled: !optimizerDisabled,
-            runs: 1000,
+            enabled: true,
+            runs: 100,
           },
           viaIR: true,
         },
@@ -246,6 +246,22 @@ const config: HardhatUserConfig = {
       },
       chainId: 97,
     },
+    somniaTestnet: {
+      url: 'https://dream-rpc.somnia.network',
+      accounts: {
+          mnemonic: mnemonic.testnet,
+          initialIndex: 0,
+          count: 10,
+      },
+    },
+    somnia: {
+      url: 'https://api.infra.mainnet.somnia.network/',
+      accounts: {
+          mnemonic: mnemonic.testnet,
+          initialIndex: 0,
+          count: 10,
+      },
+    }
   },
   etherscan: {
     apiKey: {
@@ -260,6 +276,8 @@ const config: HardhatUserConfig = {
       berachain: process.env.BERASCAN_APIKEY ?? '',
       berachainBepolia: process.env.BERASCAN_APIKEY ?? '',
       polygon: process.env.POLYGONSCAN_APIKEY ?? '',
+      somniaTestnet: 'empty',
+      somnia: 'empty',
     },
     customChains: [
       {
@@ -296,6 +314,22 @@ const config: HardhatUserConfig = {
           browserURL: 'https://testnet.berascan.com/',
         },
       },
+      {
+        network: 'somniaTestnet',
+        chainId: 50312,
+        urls: {
+          apiURL: 'https://shannon-explorer.somnia.network/api',
+          browserURL: 'https://shannon-explorer.somnia.network',
+        },
+      },
+      {
+        network: 'somnia',
+        chainId: 5031,
+        urls: {
+          apiURL: 'https://mainnet.somnia.w3us.site/api',
+          browserURL: 'https://explorer.somnia.network',
+        },
+       },
     ],
   },
   gasReporter: {

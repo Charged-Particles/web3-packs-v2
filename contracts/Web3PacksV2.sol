@@ -35,7 +35,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
+// import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
@@ -52,40 +52,28 @@ import "./interfaces/IBaseProton.sol";
 contract Web3PacksV2 is
   IWeb3Packs,
   Ownable,
-  Pausable,
   BlackholePrevention,
   ReentrancyGuard
 {
   using Address for address payable;
   using SafeERC20 for IERC20;
 
-  event ChargedParticlesSet(address indexed chargedParticles);
-  event ChargedStateSet(address indexed chargedState);
-  event Web3PacksStateSet(address indexed web3state);
-  event Web3PacksVaultSet(address indexed web3vault);
-  event ProtonSet(address indexed proton);
-  event PackBundled(uint256 indexed tokenId, address indexed receiver, bytes32 packType, uint256 paymentAmount);
-  event PackUnbundled(uint256 indexed tokenId, address indexed receiver, uint256 ethAmount);
-  event ProtocolFeeSet(uint256 fee);
-  event RewardsPercentSet(uint256 max, uint256 step);
-  event Web3PacksTreasurySet(address indexed treasury);
-
   uint256 private constant BASIS_POINTS = 10000;
-  uint256 public _rewardsMax = 330;  // 3.3%
-  uint256 public _rewardsStep = 30;  // 0.3%
+  // uint256 internal _rewardsMax = 330;  // 3.3%
+  // uint256 internal _rewardsStep = 30;  // 0.3%
 
-  address public _weth;
-  address public _proton;
-  address public _web3state;
-  address public _web3vault;
-  address public _chargedParticles;
-  address public _chargedState;
+  address internal _weth;
+  address internal _proton;
+  address internal _web3state;
+  address internal _web3vault;
+  address internal _chargedParticles;
+  address internal _chargedState;
   address payable internal _treasury;
-  uint256 public _protocolFee;
+  uint256 internal _protocolFee;
 
   // Charged Particles Wallet Managers
-  string public _cpWalletManager = "generic.B";
-  string public _cpBasketManager = "generic.B";
+  // string public _cpWalletManager = "generic.B";
+  // string public _cpBasketManager = "generic.B";
 
   constructor(
     address weth,
@@ -108,7 +96,7 @@ contract Web3PacksV2 is
 
   function bundle(
     IWeb3PacksDefs.BundleChunk[] calldata bundleChunks,
-    address[] calldata referrals,
+    address[] calldata /* referrals */,
     string calldata tokenMetaUri,
     IWeb3PacksDefs.LockState calldata lockState,
     bytes32 packType,
@@ -118,7 +106,7 @@ contract Web3PacksV2 is
     external
     payable
     override
-    whenNotPaused
+    // whenNotPaused
     nonReentrant
     returns(uint256 tokenId)
   {
@@ -139,7 +127,7 @@ contract Web3PacksV2 is
     }
 
     uint256 remainingAmount = totalPayment - fee;
-    uint256 rewards = _collectReferralRewards(remainingAmount, referrals);
+    uint256 rewards = 0; // _collectReferralRewards(remainingAmount, referrals);
     uint256 bundleAmount = remainingAmount - rewards;
 
     tokenId = _bundle(
@@ -161,7 +149,7 @@ contract Web3PacksV2 is
     external
     override
     payable
-    whenNotPaused
+    // whenNotPaused
     nonReentrant
   {
     _collectFees(0);
@@ -175,46 +163,46 @@ contract Web3PacksV2 is
   }
 
   // Primarily for Unbundling Old Packs from V1
-  function unbundleUnknown(
-    address payable receiver,
-    address tokenAddress,
-    uint256 tokenId,
-    bytes32[] memory packBundles,
-    bool sellAll
-  )
-    external
-    override
-    payable
-    whenNotPaused
-    nonReentrant
-  {
-    _collectFees(0);
-    uint256 ethAmount = _unbundlePack(
-      receiver,
-      tokenAddress,
-      tokenId,
-      packBundles,
-      sellAll
-    );
-    emit PackUnbundled(tokenId, receiver, ethAmount);
-  }
+  // function unbundleUnknown(
+  //   address payable receiver,
+  //   address tokenAddress,
+  //   uint256 tokenId,
+  //   bytes32[] memory packBundles,
+  //   bool sellAll
+  // )
+  //   external
+  //   override
+  //   payable
+  //   whenNotPaused
+  //   nonReentrant
+  // {
+  //   _collectFees(0);
+  //   uint256 ethAmount = _unbundlePack(
+  //     receiver,
+  //     tokenAddress,
+  //     tokenId,
+  //     packBundles,
+  //     sellAll
+  //   );
+  //   emit PackUnbundled(tokenId, receiver, ethAmount);
+  // }
 
   // NOTE: Call via "staticCall" for Balances
-  function getPackBalances(address tokenAddress, uint256 tokenId) public override returns (TokenAmount[] memory) {
-    return _getPackBalances(tokenAddress, tokenId);
-  }
+  // function getPackBalances(address tokenAddress, uint256 tokenId) public override returns (TokenAmount[] memory) {
+  //   return _getPackBalances(tokenAddress, tokenId);
+  // }
 
   function getPackPriceEth(uint256 tokenId) public view override returns (uint256 packPriceEth) {
     packPriceEth = IWeb3PacksState(_web3state).getPackPriceByPackId(tokenId);
   }
 
-  function getReferralRewardsOf(address account) public view override returns (uint256 balance) {
-    balance = IWeb3PacksVault(_web3vault).getReferrerBalance(account);
-  }
+  // function getReferralRewardsOf(address account) public view override returns (uint256 balance) {
+  //   balance = IWeb3PacksVault(_web3vault).getReferrerBalance(account);
+  // }
 
-  function claimReferralRewards(address payable account) public override nonReentrant {
-    IWeb3PacksVault(_web3vault).claimReferralRewards(account);
-  }
+  // function claimReferralRewards(address payable account) public override nonReentrant {
+  //   IWeb3PacksVault(_web3vault).claimReferralRewards(account);
+  // }
 
 
   /***********************************|
@@ -360,42 +348,42 @@ contract Web3PacksV2 is
     }
   }
 
-  function _getPackBalances(address tokenAddress, uint256 tokenId) internal returns (TokenAmount[] memory) {
-    IWeb3PacksBundler bundler;
+  // function _getPackBalances(address tokenAddress, uint256 tokenId) internal returns (TokenAmount[] memory) {
+  //   IWeb3PacksBundler bundler;
 
-    // Ensure Pack has Bundles
-    bytes32[] memory bundles = IWeb3PacksState(_web3state).getBundlesByPackId(tokenId);
-    uint256 bundleCount = bundles.length;
-    if (bundleCount == 0) {
-      revert NoBundlesInPack();
-    }
+  //   // Ensure Pack has Bundles
+  //   bytes32[] memory bundles = IWeb3PacksState(_web3state).getBundlesByPackId(tokenId);
+  //   uint256 bundleCount = bundles.length;
+  //   if (bundleCount == 0) {
+  //     revert NoBundlesInPack();
+  //   }
 
-    TokenAmount[] memory tokenBalances = new TokenAmount[](bundleCount);
-    for (uint i; i < bundleCount; i++) {
-      bytes32 bundlerId = bundles[i];
-      address bundlerAddress = IWeb3PacksState(_web3state).getBundlerById(bundlerId);
-      if (bundlerAddress == address(0)) {
-        // skip unregistered bundlers
-        continue;
-      }
+  //   TokenAmount[] memory tokenBalances = new TokenAmount[](bundleCount);
+  //   for (uint i; i < bundleCount; i++) {
+  //     bytes32 bundlerId = bundles[i];
+  //     address bundlerAddress = IWeb3PacksState(_web3state).getBundlerById(bundlerId);
+  //     if (bundlerAddress == address(0)) {
+  //       // skip unregistered bundlers
+  //       continue;
+  //     }
 
-      // Get Liquidity Token from Bundler
-      bundler = IWeb3PacksBundler(bundlerAddress);
-      (address assetTokenAddress, uint256 assetTokenId) = bundler.getLiquidityToken(tokenId);
-      bool isNft = (assetTokenId > 0);
+  //     // Get Liquidity Token from Bundler
+  //     bundler = IWeb3PacksBundler(bundlerAddress);
+  //     (address assetTokenAddress, uint256 assetTokenId) = bundler.getLiquidityToken(tokenId);
+  //     bool isNft = (assetTokenId > 0);
 
-      // Get Balance of NFT from Charged Particles
-      uint256 assetBalance = isNft ? 1 : _getMass(tokenAddress, tokenId, assetTokenAddress);
+  //     // Get Balance of NFT from Charged Particles
+  //     uint256 assetBalance = isNft ? 1 : _getMass(tokenAddress, tokenId, assetTokenAddress);
 
-      // Track Token Balances
-      tokenBalances[i] = TokenAmount({
-        tokenAddress: assetTokenAddress,
-        balance: assetBalance,
-        nftTokenId: assetTokenId
-      });
-    }
-    return tokenBalances;
-  }
+  //     // Track Token Balances
+  //     tokenBalances[i] = TokenAmount({
+  //       tokenAddress: assetTokenAddress,
+  //       balance: assetBalance,
+  //       nftTokenId: assetTokenId
+  //     });
+  //   }
+  //   return tokenBalances;
+  // }
 
   function enterWeth(uint256 amount) internal virtual {
     IWETH(_weth).deposit{value: amount}();
@@ -439,7 +427,7 @@ contract Web3PacksV2 is
     IChargedParticles(_chargedParticles).energizeParticle(
       _proton,
       packTokenId,
-      _cpWalletManager,
+      "generic.B",
       assetTokenAddress,
       assetTokenAmount,
       address(this)
@@ -457,7 +445,7 @@ contract Web3PacksV2 is
       receiver,
       _proton,
       packTokenId,
-      _cpWalletManager,
+      "generic.B",
       assetTokenAddress
     );
   }
@@ -474,7 +462,7 @@ contract Web3PacksV2 is
     IChargedParticles(_chargedParticles).covalentBond(
       _proton,
       packTokenId,
-      _cpBasketManager,
+      "generic.B",
       nftTokenAddress,
       nftTokenId,
       1
@@ -493,7 +481,7 @@ contract Web3PacksV2 is
       receiver,
       _proton,
       packTokenId,
-      _cpBasketManager,
+      "generic.B",
       nftTokenAddress,
       nftTokenId,
       1
@@ -518,11 +506,11 @@ contract Web3PacksV2 is
     }
   }
 
-  function _getMass(address tokenAddress, uint256 tokenId, address assetTokenAddress) internal returns (uint256 assetMass) {
-    /// @dev "baseParticleMass" is not a "view" function; call via "callStatic"
-    assetMass = IChargedParticles(_chargedParticles)
-      .baseParticleMass(tokenAddress, tokenId, _cpWalletManager, assetTokenAddress);
-  }
+  // function _getMass(address tokenAddress, uint256 tokenId, address assetTokenAddress) internal returns (uint256 assetMass) {
+  //   /// @dev "baseParticleMass" is not a "view" function; call via "callStatic"
+  //   assetMass = IChargedParticles(_chargedParticles)
+  //     .baseParticleMass(tokenAddress, tokenId, "generic.B", assetTokenAddress);
+  // }
 
   function _getProtocolFee(uint256 totalPayment) internal view returns (uint256) {
     if (_protocolFee > 0 && totalPayment < _protocolFee) {
@@ -541,40 +529,40 @@ contract Web3PacksV2 is
     _treasury.sendValue(fees);
   }
 
-  function _collectReferralRewards(
-    uint256 paymentAmount,
-    address[] memory referrals
-  ) internal returns (uint256 fee) {
-    uint256 referralAmountTotal = ((paymentAmount * _rewardsMax) / BASIS_POINTS);
-    uint256[] memory referralAmounts;
-    IWeb3PacksVault _vault = IWeb3PacksVault(_web3vault);
+  // function _collectReferralRewards(
+  //   uint256 paymentAmount,
+  //   address[] memory referrals
+  // ) internal returns (uint256 fee) {
+  //   uint256 referralAmountTotal = ((paymentAmount * _rewardsMax) / BASIS_POINTS);
+  //   uint256[] memory referralAmounts;
+  //   IWeb3PacksVault _vault = IWeb3PacksVault(_web3vault);
 
-    // Calculate Referral Amounts and Distribute
-    if (referrals.length > 0 && referrals[0] != address(0)) {
-      referralAmounts = new uint256[](referrals.length);
+  //   // Calculate Referral Amounts and Distribute
+  //   if (referrals.length > 0 && referrals[0] != address(0)) {
+  //     referralAmounts = new uint256[](referrals.length);
 
-      // Remove Referral Value from Funding Value
-      fee = referralAmountTotal;
+  //     // Remove Referral Value from Funding Value
+  //     fee = referralAmountTotal;
 
-      if (referrals.length > 1 && referrals[1] != address(0)) {
-        referralAmounts[0] = (paymentAmount * _rewardsStep) / BASIS_POINTS;
-        if (referrals.length > 2 && referrals[2] != address(0)) {
-          referralAmounts[1] = (paymentAmount * _rewardsStep) / BASIS_POINTS;
-          referralAmounts[2] = (paymentAmount * (_rewardsMax - (_rewardsStep * 2))) / BASIS_POINTS;
-        } else {
-          referralAmounts[1] = (paymentAmount * (_rewardsMax - _rewardsStep)) / BASIS_POINTS;
-        }
-      } else {
-        referralAmounts[0] = referralAmountTotal;
-      }
+  //     if (referrals.length > 1 && referrals[1] != address(0)) {
+  //       referralAmounts[0] = (paymentAmount * _rewardsStep) / BASIS_POINTS;
+  //       if (referrals.length > 2 && referrals[2] != address(0)) {
+  //         referralAmounts[1] = (paymentAmount * _rewardsStep) / BASIS_POINTS;
+  //         referralAmounts[2] = (paymentAmount * (_rewardsMax - (_rewardsStep * 2))) / BASIS_POINTS;
+  //       } else {
+  //         referralAmounts[1] = (paymentAmount * (_rewardsMax - _rewardsStep)) / BASIS_POINTS;
+  //       }
+  //     } else {
+  //       referralAmounts[0] = referralAmountTotal;
+  //     }
 
-      // Transfer Rewards to Vault Contract
-      IERC20(_weth).safeTransfer(address(_vault), fee);
+  //     // Transfer Rewards to Vault Contract
+  //     IERC20(_weth).safeTransfer(address(_vault), fee);
 
-      // Update Referrer Balances
-      _vault.updateReferrerBalances(referralAmountTotal, referrals, referralAmounts);
-    }
-  }
+  //     // Update Referrer Balances
+  //     _vault.updateReferrerBalances(referralAmountTotal, referrals, referralAmounts);
+  //   }
+  // }
 
   /***********************************|
   |          Only Admin/DAO           |
@@ -583,23 +571,29 @@ contract Web3PacksV2 is
   /**
     * @dev Setup the ChargedParticles Interface
   */
-  function setChargedParticles(address chargedParticles) external onlyOwner {
-    require(chargedParticles != address(0), "Invalid address for chargedParticles");
-    _chargedParticles = chargedParticles;
-    emit ChargedParticlesSet(chargedParticles);
-  }
+  // function setChargedParticles(address chargedParticles) external onlyOwner {
+  //   require(chargedParticles != address(0), "Invalid address for chargedParticles");
+  //   _chargedParticles = chargedParticles;
+  //   emit ChargedParticlesSet(chargedParticles);
+  // }
 
-  function setChargedState(address chargedState) external onlyOwner {
-    require(chargedState != address(0), "Invalid address for chargedState");
-    _chargedState = chargedState;
-    emit ChargedStateSet(chargedState);
-  }
+  // function setChargedState(address chargedState) external onlyOwner {
+  //   require(chargedState != address(0), "Invalid address for chargedState");
+  //   _chargedState = chargedState;
+  //   emit ChargedStateSet(chargedState);
+  // }
 
-  function setProton(address proton) external onlyOwner {
-    require(proton != address(0), "Invalid address for proton");
-    _proton = proton;
-    emit ProtonSet(proton);
-  }
+  // function setProton(address proton) external onlyOwner {
+  //   require(proton != address(0), "Invalid address for proton");
+  //   _proton = proton;
+  //   emit ProtonSet(proton);
+  // }
+
+  // function setWrappedNativeToken(address wnative) external onlyOwner {
+  //   require(wnative != address(0), "Invalid address for wnative");
+  //   _weth = wnative;
+  //   emit WrappedNativeTokenSet(wnative);
+  // }
 
   function setWeb3PacksState(address web3state) external onlyOwner {
     require(web3state != address(0), "Invalid address for web3state");
@@ -624,19 +618,19 @@ contract Web3PacksV2 is
     emit ProtocolFeeSet(fee);
   }
 
-  function setRewardsPercent(uint256 max, uint256 step) external onlyOwner {
-    _rewardsMax = max;
-    _rewardsStep = step;
-    emit RewardsPercentSet(max, step);
-  }
+  // function setRewardsPercent(uint256 max, uint256 step) external onlyOwner {
+  //   _rewardsMax = max;
+  //   _rewardsStep = step;
+  //   emit RewardsPercentSet(max, step);
+  // }
 
-  function pause() public onlyOwner {
-    _pause();
-  }
+  // function pause() public onlyOwner {
+  //   _pause();
+  // }
 
-  function unpause() public onlyOwner {
-    _unpause();
-  }
+  // function unpause() public onlyOwner {
+  //   _unpause();
+  // }
 
 
   /***********************************|

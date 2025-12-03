@@ -59,6 +59,17 @@ const globals = {
       chargedState: '0x9c00b8CF03f58c0420CDb6DE72E27Bf11964025b',
       protonC: '0x59dde2EBe605cD75365F387FFFE82E5203b8E4cd',
     },
+    // somniaTestnet
+    50312: {
+      chargedParticles: '0xd8bFF003AcfF6067B5F6AB1EC966eD650C6f0740',
+      chargedState: '0x54F9A3f294dBd6f5a100084647bd0E6EcD4b653e',
+      protonC: '0x9E61185CDDA5De038Cebd4C04E82b90952a186bE',
+    },
+    5031: {
+      chargedParticles: '0x2Ff4613a12570a77D88376A3e5d0FF68953b3fd8',
+      chargedState: '0x10a4b06BA9aC1Bf6e44F17EAf5c0D05c98F82704',
+      protonC: '0x6487cb6570D43e3239A680fd607e6859307a0149',
+    }
   },
 
   tokenAddress: {
@@ -119,6 +130,17 @@ const globals = {
       tdm: '0x878b6bf76f7ba67d0c4da616eac1933f9b133c1c',
       lock: '0x69ce536f95a84e1ef51ed0132c514c7ce012e49b',
     },
+    // Somnia
+    5031: {
+      wsomi: '0x046EDe9564A72571df6F5e44d0405360c0f4dCab',
+      weth: '0x936ab8c674bcb567cd5deb85d8a216494704e9d8',
+      usdc: '0x28BEc7E30E6faee657a03e19Bf1128AaD7632A00',
+    },
+    // Somnia Testnet
+    50312: {
+      wsomi: '0x046EDe9564A72571df6F5e44d0405360c0f4dCab',
+      weth: '0xdd8f41bf80d0E47132423339ca06bC6413da96b5',
+    }
   },
 
   router: {
@@ -160,6 +182,16 @@ const globals = {
       quickswapAlgebra: '0xf5b509bB0909a69B1c207E495f687a596C168E12', // Swap router
       quickswapAlgebraLP: '0x8eF88E4c7CfbbaC1C163f7eddd4B578792201de6', // Non fungible position manager
     },
+    // Somnia
+    5031: {
+      quickswapAlgebra: '0x1582f6f3D26658F7208A799Be46e34b1f366CE44', // Swap router
+      quickswapAlgebraLP: '0xfE02219e0578B1E4831CDE7C3CB36f71AEb4A833', // Non fungible position manager
+    },
+    // Somnia Testnet
+    50312: {
+      quickswapAlgebra: '0xE94de02e52Eaf9F0f6Bf7f16E4927FcBc2c09bC7', // Swap router
+      quickswapAlgebraLP: '0x37A4950b4ea0C46596404895c5027B088B0e70e7', // Non fungible position manager
+    }
   },
 
   poolId: {
@@ -186,7 +218,7 @@ const globals = {
   wethAbi : [
     'function deposit() public',
     'function withdraw(uint wad) public',
-  ],
+  ]
 };
 
 module.exports = globals;
